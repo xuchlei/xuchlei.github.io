@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GitHub Pages绑定域名 - xuchl</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="GitHub Pages绑定域名
+准备 申请域名
+老早就想申请一个域名了，和GitHub的用户名一样，可选的也不是很多。个人用的话推荐.top顶级域名，便宜（万网相对便宜吧，续费每年26￥）。然后我,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="xuchl" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<body class="loading">
+    <span id="config-title" style="display:none">xuchl</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="http://xuchunlei.top"></a>
+    <div title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">GitHub Pages绑定域名</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">GitHub Pages绑定域名</h1>
+        <div class="stuff">
+            <span>十一月 08, 2019</span>
+            
+
+        </div>
+        <div class="content markdown">
+            <h1 id="GitHub-Pages绑定域名"><a href="#GitHub-Pages绑定域名" class="headerlink" title="GitHub Pages绑定域名"></a>GitHub Pages绑定域名</h1><blockquote>
+<h4 id="准备-申请域名"><a href="#准备-申请域名" class="headerlink" title="准备 申请域名"></a>准备 申请域名</h4></blockquote>
+<p>老早就想申请一个域名了，和GitHub的用户名一样，可选的也不是很多。个人用的话推荐.top顶级域名，便宜（万网相对便宜吧，续费每年26￥）。<br>然后我是新用户，首年1元就可以（有的首次开通便宜，可以多买几年）。<br>大部分顶级域名国内都需要实名认证，一般2到3个工作日审核。我早上申请的，过了一会域名就实名通过了，可以进行解析了。</p>
+<blockquote>
+<h4 id="GitHub仓库配置"><a href="#GitHub仓库配置" class="headerlink" title="GitHub仓库配置"></a>GitHub仓库配置</h4></blockquote>
+<p>xxx.github.io仓库 &gt; Settings &gt; Custom domain中写入申请的域名 &gt; Save<br><a href="https://help.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site" target="_blank" rel="noopener">官方文档</a></p>
+<blockquote>
+<h4 id="添加域名解析"><a href="#添加域名解析" class="headerlink" title="添加域名解析"></a>添加域名解析</h4></blockquote>
+<ul>
+<li><p>获取GitHub Pages域名：ping自己的地址xxx.github.io，获取到ip</p>
+</li>
+<li><p>添加域名解析：可以加两条A类型的，一条www，一条@。</p>
+</li>
+</ul>
+<p>过一段时间就能访问了</p>
+<blockquote>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4></blockquote>
+<p>以下主题限定<br>从 xxx.github.io 到新域名，需要更改Hexo的url配置，这样对应的主页地址才能更改。<br>Gitalk的Homepage URL和Authorization callback URL也要修改。<br>顺便删掉了部分代码，去掉谷歌403错误（疑似广告）<br>音乐本地话，去除”A cookie associated with a cross-site resourced……”警告</p>
+<p>p.s：新建这篇文章发现，名字中如果有空格需要加引号，不然空格前面的就会忽略掉（即《Pages绑定域名》）。加上引号，生成的文件名空格会被-替代。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='http://xuchunlei.top/sound/again.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='false'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+</div>
+</body>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+</html>
