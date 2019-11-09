@@ -139,7 +139,7 @@ body.mu .icon-logo {color:#333;}
 #container {padding-bottom:100px;overflow:hidden;position:relative;}
 #container:before {content:'';display:block;width:1px;height:200%;position:absolute;left:50%;background:#eaeaea;top:-50%;z-index:0;}
 #primary {position:relative;}
-#single {background:#fffffff0;position:relative;overflow-x:hidden;}
+#single {background:rgba(255, 255, 255, 0.8);position:relative;overflow-x:hidden;}
 .section {position:relative;width:100%;overflow:hidden;-webkit-transition:all 0.3s cubic-bezier(0.25,0.5,0.5,0.9);-moz-transition:all 0.3s cubic-bezier(0.25,0.5,0.5,0.9);transition:all 0.3s cubic-bezier(0.25,0.5,0.5,0.9);}
 body.touch,body.touch .article {margin-top:0;}
 .zoom:before {opacity:0;color:#fff;font-size:20px;display:block;z-index:3;left:50%;top:70%;padding:5px;margin-top:-15px;margin-left:-15px;position:absolute;background:rgba(0,0,0,.7);-webkit-transition:all 0.3s cubic-bezier(0.25,0.5,0.5,0.9);-moz-transition:all 0.3s cubic-bezier(0.25,0.5,0.5,0.9);transition:all 0.3s cubic-bezier(0.25,0.5,0.5,0.9);}
