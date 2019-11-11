@@ -330,3 +330,4 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
   .article .side {display:none}
   .comment .gt-btn-public .gt-btn-text:after{content:"";}
 }
+#footer {color: rgba(255, 255, 255, 0.5); position: relative; text-align: center;}
