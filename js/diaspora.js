@@ -255,7 +255,7 @@ $(function() {
         if (!cover.t.attr('src')) {
             alert('Please set the post thumbnail')
         }
-        $('#preview').css('min-height', window.innerHeight)
+        $('#preview').css('min-height', window.innerHeight - 20) //去掉添加统计div的高度
         Diaspora.PS()
         $('.pview a').addClass('pviewa')
         var T;
@@ -272,7 +272,7 @@ $(function() {
             }, 500)
         })
     } else {
-        $('#single').css('min-height', window.innerHeight)
+        $('#single').css('min-height', window.innerHeight - 20) //去掉添加统计div的高度
         setTimeout(function() {
             $('html, body').removeClass('loading')
         }, 1000)
