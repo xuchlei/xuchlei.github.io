@@ -18,6 +18,26 @@ body {font-family:'PingFang SC','Hiragino Sans GB','Microsoft Yahei','WenQuanYi 
   top: 0;
   width: 100%;
   /*z-index: -1*/;
+  -webkit-filter: blur(2px);
+  filter: blur(2px);
+}
+#bg2 {
+  background-image: url(/img/bg2.jpg);
+  background-color: #050a10;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  /*z-index: -1*/;
+  -webkit-filter: blur(1px);
+  filter: blur(1px);
 }
 body:before {background:grey;position:absolute;content:'';display:block;width:14px;height:14px;left:50%;top:50%;margin-left:-7px;margin-top:-7px;border-radius:50%;-webkit-border-radius:50%;-moz-border-radius:50%;-webkit-animation:loading 2s ease-out forwards infinite;-moz-animation:loading 2s ease-out forwards infinite;display:none;}
 body.loading:before {display:block;}
