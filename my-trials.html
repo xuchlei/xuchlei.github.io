@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>我的足迹</title>
+<style type="text/css">
+html{height:100%}
+body{height:100%;margin:0px;padding:0px}
+#container{height:100%}
+</style>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=AA4uqECjDYfZUk9vSVMNR5bPdFEtw6GU">
+//v3.0版本的引用方式：src="http://api.map.baidu.com/api?v=3.0&ak=您的密钥"
+</script>
+</head>
+
+<body>
+<div id="container"></div>
+<script type="text/javascript">
+var map = new BMap.Map("container");
+var point = new BMap.Point(123.678995,33.632182);
+map.centerAndZoom(point, 6);
+map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+var datas = ["烟台市", "济南市", "杭州市", "南京市", "上海市", "嘉兴市", "泰州市", "北京市"];
+
+function getBoundary(){
+var bdary = new BMap.Boundary();
+for(var i = 0; i < datas.length; i++) {
+	bdary.get(datas[i], function(rs){       //获取行政区域
+		//map.clearOverlays();        //清除地图覆盖物
+		var count = rs.boundaries.length; //行政区域的点有多少个
+		var pointArray = [];
+		for (var i = 0; i < count; i++) {
+			var ply = new BMap.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeColor: "#ff0000"}); //建立多边形覆盖物
+			map.addOverlay(ply);  //添加覆盖物
+			pointArray = pointArray.concat(ply.getPath());
+		}
+	});
+  }
+}
+setTimeout(function(){getBoundary();}, 2000);
+
+var points = [
+	// 在东京(遗憾啊,没好好逛过，部分地点忘了（不重要））
+	{"lng":140.392831, "lat":35.772015, "title":"成田机场", "content":"第一次到日本的地方"},
+	{"lng":139.450899, "lat":35.623931, "title":"多摩市", "content":"第一次在日本居住地方，过了3个多月，遍地紫阳花，因为当时的原因，满满的遗憾……"},
+	{"lng":139.772048, "lat":35.705027, "title":"秋叶原", "content":"第一次在日本出远门去逛的地方，宅的三大圣地之一（宅的天堂）"},
+	{"lng":139.773935, "lat":35.715432, "title":"上野公园", "content":"和朋友一起去，第一次喝星巴克"},
+	{"lng":139.774518, "lat":35.710061, "title":"阿美横商店街", "content":""},
+	{"lng":139.446201, "lat":35.650488, "title":"", "content":""}, // 三菱UFJ銀行聖蹟桜ヶ丘支店（第一次办银行卡的地方，结果失败）
+	{"lng":139.773696, "lat":35.682532, "title":"日本桥", "content":"和以前的同事看柯南剧场版，并搓了一顿"},
+	{"lng":139.76894, "lat":35.681535, "title":"", "content":""}, // 大丸百货（代购侦查）
+	{"lng":139.450212, "lat":35.653337, "title":"多摩川", "content":"捡了两块石头留念"},
+	{"lng":139.443138, "lat":35.61391, "title":"", "content":""}, // bookoff多摩永山店
+	{"lng":139.469234, "lat":35.626468, "title":"", "content":""}, // 卢屋书店（骨王在这买的）
+	{"lng":139.434016, "lat":35.630271, "title":"乞田川", "content":"樱花很漂亮"},
+	{"lng":139.460718, "lat":35.637997, "title":"樱丘公园", "content":"第一次赏樱的地方"},
+	{"lng":139.421731, "lat":35.621865, "title":"", "content":""}, // 多摩邮局（代购邮寄）和朋友逛过附近商场
+	{"lng":139.627906, "lat":35.6119, "title":"", "content":""}, // 二子玉川（面试）
+	{"lng":139.796006, "lat":35.655449, "title":"", "content":""}, // 丰州（面试）
+	{"lng":139.769631, "lat":35.692301, "title":"", "content":""}, // 神田（"工作"的地方）
+	// 在名古屋
+	{"lng":136.814647, "lat":34.859167, "title":"中部国际机场", "content":""},
+	{"lng":136.920355, "lat":35.172214, "title":"新荣町", "content":"在名古屋待了半年，整体还行，就是过得比较艰苦（自己带的日元，没敢太嗨）"},
+	{"lng":136.911372, "lat":35.173703, "title":"", "content":""}, // 中部电力（工作）
+	{"lng":136.899662, "lat":35.187537, "title":"名古屋城", "content":"附近转过，第一次去因为台风不能进（其实没钱，后来也没进去）"},
+	{"lng":136.908951, "lat":35.125575, "title":"热田神宫", "content":"步行超过15公里耗时三四个小时，下雨，打伞的手都累了。后来去买御守，也是步行去的（坐不起电车）"},
+	{"lng":136.891739, "lat":35.174548, "title":"四间道", "content":"和朋友去过庆典"},
+	{"lng":136.908295, "lat":35.172342, "title":"名古屋电视塔", "content":""},
+	{"lng":136.936789, "lat":35.192492, "title":"", "content":""}, // QBハウス（理发）
+	{"lng":136.926409, "lat":35.171324, "title":"", "content":""}, // バロー車道店（经常去的超市）
+	{"lng":136.922228, "lat":35.177992, "title":"", "content":""}, // マックスバリュ　代官店（活动范围扩大 超市）
+	{"lng":136.920489, "lat":35.163722, "title":"", "content":""}, // バロー 新栄店（活动范围扩大 超市）
+	{"lng":136.918935, "lat":35.155504, "title":"", "content":""}, // 鹤舞公园
+	{"lng":136.899694, "lat":35.159888, "title":"大须", "content":"宅的三大圣地之一"},
+	{"lng":137.313256, "lat":35.130291, "title":"香岚溪", "content":"赏枫叶的地方，可惜去的有点晚，枫叶的状态不是很好"},
+	// 京都
+	{"lng":135.785049, "lat":34.994853, "title":"清水寺", "content":"大晦日和朋友出行第一站，依旧没进去"},
+	{"lng":135.780773, "lat":34.996202, "title":"二年坡三年坡", "content":""},
+	{"lng":135.77855, "lat":35.003665, "title":"八坂神社", "content":""},
+	{"lng":135.775177, "lat":35.005121, "title":"花间小路", "content":""},
+	{"lng":135.771503, "lat":35.003495, "title":"绿川", "content":""},
+	{"lng":135.751462, "lat":35.012845, "title":"二条城", "content":"去的时候没开门"},
+	{"lng":135.729224, "lat":35.039441, "title":"金阁寺", "content":"到的时候都傍晚了，出来都晚上了（这次进去了），当天步行超20公里（穷），最后走不动了，做的公交回去的"},
+	{"lng":135.74401, "lat":35.001469, "title":"壬生寺", "content":"除夜，敲了新年的钟声，晚上大家饮酒作欢"},
+	{"lng":135.77542, "lat":34.967278, "title":"伏见稻荷大社", "content":"初拜，抽了签，去了向往已久的千本鸟居（就然还有(魔法少女)小圆(pv)做宣传）"},
+	{"lng":135.747945, "lat":34.994811, "title":"", "content":""}, // （住宿一晚）
+	// 神户
+	{"lng":135.186724, "lat":34.682646, "title":"神户港塔", "content":"计划失误，错过六甲山的夜景，其他地方也没怎么逛。牛肉只吃了牛丼，神户牛最后没吃。"},
+	{"lng":135.188112, "lat":34.688225, "title":"南京街", "content":""},
+	{"lng":135.254281, "lat":34.711266, "title":"", "content":""},
+	// 大阪
+	{"lng":135.500412, "lat":34.675128, "title":"心斋桥", "content":""},
+	{"lng":135.500745, "lat":34.669143, "title":"道顿崛", "content":"著名的格力高广告牌，吃了一份章鱼小丸子"},
+	{"lng":135.506301, "lat":34.652519, "title":"通天阁", "content":"上塔上溜了一圈，夜景还行"},
+	{"lng":135.505519, "lat":34.66175, "title":"大阪日本桥", "content":"宅的三大圣地之一（后来才知道的），因为是元旦，开着的店铺不多，陪朋友买了海贼王的手办"},
+	{"lng":135.525915, "lat":34.687154, "title":"大阪城", "content":"没有登阁，外面有个老爷爷穿着铠甲和游客免费拍照（旗子上汉语翻译是错误的）"},
+	{"lng":135.500152, "lat":34.651705, "title":"", "content":""} // （住宿一晚）
+	]
+
+function addMarker(point){
+	var curpoint = new BMap.Point(point.lng, point.lat);
+	var marker = new BMap.Marker(curpoint);
+	map.addOverlay(marker);
+	if (point.title !== "") {
+		var opts = {
+			width : 200,     // 信息窗口宽度
+			height: 105,     // 信息窗口高度
+			title : point.title
+		}
+		var infoWindow = new BMap.InfoWindow(point.content, opts); // 创建信息窗口对象
+		marker.addEventListener("click", function(){
+			this.openInfoWindow(infoWindow);
+		});
+	}
+}
+for (var i = 0; i < points.length; i ++) {
+	addMarker(points[i]);
+}
+</script>
+</body>
+</html>
