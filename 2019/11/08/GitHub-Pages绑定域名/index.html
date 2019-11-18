@@ -41,10 +41,10 @@
 	});
 	document.onload = setTimeout(function(){
 		// 如果没有Cookie:introShow 进行引导
-		//if (getCookie('introShow') != "true") {
-		//	document.cookie = "introShow=true";
+		if (getCookie('introShow') != "true") {
+			document.cookie = "introShow=true";
 			intro.start();
-		//}
+		}
 	}, 2000);
 	// 获取Cookie
 	function getCookie(c_name){
