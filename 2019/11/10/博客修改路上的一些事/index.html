@@ -35,20 +35,16 @@
 			{
 				element: '#step1',
 				intro: "点击播放(暂停)音乐"
-			},
-			{
-				element: '#step2',
-				intro: "点击获取当前页面二维码网址"
-			},
+			}
 		]
 	});
-	window.onload = function(){
+	document.onload = setTimeout(function(){
 		// 如果没有Cookie:introShow 进行引导
-		if (getCookie('introShow') != "true") {
-			document.cookie = "introShow=true";
+		//if (getCookie('introShow') != "true") {
+		//	document.cookie = "introShow=true";
 			intro.start();
-		}
-	};
+		//}
+	}, 2000);
 	// 获取Cookie
 	function getCookie(c_name){
 		if (document.cookie.length > 0){
