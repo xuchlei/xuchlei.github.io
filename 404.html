@@ -3,6 +3,8 @@
 <head><meta name="generator" content="Hexo 3.9.0">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>404</title>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.ripples.js"></script>
 <style type="text/css">
 #bg {
   background-image: url(/img/fgo404.jpg);
@@ -20,9 +22,17 @@
   width: 100%;
 }
 </style>
+<script>
+	$(document).ready(function() {
+		$('body').ripples({
+			resolution: 512,
+			dropRadius: 20, //px
+			perturbance: 0.03,
+		});
+	})
+</script>
 </head>
 
-<body>
-<div id="bg"><div>
-</div></div></body>
+<body id="bg">
+</body>
 </html>
