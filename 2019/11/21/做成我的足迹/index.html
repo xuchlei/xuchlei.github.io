@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>做成我的足迹 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="做成我的足迹光阴荏苒，日月如梭，往事随风，飘散而过。
+在如何完善博客的想法下，足迹诞生了。最近一直在弄这个，以致于废寝忘食。其实最费时间的是数据部分，手机坏过换过，数据丢失了很多，备份不是很完整。
+,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg2"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	document.onload = setTimeout(function(){
+		// 如果没有Cookie:introShow 进行引导
+		if (getCookie('introShow') != "true") {
+			document.cookie = "introShow=true";
+			intro.start();
+		}
+	}, 2000);
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">做成我的足迹</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div id="step2">
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">做成我的足迹</h1>
+        <div class="stuff">
+            <span>十一月 21, 2019</span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/随笔/">随笔</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h1 id="做成我的足迹"><a href="#做成我的足迹" class="headerlink" title="做成我的足迹"></a>做成我的足迹</h1><p><em>光阴荏苒，日月如梭，往事随风，飘散而过。</em></p>
+<p>在如何完善博客的想法下，足迹诞生了。最近一直在弄这个，以致于废寝忘食。其实最费时间的是数据部分，手机坏过换过，数据丢失了很多，备份不是很完整。</p>
+<h4 id="选择工具"><a href="#选择工具" class="headerlink" title="选择工具"></a>选择工具</h4><ul>
+<li><p>谷歌地图：首选，但是国内用不了，Pass</p>
+</li>
+<li><p>高德地图：备选，但是看了web版的日本地图，Pass（安卓比web强，IOS就是完整的，呵呵）</p>
+</li>
+<li><p>百度地图：最终，还是选择了百度，国外的地图还可以参考（当然需要和当地的地图结合来看，比如日本的话对照雅虎）</p>
+</li>
+<li><p>必应地图：论外，文档读起来有难度</p>
+</li>
+<li><p>雅虎地图：论外，文档读起来有难度</p>
+</li>
+</ul>
+<h4 id="想法"><a href="#想法" class="headerlink" title="想法"></a>想法</h4><p>国内可以添加行政区划，国外因为没有数据只能加点(marker)</p>
+<h4 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h4><p>发现实现很简单，但是数据的添加比较麻烦。<br>刚开始只是根据自己的记忆来从官方的<a href="http://lbsyun.baidu.com/jsdemo.htm#h0_4" target="_blank" rel="noopener">地图点击事件demo</a>（加了一句缩放代码）上获取经纬度数据。没错，一个一个点的点，然后复制……通过数组，一个个push进去，循环生成marker点，第一版做成。和朋友演示，告诉他实现方法。回了一句【弄个json数据文件，然后自动添加吧】，我以娱乐用回绝。<br>　<br>第二天，朋友给我看了他的足迹（完虐我，知道了飞地的概念）。<br>　<br>两天后，朋友发我【把我的足迹的实现方式改了改】，加了一个信息窗口（InfoWindow），可以写注释，加自己博客文章的链接等等。而且从数据库读取的json。【不过所有去过的点要一个个加，感觉心好累】，经过讨论，然后我痛定思痛，要写个工具来生成json。把数组改成json格式，修改代码逻辑，第二版完成。然后写json工具发现百度demo在线能跑，本地报错，然后通过自己的方法解决。最后json获取工具初版完成，是这个样子的<br><img src="/img/20191121/1.png" alt>通过点击来添加点，点上右键删除，alert经纬度和标签。然而朋友【这个不错，怎么保存出来】，然后讨论了生成问题。最后我决定生成在textarea中，自己复制粘贴。然后第二版的样子如下<br><img src="/img/20191121/2.png" alt>后来根据朋友的信息窗口，修改了json格式。<br>　<br>第四天（周六）,格式和朋友对齐，工具输出优化，展示页面逻辑优化。<br>　<br>周三，添加了获取图片EXIF信息的功能，有GPS信息，会直接在地图上标记。<br><img src="/img/20191121/3.png" alt><br>周四（今天），添加了地点检索功能（需要手动点击选点），至此完结，以后估计不会加新功能了。<br>点基本不会动了，有新去的地方会再加。另外放出<a href="https://xuchunlei.top/baidumapGetPoint" target="_blank">工具页面</a>和<a href="https://xuchunlei.top/myTrails" target="_blank">展示页面</a>，都是静态页面，请自行取用（百度地图的key需要更换）。<br><img src="/img/20191121/4.png" alt></p>
+<p>加完点，感觉有点伤感。这么多年，走过的路不是很顺心。<br>过去就过去吧，翻篇了，再怀念也没有用。不知道未来如何，但是越努力，越幸运。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='http://xuchunlei.top/sound/akatukinokuruma.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='false'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+</div>
+<div id="footer">
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+
+</body>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>足迹添加</title>
+<style type="text/css">
+html{height:100%}
+body{height:100%;margin:0px;padding:0px}
+#container{height:80%}
+</style>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=AA4uqECjDYfZUk9vSVMNR5bPdFEtw6GU">
+//v3.0版本的引用方式：src="http://api.map.baidu.com/api?v=3.0&ak=您的密钥"
+</script>
+<script type="text/javascript" src="exif.js"></script>
+</head>
+
+<body>
+<div id="container"></div>
+<input id="file-input" type="file">
+<input type="button" onclick="getPoint()" value="获取标记信息">
+<input type="text" id="target" autocomplete="off">
+<input type="button" onclick="doSearch()" value="检索地点">
+<input type="button" onclick="doClean()" value="清除检索地点">
+<br>
+<textarea id="out" cols="100" rows="5"></textarea>
+<script type="text/javascript">
+	var map = new BMap.Map("container");
+	var pointMap = new Map();
+	var i = 1;
+	map.centerAndZoom(new BMap.Point(116.404, 39.915), 10);
+	map.enableScrollWheelZoom(true);
+	// 设置标记信息
+	function setPoint(e){
+		// 设置经纬度
+		var point = new BMap.Point(e.point.lng, e.point.lat);
+		// 设置标签内容
+		var labelInfo = window.prompt("请输入标题","");
+		labelInfo = labelInfo ? labelInfo : ""; //点取消时null替换为空白
+		var label = new BMap.Label(i + ":" + labelInfo, {offset:new BMap.Size(20,-10)})
+		// 创建右键菜单
+		var markerMenu = new BMap.ContextMenu();
+		markerMenu.addItem(new BMap.MenuItem('删除',removeMarker.bind(marker)));
+
+		// 生成标记
+		var marker = new BMap.Marker(point);
+		map.addOverlay(marker);
+		marker.setLabel(label); // 必须写到addOverlay()后,不然取不到Overlay.getLabel()取不到。
+		marker.addContextMenu(markerMenu);
+		marker.disableMassClear(); // 禁止覆盖物在map.clearOverlays方法中被清除(为了只清除检索结果)
+		pointMap.set(i + ":" + labelInfo, marker);
+		i++;
+	}
+
+	// 鼠标点击开始设置标记
+	map.addEventListener("click", setPoint);
+
+	// 删除标记
+	var removeMarker = function(e,ee,marker){
+		pointMap.delete(marker.getLabel().content);
+		map.removeOverlay(marker);
+	}
+
+	// 获取标记信息
+	function getPoint() {
+		var jsonData = new Array();
+		for (var [key, value] of pointMap) {
+			var pointInfo = new Object();
+			pointInfo.lng = value.getPosition().lng;
+			pointInfo.lat = value.getPosition().lat;
+			pointInfo.title = value.getLabel().content.substring(2);
+			pointInfo.content = ""; //内容，默认空，输出后自行修改
+			jsonData.push(pointInfo);
+		}
+		// ======废弃 开始======
+		//var allOverlay = map.getOverlays();
+		// 从下标3开始才是地图上的点
+		// （和初始缩放级别有关,前面大概可以有3层（下标从3开始），官方的demo本地跑不通）
+		// （因为点击查看详细信息（即鼠标图标是手的形状，下标会刷新，从3开始。这种情况下可能获取不到坐标）
+		/*for (var i = 3; i < allOverlay.length; i++){
+			var pointInfo = new Object();
+			pointInfo.lng = allOverlay[i].getPosition().lng;
+			pointInfo.lat = allOverlay[i].getPosition().lat;
+			pointInfo.label = allOverlay[i].getLabel().content;
+			jsonData.push(pointInfo);
+		}*/
+		// ======废弃 结束======
+		// 换行输出
+		document.getElementById("out").innerHTML = JSON.stringify(jsonData).replace(/},/g, "},\r\n");
+	}
+
+	// 获取图片经纬度
+	document.getElementById("file-input").onchange = function(e) {
+	    EXIF.getData(e.target.files[0], function() {
+			var allMetaData = EXIF.getAllTags(this);
+			var Longitude;
+			  if (allMetaData.GPSLongitude) {
+				var LongitudeArry = allMetaData.GPSLongitude;
+				var longLongitude =
+				  LongitudeArry[0].numerator / LongitudeArry[0].denominator +
+				  LongitudeArry[1].numerator / LongitudeArry[1].denominator / 60 +
+				  LongitudeArry[2].numerator / LongitudeArry[2].denominator / 3600;
+				Longitude = longLongitude.toFixed(8);
+			  }
+			 
+			  var Latitude;
+			  if (allMetaData.GPSLatitude) {
+				var LatitudeArry = allMetaData.GPSLatitude;
+				var longLatitude =
+				  LatitudeArry[0].numerator / LatitudeArry[0].denominator +
+				  LatitudeArry[1].numerator / LatitudeArry[1].denominator / 60 +
+				  LatitudeArry[2].numerator / LatitudeArry[2].denominator / 3600;
+				Latitude = longLatitude.toFixed(8);
+			};
+			var DateTimeOriginal;
+			if (allMetaData.DateTimeOriginal) {
+			DateTimeOriginal = allMetaData.DateTimeOriginal;
+			}
+			alert(Longitude + " " + Latitude + " " + DateTimeOriginal);
+			if (typeof(Longitude) != 'undefined') {
+				var imgPoint = new BMap.Point(Longitude, Latitude);
+				map.centerAndZoom(imgPoint,12);
+				var e = {point:{lng:0, lat:0}};
+				e.point.lng = Longitude;
+				e.point.lat = Latitude;
+				setPoint(e);
+				
+			}
+		})
+	}
+
+	// 检索地点
+	function doSearch() {
+		target = document.getElementById("target").value;
+		var local = new BMap.LocalSearch(map, {
+			renderOptions:{map: map, autoViewport: true},
+			pageCapacity: 6
+		});
+		doClean();
+		local.search(target);
+	}
+	// 清除覆盖物
+	function doClean() {
+		map.clearOverlays();
+	}
+</script>
+</body>
+</html>
