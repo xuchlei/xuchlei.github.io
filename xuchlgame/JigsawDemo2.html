@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html>
+ <head><meta name="generator" content="Hexo 3.9.0">
+  <title>Jigsaw</title>
+  <!--
+   2018/02/05 作成
+   2018/03/01 <br/>\r\n 削除
+  -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=11">
+  <style type="text/css">
+   *{
+    padding:0px;
+    margin:0px;
+   }
+   <!-- Safari -->
+   [draggable = true] {
+    -khtml-user-drag: element;
+   }
+   #assemble {
+    position: relative;
+   }
+   .fragment {
+    border: 1px solid blue;
+    position: absolute;
+    background: #f5f5f5;
+    
+    border-collapse: collapse;
+   }
+   #reback {
+    border: 1px solid red;
+    width: 100px;
+    height: 50px;
+   }
+
+  </style>
+  <script language="javaScript">
+   var checkSuccess = [];
+   var n = 2;
+   function doStart() {
+    // var images = [".jpe", ".jpg", ".jpeg", ".gif", ".png", ".bmp", ".ico", ".svg", ".svgz", ".tif", ".tiff", ".ai", ".drw", ".pct", ".psp", ".xcf", ".psd", ".raw"];
+    if (document.getElementById("upfile").files[0] == null || !document.getElementById("upfile").files[0].type.match('image.*')) {
+     alert("picture is bad!");
+     return;
+    }
+    
+    //var preview = document.querySelector('img');
+    //var file    = document.querySelector('input[type=file]').files[0];
+    //var reader  = new FileReader();
+    //reader.onloadend = function () {
+    // preview.src = reader.result;
+    //}
+    //if (file) {
+    // reader.readAsDataURL(file);
+    //} else {
+    // preview.src = "";
+    //}
+    
+    // TODO IE11 だけ
+    var pUrl =  document.getElementById("upfile").value;
+    pUrl = pUrl.replace(/\\/g, "\\\\");
+    document.getElementById("target").src = pUrl;
+    
+    n = Number(document.getElementById("jigsawSize").value);
+    if (isNaN(n) || n < 2 || 10 < n) {
+     alert("size is bad!");
+     return;
+    }
+    
+    var pHeight = document.getElementById("target").height;
+    var pWidth = document.getElementById("target").width;
+    var sHeight = (pHeight / n)  + "px";
+    var sWidth = (pWidth / n)  + "px";
+    
+    var fragmentTo = "";
+    var assembleFrom = "";
+    checkSuccess = [];
+    for (var i = 1; i <= n * n; i++) {
+     fragmentTo = fragmentTo + "<div name='fragment' id='fragment_" + i + "' class='fragment'></div>\r\n";
+     assembleFrom = assembleFrom + "<div id='test" + i + "' name='hint' class='split" + i + "' draggable='true' ondragstart='drag(event)'></div>\r\n"
+     checkSuccess.push(i);
+    }
+    document.getElementById("assemble").innerHTML = fragmentTo;
+    document.getElementById("fragments").innerHTML = assembleFrom;
+    
+    var coordinates = [];
+    var checkResult = [];
+    for (var i = 0; i < 100; i = i + (100 / n)) {
+     for (var m = 0; m < 100; m = m + (100 / n)) {
+      var tempw = (i / 100) * pWidth;
+      var temph = (m / 100) * pHeight;
+      coordinates.push("-" + tempw + "px -" + temph + "px");
+      checkResult.push("-" + tempw + "px -" + temph + "px");
+     }
+    }
+    
+    var result = [];
+    for (var i = 1; i <= n * n; i++) {
+     document.getElementById("test" + i).style.height = sHeight;
+     document.getElementById("test" + i).style.width = sWidth;
+     var coordinate = coordinates[Math.floor(Math.random() * coordinates.length)];
+     result.push(checkResult.indexOf(coordinate) + 1);
+     coordinates.splice(coordinates.indexOf(coordinate), 1);
+     document.getElementById("test" + i).style.background = "url('" + pUrl + "') no-repeat " + coordinate;
+     document.getElementById("test" + i).name = checkResult.indexOf(coordinate) + 1;
+     // 2019/06/28 碎片生成区域更改 add start
+     if (n < 6) {
+       // 随机到拼图区域
+       document.getElementById("fragment_" + i).appendChild(document.getElementById("test" + i));
+       document.getElementById("reback").innerHTML = "";
+     } else {
+       // 放到撤回区域
+       document.getElementById("reback").appendChild(document.getElementById("test" + i));
+     }
+     // 2019/06/28 随机到拼图区域 add end
+    }
+    
+    document.getElementById("assemble").style.height = pHeight + "px";
+    document.getElementById("assemble").style.width = pWidth + "px";
+    
+    document.getElementById("reback").style.height = sHeight;
+    document.getElementById("reback").style.width = sWidth;
+    
+    Array.prototype.forEach.call(document.querySelectorAll("[name='fragment']"), function(target){
+     target.style.height = sHeight;
+     target.style.width = sWidth;
+    })
+    
+    var inx = 0;
+    for (var i = 0; i < 100; i = i + (100 / n)) {
+     for (var m = 0; m < 100; m = m + (100 / n)) {
+      document.querySelectorAll("[name='fragment']")[inx].style.top = m + "%";
+      document.querySelectorAll("[name='fragment']")[inx].style.left = i + "%";
+      inx++
+     }
+    }
+   }
+   
+   function drag(ev) {
+    ev.dataTransfer.setData("Text", ev.target.id);
+   }
+   function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("Text");
+    ev.target.appendChild(document.getElementById(data));
+    
+    var test = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#assemble [name='hint']"), function(target){
+     test.push(target.name);
+    })
+    
+    if (test.length == n * n ) {
+     if (test.toString() == checkSuccess.toString()) {
+      alert("clear");
+     }
+    }
+   }
+   function allowDrop(ev) {
+    ev.preventDefault();
+   }
+  </script>
+ </head>
+ <body>
+  <div><font color="red">IE11 only</font></div>
+  <img id="target" src style="display:none">
+  <input type="file" id="upfile" accept="image/*">
+  jigsawSize:<input type="text" id="jigsawSize" size="8" value="2" maxlength="2">
+  <input type="button" id="start" onclick="doStart();" value="create">
+  <br>
+  <div id="assemble" ondrop="drop(event)" ondragover="allowDrop(event)">
+   <div name="fragment" class="fragment"></div>
+   <div name="fragment" class="fragment"></div>
+   <div name="fragment" class="fragment"></div>
+   <div name="fragment" class="fragment"></div>
+  </div>
+  <br>
+  <div id="reback" ondrop="drop(event)" ondragover="allowDrop(event)"><font color="red">rollback area</font></div>
+  <br>
+  <div id="fragments">
+   <div id="test1" class="split1" draggable="true" ondragstart="drag(event)"></div>
+   <br>
+   <div id="test2" class="split2" draggable="true" ondragstart="drag(event)"></div>
+   <br>
+   <div id="test3" class="split3" draggable="true" ondragstart="drag(event)"></div>
+   <br>
+   <div id="test4" class="split4" draggable="true" ondragstart="drag(event)"></div>
+  </div>
+ </body>
+</html>

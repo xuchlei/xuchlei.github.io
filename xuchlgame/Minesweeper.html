@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <!--
+      2018/05/05 ver1.0 使用记事本作成
+                        右键相关功能未实现
+    -->
+    <meta name="author" content="xuchl,xuchl@jdz90.com">
+    <meta charset="UTF-8">
+    <!--[if lt IE 9]>
+    <script src="http://cdn.static.runoob.com/libs/html5shiv/3.7/html5shiv.min.js"></script>
+    <![endif]--> 
+    <title>Minesweeper</title>
+    <style type="text/css">
+      body {
+        padding:0;
+        margin:0;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="cans">不支持canvas</canvas>
+    <script type="text/javascript">
+      // 长
+      var xl = 9;
+      // 宽
+      var yl = 9;
+      // 地雷数
+      var minesSum = 10;
+      // 地雷区域
+      //var minesAry = ["0,1", "1,0", "1,8", "4,4", "4,6", "4,8", "6,4", "7,0", "8,2", "8,7"];
+      var minesAry = new Array();
+      // 数字区域
+      var numberAry = new Array();
+      var number2Ary = new Array();
+      // 打开区域
+      var clearAry = new Array();
+
+      var flagAry = new Array();
+      var unknowAry = new Array();
+
+      var canvas = document.getElementById("cans");
+      // 设置扫雷区域
+      canvas.width = xl * 20;
+      canvas.height = yl * 20;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle='#CCCCCC';
+      ctx.strokeStyle="#AAAAAA";
+      for (var i = 0; i < xl; i++) {
+        for (var m = 0; m < yl; m++) {
+          ctx.fillRect(i * 20, m * 20, 20, 20);
+          ctx.strokeRect(i * 20, m * 20, 20, 20);
+        }
+      }
+      setMines();
+      setNumber();
+
+      // 设置地雷
+      function setMines() {
+        do {
+          var xmine = Math.floor(Math.random() * xl);
+          var ymine = Math.floor(Math.random() * yl);
+          var mineInx = xmine + "," + ymine;
+          if (minesAry.indexOf(mineInx) == -1) {
+            minesAry.push(mineInx);
+          }
+        } while(minesAry.length < minesSum)
+
+        /*for (var i = 0; i < minesAry.length; i++) {
+          var xm = minesAry[i].split(",")[0];
+          var ym = minesAry[i].split(",")[1];
+          ctx.fillStyle='#000000';
+          ctx.fillRect(xm * 20, ym * 20, 20, 20);
+        }*/
+      }
+      function setMinesOver() {
+        for (var i = 0; i < minesAry.length; i++) {
+          var xm = minesAry[i].split(",")[0];
+          var ym = minesAry[i].split(",")[1];
+          ctx.fillStyle='#000000';
+          ctx.fillRect(xm * 20, ym * 20, 20, 20);
+        }
+      }
+
+      // 设置数字
+      function setNumber() {
+        for (var x = 0; x < xl; x++) {
+          for (var y = 0; y < yl; y++) {
+
+            if (-1 < minesAry.indexOf(x + "," + y)) {
+              continue;
+            }
+
+            var numberTagAry = getEight(x, y);
+            var numberSum = 0;
+
+            for (var i = 0; i < 8; i++) {
+              if (isIllegal(numberTagAry[i].split(",")[0], numberTagAry[i].split(",")[1])) {
+                continue;
+              } else if(-1 < minesAry.indexOf(numberTagAry[i])) {
+                numberSum++;
+              }
+            }
+
+            if (0 < numberSum) {
+              //ctx.fillStyle='red';
+              //ctx.fillText(numberSum, x * 20 , (y + 1) * 20); // TODO y + 1?
+              numberAry.push(x + "," + y);
+              number2Ary.push(numberSum);
+              numberSum = 0;
+            }
+          }
+        }
+      }
+
+      function setNumber2(inx) {
+        var x = parseInt(numberAry[inx].split(",")[0]);
+        var y = parseInt(numberAry[inx].split(",")[1]);
+        var numberSum = number2Ary[inx];
+        ctx.fillStyle='red';
+        ctx.fillText(numberSum, x * 20 , (y + 1) * 20);
+      }
+
+      // 判断坐标是否非法
+      function isIllegal(x, y) {
+        return !(-1 < x && x < xl && -1 < y && y < yl);
+      }
+
+      // 获取周围坐标
+      function getEight(x, y) {
+        var xadd = x + 1;
+        var xsubtract = x - 1;
+        var yadd = y + 1;
+        var ysubtract = y - 1;
+        var eightAry = [x + "," + ysubtract,
+                            xadd + "," + ysubtract,
+                            xadd + "," + y,
+                            xadd + "," + yadd,
+                            x + "," + yadd,
+                            xsubtract + "," + yadd,
+                            xsubtract + "," + y,
+                            xsubtract + "," + ysubtract];
+        return eightAry;
+      } 
+
+      // 打开空白区域
+      function blankOpen(x, y) {
+        if (isIllegal(x, y)) {
+          return;
+        }
+        var openAry = getEight(x, y);
+        for (var i = 0; i < 8; i++) {
+          var xtag = parseInt(openAry[i].split(",")[0]);
+          var ytag = parseInt(openAry[i].split(",")[1]);
+          if (isIllegal(xtag, ytag)) {
+            continue;
+          } else if (numberAry.indexOf(openAry[i]) == -1 &&
+                     clearAry.indexOf(openAry[i]) == -1 &&
+                     minesAry.indexOf(openAry[i]) == -1) {
+            ctx.fillStyle='#FFFFFF';
+            ctx.fillRect(xtag * 20, ytag * 20, 20, 20);
+            ctx.strokeRect(xtag * 20, ytag * 20, 20, 20);
+            if (clearAry.indexOf(openAry[i]) == -1) {
+              clearAry.push(openAry[i]);
+            }
+            // 递归循环
+            blankOpen(xtag, ytag);
+          } else if (-1 < numberAry.indexOf(openAry[i])) {
+            ctx.fillStyle='#FFFFFF';
+            ctx.fillRect(xtag * 20, ytag * 20, 20, 20);
+            ctx.strokeRect(xtag * 20, ytag * 20, 20, 20);
+            if (clearAry.indexOf(openAry[i]) == -1) {
+              clearAry.push(openAry[i]);
+            }
+
+            setNumber2(numberAry.indexOf(openAry[i]));
+          }
+        }
+      }
+
+      // main
+      function open(e) {
+        // 获取坐标
+        var e = e || event;
+        var xi = Math.floor((e.clientX / 20));
+        var yi = Math.floor((e.clientY / 20));
+        // 数字时
+        if (-1 < numberAry.indexOf(xi + "," + yi)) {
+          ctx.fillStyle='#FFFFFF';
+          ctx.fillRect(xi * 20, yi * 20, 20, 20);
+          ctx.strokeRect(xi * 20, yi * 20, 20, 20);
+          if (clearAry.indexOf(xi + "," + yi) == -1) {
+            clearAry.push(xi + "," + yi);
+          }
+          setNumber2(numberAry.indexOf(xi + "," + yi));
+        } else if(-1 < minesAry.indexOf(xi + "," + yi)) {
+          // 地雷时
+          setMinesOver();
+          ctx.fillStyle='red';
+          ctx.fillRect(xi * 20, yi * 20, 20, 20);
+          ctx.strokeRect(xi * 20, yi * 20, 20, 20);
+          alert("Game Over!");
+
+          // exit
+          canvas.removeEventListener("click", open);
+        } else {
+          // 空白时
+          ctx.fillStyle='#FFFFFF';
+          ctx.fillRect(xi * 20, yi * 20, 20, 20);
+          ctx.strokeRect(xi * 20, yi * 20, 20, 20);
+          blankOpen(xi, yi);
+        }
+
+        if (clearAry.length == xl * yl - minesAry.length) {
+          alert("Clear!");
+        }
+      }
+
+      // TODO 未完成
+      // 鼠标右键
+      function rightClick(e) {
+        var e = e || event;
+        var xi = Math.floor((e.clientX / 20));
+        var yi = Math.floor((e.clientY / 20));
+        var tag = xi + "," + yi;
+        if (e.button == 2){
+          // 旗帜
+          if (flagAry.indexOf(tag) == -1) {
+            ctx.fillStyle='green';
+            ctx.fillText("F", xi * 20 , (yi + 1) * 20);
+            flagAry.push(tag);
+          } else if (unknowAry.indexOf(tag) == -1) {
+            // 未知
+            ctx.fillStyle='#CCCCCC';
+            ctx.strokeStyle="#AAAAAA";
+            ctx.fillRect(xi * 20 , yi * 20, 20, 20);
+            ctx.strokeRect(xi * 20 , yi * 20, 20, 20);
+
+            ctx.fillStyle='green';
+            ctx.fillText("?", xi * 20 , (yi + 1) * 20);
+            unknowAry.push(tag);
+          } else {
+            // 清除
+            ctx.fillStyle='#CCCCCC';
+            ctx.strokeStyle="#AAAAAA";
+            ctx.fillRect(xi * 20 , yi * 20, 20, 20);
+            ctx.strokeRect(xi * 20 , yi * 20, 20, 20);
+
+            flagAry.splice(flagAry.indexOf(tag), 1);
+            unknowAry.splice(unknowAry.indexOf(tag), 1);
+          }
+        }
+
+        e.returnvalue = false;
+      }
+
+      // run
+      canvas.addEventListener("click", open);
+      //canvas.addEventListener("mousedown", rightClick);
+    </script>
+  </body>
