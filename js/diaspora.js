@@ -58,7 +58,9 @@ var Diaspora = {
                 Diaspora.loading();
                 Diaspora.L(state.u, function(data) {
                     document.title = state.t;
-                    $('#preview').html($(data).filter('#single'));
+                    // $('#preview').html($(data).filter('#single')); js会丢失
+					var re = new RegExp('<div id="single"([\\s\\S]*)<div id="footer">');
+					$('#preview').html(re.exec(data)[0]);
                     Diaspora.preview();
                     setTimeout(function() { Diaspora.player(); }, 0);
                 });
@@ -87,7 +89,9 @@ var Diaspora = {
                     break;
             }
             document.title = title;
-            $('#preview').html($(data).filter('#single'))
+            // $('#preview').html($(data).filter('#single')) js会丢失
+			var re = new RegExp('<div id="single"([\\s\\S]*)<div id="footer">');
+			$('#preview').html(re.exec(data)[0]);
             switch (flag) {
                 case 'push':
                     Diaspora.preview()
