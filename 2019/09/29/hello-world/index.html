@@ -35,16 +35,13 @@
 			{
 				element: '#step1',
 				intro: "点击播放(暂停)音乐"
+			},
+			{
+				element: '#step2',
+				intro: "查看页面地址二维码（PC限定）"
 			}
 		]
 	});
-	document.onload = setTimeout(function(){
-		// 如果没有Cookie:introShow 进行引导
-		if (getCookie('introShow') != "true") {
-			document.cookie = "introShow=true";
-			intro.start();
-		}
-	}, 2000);
 	// 获取Cookie
 	function getCookie(c_name){
 		if (document.cookie.length > 0){
@@ -58,8 +55,17 @@
 		}
 		return ""
 	}
-	// 返回顶部
+	
 	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
 		$('.to-top').toTop();
 	});
 </script>
