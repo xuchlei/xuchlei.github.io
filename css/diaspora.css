@@ -3,7 +3,7 @@ html {-webkit-text-size-adjust:100%;}
 html,body {-webkit-tap-highlight-color:rgba(0,0,0,0);-webkit-font-smoothing:antialiased;background:#fff;}
 body {font-family:'PingFang SC','Hiragino Sans GB','Microsoft Yahei','WenQuanYi Micro Hei',sans-serif;font-size:14px;position:relative;overflow-x:hidden;}
 /* Backgroud image */
-#bg {
+body {
   background-image: url(/img/bg.jpg);
   background-color: #050a10;
   background-attachment: fixed;
@@ -12,32 +12,6 @@ body {font-family:'PingFang SC','Hiragino Sans GB','Microsoft Yahei','WenQuanYi 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
-  height: 100%;
-  left: 0;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  /*z-index: -1*/;
-  -webkit-filter: blur(2px);
-  filter: blur(2px);
-}
-#bg2 {
-  background-image: url(/img/bg2.jpg);
-  background-color: #050a10;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-position: center;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  background-size: cover;
-  height: 100%;
-  left: 0;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  /*z-index: -1*/;
-  -webkit-filter: blur(1px);
-  filter: blur(1px);
 }
 body:before {background:grey;position:absolute;content:'';display:block;width:14px;height:14px;left:50%;top:50%;margin-left:-7px;margin-top:-7px;border-radius:50%;-webkit-border-radius:50%;-moz-border-radius:50%;-webkit-animation:loading 2s ease-out forwards infinite;-moz-animation:loading 2s ease-out forwards infinite;display:none;}
 body.loading:before {display:block;}
@@ -190,7 +164,7 @@ h1.title {font-size:30px;color:#333;line-height:1.3;position:relative;font-weigh
 .comment .gt-ico-tip{display:none;}
 .comment .gt-btn-public .gt-btn-text:after{content:"（Cmd | Ctrl  + Enter）";}
 .comment .gt-meta{margin:0; border:0;}
-#preview {position:fixed;top:0;width:100%;height:100%;z-index:5;background:#fff;left:100%;-moz-transition:all 0.3s cubic-bezier(0,0,0.2,1);-webkit-transition:all 0.3s cubic-bezier(0,0,0.2,1);transition:all 0.3s cubic-bezier(0,0,0.2,1);overflow-y:scroll;}
+#preview {position:fixed;top:0;width:100%;height:100%;z-index:5;/*background:#fff;*/left:100%;-moz-transition:all 0.3s cubic-bezier(0,0,0.2,1);-webkit-transition:all 0.3s cubic-bezier(0,0,0.2,1);transition:all 0.3s cubic-bezier(0,0,0.2,1);overflow-y:scroll;}
 #preview.show {left:0;}
 #preview + canvas {display:none;}
 .article {width:70%;margin:0 auto;margin-top:50px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:flex-start;justify-content:flex-start;}

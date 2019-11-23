@@ -58,7 +58,9 @@ var Diaspora = {
                 Diaspora.loading();
                 Diaspora.L(state.u, function(data) {
                     document.title = state.t;
-                    $('#preview').html($(data).filter('#single'));
+                    // $('#preview').html($(data).filter('#single')); js会丢失
+					var re = new RegExp('<div id="single"([\\s\\S]*)<div id="footer">');
+					$('#preview').html(re.exec(data)[0]);
                     Diaspora.preview();
                     setTimeout(function() { Diaspora.player(); }, 0);
                 });
@@ -87,7 +89,9 @@ var Diaspora = {
                     break;
             }
             document.title = title;
-            $('#preview').html($(data).filter('#single'))
+            // $('#preview').html($(data).filter('#single')) js会丢失
+			var re = new RegExp('<div id="single"([\\s\\S]*)<div id="footer">');
+			$('#preview').html(re.exec(data)[0]);
             switch (flag) {
                 case 'push':
                     Diaspora.preview()
@@ -273,6 +277,7 @@ $(function() {
         })
     } else {
         $('#single').css('min-height', window.innerHeight - 20) //去掉添加统计div的高度
+		document.body.style.backgroundImage="url(/img/bg2.jpg)"; // 替换背景
         setTimeout(function() {
             $('html, body').removeClass('loading')
         }, 1000)
