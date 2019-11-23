@@ -277,7 +277,9 @@ $(function() {
         })
     } else {
         $('#single').css('min-height', window.innerHeight - 20) //去掉添加统计div的高度
-		document.body.style.backgroundImage="url(/img/bg2.jpg)"; // 替换背景
+		 // 替换背景
+		var bg = document.getElementById("bg")
+		if (bg) bg.style.backgroundImage="url(/img/bg2.jpg)";
         setTimeout(function() {
             $('html, body').removeClass('loading')
         }, 1000)
