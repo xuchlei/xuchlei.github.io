@@ -41,7 +41,9 @@ for(var i = 0; i < datas.length; i++) {
 	});
   }
 }
-setTimeout(function(){getBoundary();}, 2000);
+getBoundary();
+var iw = new BMap.InfoWindow("点击标记打开信息窗口（有的话）");  // 创建信息窗口对象
+map.openInfoWindow(iw, point); //开启信息窗口
 
 var points = [
 	// 在东京(遗憾啊,没好好逛过，部分地点忘了（不重要），基本按照时间顺序）
