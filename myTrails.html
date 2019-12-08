@@ -143,7 +143,12 @@ var points = [
 	{"lng":116.41857051537177,"lat":39.91594778164794,"title":"王府井","content":"北京第一顿饭，吃的日式料理，因为国内的太贵"},
 	{"lng":116.64467401223321,"lat":40.04072158492817,"title":"","content":""}, // （住宿一晚）
 	{"lng":116.44312569648702,"lat":39.94288957311585,"title":"","content":""}, // 附近溜达过，吃过晚饭，具体地点忘了
-	{"lng":116.60931670736048,"lat":40.08374541109134,"title":"北京首都国际机场","content":"第一次做飞机，还是国际航线，目标东京"}
+	{"lng":116.60931670736048,"lat":40.08374541109134,"title":"北京首都国际机场","content":"第一次做飞机，还是国际航线，目标东京"},
+	// 广州 出差两周，无心看风景
+	{"lng":113.30913776314385,"lat":23.39143278940526,"title":"广州白云国际机场","content":"国内航线第一次到达，从济南遥墙走的"},
+	{"lng":113.2446361936489,"lat":23.107647570907403,"title":"","content":""}, // 出差工作的地方
+	{"lng":113.27836698163883,"lat":23.12167484931582,"title":"黄埔军校同学会旧址","content":""}, // 广州第一顿饭（不对外开放）
+	{"lng":113.23933107080038,"lat":23.099438793195404,"title":"","content":""} // （住宿的地方）
 	]
 
 function addMarker(point){
@@ -159,6 +164,9 @@ function addMarker(point){
 		var infoWindow = new BMap.InfoWindow(point.content, opts); // 创建信息窗口对象
 		marker.addEventListener("click", function(){
 			this.openInfoWindow(infoWindow);
+			// 移动显示
+			map.panTo(point);
+			map.setZoom(14);
 		});
 	}
 }
