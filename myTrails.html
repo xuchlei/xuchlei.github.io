@@ -17,7 +17,7 @@ body{height:100%;margin:0px;padding:0px}
 <body>
 <div id="container"></div>
 <script type="text/javascript">
-var map = new BMap.Map("container");
+var map = new BMap.Map("container", {enableMapClick: false}); // enableMapClick: false禁用点击弹出详细信息窗口
 var point = new BMap.Point(123.678995,33.632182);
 map.centerAndZoom(point, 5);
 map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
@@ -153,8 +153,14 @@ var points = [
 	// 武汉
 	{"lng":114.43076064504646,"lat":30.61278620395281,"title":"","content":""},
 	{"lng":114.61565967664019,"lat":30.4685575453525,"title":"","content":""},
-	{"lng":114.44669892038782,"lat":30.45966661247478,"title":"","content":""},
-	{"lng":114.22040677936927,"lat":30.773619550126842,"title":"","content":""}
+	{"lng":114.44859434501387,"lat":30.45830077799561,"title":"","content":""},
+	{"lng":114.22040677936927,"lat":30.773619550126842,"title":"","content":""},
+	// 深证
+	{"lng":113.81837130372398,"lat":22.637309356687478,"title":"","content":""},
+	{"lng":114.03948915778263,"lat":22.75215205681878,"title":"","content":""},
+	{"lng":114.3095197939928,"lat":22.7889164381731,"title":"","content":""},
+	{"lng":114.14090214558567,"lat":22.654976647740316,"title":"","content":""},
+	{"lng":114.13565154988159,"lat":22.682576935581523,"title":"","content":""}
 	]
 
 function addMarker(point){
