@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Markdown参考 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="Markdown参考简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）
+123456789101112标题：使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)# ,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">Markdown参考</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Markdown参考</h1>
+        <div class="stuff">
+            <span>二月 04, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Markdown/">Markdown</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
+
+<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
+
+<hr>
+<hr>
+<hr>
+<hr>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
+<p>第一层嵌套</p>
+<blockquote>
+<ul>
+<li>第二层嵌套1（无序列表）</li>
+<li>第二层嵌套2（无序列表）</li>
+</ul>
+</blockquote>
+</blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>无序列表一</li>
+<li>无序列表二<ul>
+<li>无序嵌套列表二-1</li>
+<li>无序嵌套列表二-2</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>有序列表一</li>
+<li>有序列表二</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>默认</th>
+<th align="left">左对齐</th>
+<th align="center">居中</th>
+<th align="right">右对齐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单元格</td>
+<td align="left">单元格</td>
+<td align="center"><code>单元格</code></td>
+<td align="right">单元格</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
+<pre><code>console.log(&quot;Hello world 空格&quot;)
+console.log(&quot;Hello world 空格&quot;)
+
+console.log(&quot;Hello world Tab&quot;)
+console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
