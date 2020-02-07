@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>虚拟机模拟Linux服务器 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="虚拟机模拟Linux服务器通过虚拟机简单模拟通过SSH远程连接Linux服务器，实际上服务器需要很多配置，比如安全方面。
+环境准备
+服务器（虚拟机） VMware（习惯用这个但是收费，可以用免费的V,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">虚拟机模拟Linux服务器</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">虚拟机模拟Linux服务器</h1>
+        <div class="stuff">
+            <span>二月 07, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Linux/">Linux</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h1 id="虚拟机模拟Linux服务器"><a href="#虚拟机模拟Linux服务器" class="headerlink" title="虚拟机模拟Linux服务器"></a>虚拟机模拟Linux服务器</h1><p><em>通过虚拟机简单模拟通过SSH远程连接Linux服务器，实际上服务器需要很多配置，比如安全方面。</em></p>
+<h4 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h4><ul>
+<li>服务器（虚拟机） VMware（习惯用这个但是收费，可以用免费的VirtualBox）</li>
+<li>Linux操作系统：deepin-15.11-amd64（下的最新版的深度系统，amd？我intel的cpu）</li>
+<li>连接工具：MobaXterm（Putty，TeraTerm，Xshell都可以），</li>
+<li>文件传输：FileZilla Client（或WinSCP）</li>
+</ul>
+<hr>
+<h4 id="服务器搭建"><a href="#服务器搭建" class="headerlink" title="服务器搭建"></a>服务器搭建</h4><ol>
+<li><p>虚拟机安装（略）<br><img src="/img/20200207/1.jpg" alt><br>下载完镜像，挂载安装就好了。查看宿主机能否ping通虚拟机（我装完就是通的），如果不能，调整虚拟机网络设置。<br>这里可以在linux里手动设定ip，我因为是动态获取的，后来ip自己变了。但是手动后发现有时候网络不通，导致后面的npm install安装不了……<br><img src="/img/20200207/2.png" alt></p>
+</li>
+<li><p>Linux配置<br>查看是否安装了openssh-server服务（新装deepin系统没有），刚开始跑偏了，用yum来装的，发现没有yum命令，就用sudo apt-get来安装yum，然后发现yum没有已启用的仓库（需要配置yum仓库）……。<br><img src="/img/20200207/3.png" alt></p>
+<blockquote>
+<p>apt-get 与 yum安装区别：<br>Linux一般分为两大类<br>RedHat系列：Redhat、Centos、Fedora等 安装包格式 rpm包 包管理工具 yum<br>Debian系列：Debian、Ubuntu、Deepin等 安装包格式 deb包 包管理工具 apt-get</p>
+</blockquote>
+</li>
+</ol>
+<div align="center">⬇从这开始⬇</div>
+
+<p>deepin新建用户非root用户，如需要root权限需要执行<code>sudo passwd root</code>设置root密码激活</p>
+<p>安装SSH服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install openssh-server</span><br></pre></td></tr></table></figure>
+
+<p>更改配置文件，这里只改了默认端口Port 22（不安全最好改，可以忽略）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200207/4.jpg" alt></p>
+<blockquote>
+<p>vim文本编辑器 输入模式（ESC键退出）</p>
+<blockquote>
+<p>i光标所在字符前开始插入<br>a光标所在字符后开始插入<br>o光标所在行的下面另起一新行插入<br>s删除光标所在的字符并开始插入<br>I光标所在行的行首开始插入 如果行首有空格则在空格之后插入<br>A光标所在行的行尾开始插入<br>O光标所在行的上面另起一行开始插入<br>S删除光标所在行并开始插入</p>
+</blockquote>
+<p>vim保存退出</p>
+<blockquote>
+<p>:q 回车退出<br>:w 保存<br>:wq 保存退出<br>！ 强制，比如 :q! 改动过:q会提示已修改但尚未保存（可用！强制执行）<br>:e！恢复上次编辑保存的文件状态</p>
+</blockquote>
+</blockquote>
+<p>修改配置文件后需要重新启动服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo /etc/init.d/ssh restart</span><br></pre></td></tr></table></figure>
+
+<p>另外可以安装带用户界面的防火墙<code>sudo apt-get install gufw</code>(deepin默认没有, ufw不带用户界面)来增加安全性</p>
+<ol start="3">
+<li>远程连接Linux<br>在MobaXterm中新建session，输入IP地址，用户名，端口后点OK连接。<br><img src="/img/20200207/5.jpg" alt><br>然后根据提示输入密码，效果如下，我通过“远程”在桌面新建了一个linkstart的文件夹。<br><img src="/img/20200207/6.jpg" alt><br>另外SSH建立成功可以直接使用sftp来传输文件。<br><img src="/img/20200207/7.png" alt></li>
+</ol>
+<hr>
+<h4 id="搭建FTP服务器"><a href="#搭建FTP服务器" class="headerlink" title="搭建FTP服务器"></a>搭建FTP服务器</h4><p>这个不知道啥原因，晚上弄了好久也没弄成功，第二天重新装了vsftpd就自己好了(现在怀疑是ip地址变了)……</p>
+<ul>
+<li><p>安装vsftpd</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install vsftpd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置主配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/vsftpd.conf</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>配置有很多（不是很了解），这里只改默认端口21为1121，文件末尾增加<code>listen_port=1121</code>即可。<br>如何想要上传文件，需要把<code>write_enable=YES</code>注释#去掉。</p>
+<ul>
+<li>修改标准端口<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/services</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>把21端口改为1121<br><img src="/img/20200207/8.jpg" alt></p>
+<ul>
+<li>重启服务<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/vsftpd restart</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>然后就可以通过ftp来连接了。<br><img src="/img/20200207/9.png" alt></p>
+<hr>
+<h4 id="服务器部署（Hexo博客）"><a href="#服务器部署（Hexo博客）" class="headerlink" title="服务器部署（Hexo博客）"></a>服务器部署（Hexo博客）</h4><p>简单地在linux里装了Hexo的环境，这个要根据实际情况来部署Tomcat之类。<br>因为Hexo基于Node.js，先在本地下载好Linux Binaries (x64)的安装包，通过ftp上传到Linux服务器。<br>cd到上传目录，通过tar命令解压。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar xf node-v12.15.0-linux-x64.tar.xz</span><br></pre></td></tr></table></figure>
+
+<p>进入到解压后的文件夹,设置node和npm为全局变量（软链接，前面是解压文件位置）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ln -s /home/xuchunlei/Desktop/linkstart/ftp/node-v12.15.0-linux-x64/bin/node /usr/local/bin/node</span><br><span class="line">ln -s /home/xuchunlei/Desktop/linkstart/ftp/node-v12.15.0-linux-x64/bin/npm /usr/local/bin/npm</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Linux链接分两种</p>
+<blockquote>
+<p>硬链接（Hard Link），通过索引节点来进行连接。在Linux的文件系统中，保存在磁盘分区中的文件不管是什么类型都给它分配一个编号，称为索引节点号(Inode Index)。在Linux中，多个文件名指向同一索引节点是存在的。<br>ln f1 f2 #创建f1的一个硬连接文件f2，f1和f2节点相同</p>
+</blockquote>
+<blockquote>
+<p>符号连接（Symbolic Link），也叫软连接，类似于Windows的快捷方式。它实际上是一个特殊的文件。在符号连接中，文件实际上是一个文本文件，其中包含的有另一文件的位置信息。<br>ln -s f1 f3 #创建f1的一个符号连接文件f3，f1和f3节点不同</p>
+</blockquote>
+</blockquote>
+<p>安装Git和Hexo,设置hexo为全局变量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install git</span><br><span class="line">npm install hexo-cli -g</span><br><span class="line">ln -s /home/xuchunlei/Desktop/linkstart/ftp/node-v12.15.0-linux-x64/bin/hexo /usr/local/bin/hexo</span><br></pre></td></tr></table></figure>
+
+<p>新建hexo项目linuxtest，并启动</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo init linuxtest</span><br><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<p>效果图（ip地址变了，手动设定一直有问题）<br><img src="/img/20200207/10.jpg" alt></p>
+<h4 id="其他写过的Linux文章"><a href="#其他写过的Linux文章" class="headerlink" title="其他写过的Linux文章"></a>其他写过的Linux文章</h4><p><a href="https://mp.weixin.qq.com/s?__biz=MzIwMjgwNTI0Mg==&mid=2247483775&idx=1&sn=7e8630622980da1d623a1a0ede5c60f4&scene=19#wechat_redirect" target="_blank" rel="noopener">纸上得来终觉浅–Linux从复习到放弃</a><br><a href="https://mp.weixin.qq.com/s?__biz=MzIwMjgwNTI0Mg==&mid=2247483897&idx=1&sn=95c472e3aa84fe02c2821dd31494549d&scene=19#wechat_redirect" target="_blank" rel="noopener">某码农的代码碎片3 10、Linux删除bin目录修复</a></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
