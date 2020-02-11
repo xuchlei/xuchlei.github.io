@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux服务器搭建-Redis与FastDFS - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="Linux服务器搭建-Redis与FastDFS简单记录了配置过程，仅供个人学习用。实际上会用到多台服务器，配置更复杂。
+起因（可忽略）因为新型冠状病毒的影响，没有火车站的小县城在市际班车停运的情况,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">Linux服务器搭建-Redis与FastDFS</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Linux服务器搭建-Redis与FastDFS</h1>
+        <div class="stuff">
+            <span>二月 11, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/FastDFS/">FastDFS</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Linux/">Linux</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Nginx/">Nginx</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Redis/">Redis</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h1 id="Linux服务器搭建-Redis与FastDFS"><a href="#Linux服务器搭建-Redis与FastDFS" class="headerlink" title="Linux服务器搭建-Redis与FastDFS"></a>Linux服务器搭建-Redis与FastDFS</h1><p><em>简单记录了配置过程，仅供个人学习用。实际上会用到多台服务器，配置更复杂。</em></p>
+<h4 id="起因（可忽略）"><a href="#起因（可忽略）" class="headerlink" title="起因（可忽略）"></a>起因（可忽略）</h4><p>因为新型冠状病毒的影响，没有火车站的小县城在市际班车停运的情况下，无法回到工作岗位，然后就开始在家办公模式。因为有新任务，加上自己的电脑没有公司的开发环境，只好通过TeamViewer（公司没有VPN）远程公司电脑（公司有人，帮忙开机之类的）。用了不到一天就被逼疯了，效率太低。然后决定自己搭建开发环境。不过这个是我很不想干的事情，总会出幺蛾子，比如头疼的Maven，死活下不下来，远程复制公司的jar包到Maven仓库下，jar不出错了，但是还是编译不通过，最后删掉所有的私有仓库和插件库好了……公司的框架比较老，比较重（全面），和我电脑环境有点不兼容，比如MySQL的数据库。因为新任务比较简单，用不了太多的功能，主要搭建了Redis缓存和FastDFS文件服务器。</p>
+<h4 id="Redis安装"><a href="#Redis安装" class="headerlink" title="Redis安装"></a>Redis安装</h4><p>以前在Win7中装过-<a href="https://mp.weixin.qq.com/s?__biz=MzIwMjgwNTI0Mg==&mid=2247483713&idx=1&sn=d35bd94c0abf527b56229487d79fdabc&scene=19#wechat_redirect" target="_blank" rel="noopener">NoSQL数据库Redis从入门到没有然后</a>，这次在Linux虚拟机中安装。先把VMware虚拟机的网络适配器改成桥接模式，以便于设置固定ip。</p>
+<p>先从<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a>下载最新稳定版本5.0.7，解压，编译。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-5.0.7.tar.gz</span><br><span class="line">tar xzf redis-5.0.7.tar.gz</span><br><span class="line">cd cd redis-5.0.7/</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p>make完后 redis-5.0.7目录src下会出现编译后的redis服务程序redis-server，执行<code>./redis-server</code>就可以通过前端模式启动了，不过ssh命令窗口关闭，redis-server程序就结束了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd src</span><br><span class="line">./redis-server</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>后端模式启动</p>
+<blockquote>
+<p>修改redis.conf配置文件把<code>daemonize no</code>改为线程守护<code>yes</code></p>
+</blockquote>
+</blockquote>
+<p>修改配置文件redis.conf，打开远程连接（把<code>protected-mode yes</code>改为<code>no</code>并注释掉（前加#）<code>bing 127.0.0.1</code>未设置密码<code>requirepass</code>）。</p>
+<p>重启Redis，查找并关闭进程。并指定启动服务配置文件，不然按默认启动（这里坑了，修改了配置文件，一直提示我不能远程连接）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ps -ef|grep redis</span><br><span class="line">kill 相关进程</span><br><span class="line">./redis-server redis.conf</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200211/1.jpg" alt><br>你也可以建立redis服务，设置成开机启动，这里偷懒。</p>
+<h4 id="FastDFS安装"><a href="#FastDFS安装" class="headerlink" title="FastDFS安装"></a>FastDFS安装</h4><p>FastDFS是一个开源的轻量级分布式文件系统，这里主要用来保存图片和文件并访问。</p>
+<ol>
+<li><p>先用git（没有git环境先执行<code>git apt-get install git</code>）克隆libfastcommon库（libfastcommon是从 FastDFS 和 FastDHT 中提取出来的公共 C 函数库，基础环境），进入目录编译并且安装。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/happyfish100/libfastcommon.git</span><br><span class="line">cd libfastcommon/</span><br><span class="line">./make.sh</span><br><span class="line">./make.sh install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置环境变量（注意32位系统没有64）和软连接</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export LD_LIBRARY_PATH=/usr/lib64/</span><br><span class="line">ln -s /usr/lib64/libfastcommon.so /usr/local/lib/libfastcommon.so</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装FastDFS<br>从<a href="https://github.com/happyfish100/fastdfs/releases" target="_blank" rel="noopener">https://github.com/happyfish100/fastdfs/releases</a>获取最新版本6.06，解压编译安装。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">wget wget https://github.com/happyfish100/fastdfs/archive/V6.06.tar.gz</span><br><span class="line">tar xzf V6.06.tar.gz </span><br><span class="line">cd fastdfs-6.06/</span><br><span class="line">./make.sh</span><br><span class="line">./make.sh install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改配置文件<br>默认安装路径/etc/fdfs下的client.conf.sample，storage.conf.sample，tracker.conf.sample三个参考配置文件。<br>配置跟踪器 tracker.conf，这里端口使用默认的22122，不建议修改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp tracker.conf.sample tracker.conf</span><br><span class="line">vim tracker.conf</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>修改下面两个参数<br>Tracker数据和日志目录地址（目录必须存在）<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/tracker</code><br>HTTP 服务端口<br><code>http.server_port = 80</code></p>
+<p>配置存储 storage.conf，端口依旧使用默认的23000。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp storage.conf.sample storage.conf</span><br><span class="line">vim storage.conf</span><br></pre></td></tr></table></figure>
+
+<p>Storage 数据和日志目录地址（目录必须存在）<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/storage</code><br>逐一配置 store_path_count 个路径（索引号从0开始，不配置store_path0就和base_path路径一样）<br><code>store_path0 = /home/xuchunlei/Desktop/linkstart/upload/file</code><br>tracker_server列表，这里只有一个，注释掉多余的，ip对应linux服务器的ip<br><code>tracker_server = 192.168.1.111:22122</code><br>访问端口<br><code>http.server_port = 80</code></p>
+<ol start="5">
+<li><p>启动服务<br>启动服务，22122和23000端口被监听说明启动成功。这里依然可以添加到服务，并开机启动。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/fdfs_trackerd /etc/fdfs/tracker.conf</span><br><span class="line">/usr/bin/fdfs_storaged /etc/fdfs/storage.conf</span><br><span class="line">netstat -unltp|grep fdfs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>测试上传文件<br>修改客户端 client.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp client.conf.sample client.conf</span><br><span class="line">vim client.conf</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>Client 的数据和日志目录<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/log</code><br>Tracker端口<br><code>tracker_server = 192.168.1.111:22122</code></p>
+<p>文件上传</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fdfs_test /etc/fdfs/client.conf upload /home/xuchunlei/Desktop/test.png</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200211/2.png" alt></p>
+<h4 id="FastDFS-http访问"><a href="#FastDFS-http访问" class="headerlink" title="FastDFS http访问"></a>FastDFS http访问</h4><p>虽然上传成功文件，但是这个时候是不能通过http来访问的，一般通过Nginx访问扩展模块来访问。</p>
+<ol>
+<li><p>安装Nginx<br>从<a href="https://nginx.org/en/download.html" target="_blank" rel="noopener">https://nginx.org/en/download.html</a>选择最新版本1.17.8。使用默认配置编译安装启动。浏览器访问localhost，出现Nginx界面表示安装成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">wget http://nginx.org/download/nginx-1.17.8.tar.gz</span><br><span class="line">tar xzf nginx-1.17.8.tar.gz </span><br><span class="line">cd nginx-1.17.8</span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line">/usr/local/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装fastdfs-nginx-module模块<br>在Nginx中添加fastdfs-nginx处理模块。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/happyfish100/fastdfs-nginx-module.git</span><br><span class="line">cd fastdfs-nginx-module/</span><br><span class="line">./configure --add-module=/home/xuchunlei/Desktop/linkstart/fastdfs/fastdfs-nginx-module/src</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>此时通过<code>/usr/local/nginx/sbin/nginx -V</code>来查看版本和模块信息。</p>
+<ol start="3">
+<li>配置nginx.conf<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /usr/local/nginx/conf/nginx.conf</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>配置文件中加入新的location，root配置到Storage的store_path0路径加上data</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">location /group1/M00 &#123;</span><br><span class="line">    root /home/xuchunlei/Desktop/linkstart/upload/file/data;</span><br><span class="line">    ngx_fastdfs_module;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建/M00到data的软连接</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s /home/xuchunlei/Desktop/linkstart/upload/file/data/ /home/xuchunlei/Desktop/linkstart/upload/file/data/group1/M00</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>配置mod_fastdfs.conf<br>复制fastdfs-nginx-module源码中的配置文件到/etc/fdfs目录并修改。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp mod_fastdfs.conf /etc/fdfs/</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>tracker_server<br><code>tracker_server=192.168.1.111:22122</code><br>false时，即访问地址不使用分组名称，nginx中不需要分组<br><code>url_have_group_name = true</code><br>必须和storage.conf中配置的store_path0路径的一致<br><code>store_path0=/home/xuchunlei/Desktop/linkstart/upload/file</code></p>
+<p>复制FastDFS的部分配置文件（解压文件conf文件夹中）到/etc/fdfs目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp http.conf /etc/fdfs/</span><br><span class="line">cp mime.types /etc/fdfs/</span><br></pre></td></tr></table></figure>
+
+<p>重启Nginx</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/nginx/sbin/nginx -s stop</span><br><span class="line">/usr/local/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
+
+<p>通过文件上传返回路径<code>http://192.168.1.111/group1/M00/00/00/wKgBb15BbKWAETJpAAGCZONuhNo096.png</code>来访问<br><img src="/img/20200211/3.jpg" alt></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
