@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Docker学习笔记（一）—认识与安装（Deepin15.11） - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="Docker学习笔记（一）认识与安装（Deepin15.11）老早就知道Docker了，但是没有静下心来去看。终于简单的学习了一下，记一下笔记。但是篇幅有点多，分开写吧。
+1.Docker介绍Doc,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">Docker学习笔记（一）—认识与安装（Deepin15.11）</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Docker学习笔记（一）—认识与安装（Deepin15.11）</h1>
+        <div class="stuff">
+            <span>三月 15, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Linux/">Linux</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="Docker学习笔记（一）"><a href="#Docker学习笔记（一）" class="headerlink" title="Docker学习笔记（一）"></a>Docker学习笔记（一）</h2><h2 id="认识与安装（Deepin15-11）"><a href="#认识与安装（Deepin15-11）" class="headerlink" title="认识与安装（Deepin15.11）"></a>认识与安装（Deepin15.11）</h2><p><em>老早就知道Docker了，但是没有静下心来去看。终于简单的学习了一下，记一下笔记。但是篇幅有点多，分开写吧。</em></p>
+<h3 id="1-Docker介绍"><a href="#1-Docker介绍" class="headerlink" title="1.Docker介绍"></a>1.Docker介绍</h3><p>Docker 是一个基于 Go 语言，开源的应用容器引擎。<br>Docker 可以让开发者打包他们的应用以及依赖包到一个轻量级、可移植的容器中，然后发布到任何流行的 Linux 机器上，也可以实现虚拟化。<br>容器是完全使用沙箱机制，相互隔离,容器性能开销极低。<br>Docker 从 17.03 版本之后分为 CE（Community Edition: 社区版免费） 和 EE（Enterprise Edition: 企业版收费）。<br>Docker 可以运行在Windows、Mac、Linux(CentOS,Ubuntu等)。<br><a href="https://docs.docker.com/" target="_blank" rel="noopener">官方教程</a></p>
+<h3 id="2-Docker架构"><a href="#2-Docker架构" class="headerlink" title="2.Docker架构"></a>2.Docker架构</h3><p><img src="/img/20200315/0.png" alt><br>镜像（Image）：Docker 镜像，就相当于是一个 root 文件系统。比如官方镜像 ubuntu:16.04 就包含了完整的一套 Ubuntu16.04 最小系统的 root 文件系统。<br>容器（Container）：镜像和容器的关系，就像是面向对象程序设计中的类和实例一样，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。<br>仓库（Repository）：仓库可看着一个代码控制中心，用来保存镜像。</p>
+<p>客户端（client）通过Docker命令与主机（host）的守护进程（daemon）进行通信交互，来创建和管理镜像（images），容器（containers），网络（networks），卷（volumes），插件（plugins）等Docker对象。</p>
+<h3 id="3-安装Docker"><a href="#3-安装Docker" class="headerlink" title="3 安装Docker"></a>3 安装Docker</h3><p>不同操做系统方式略有不同，可以参考官方的安装教程。这里基于Deepin15.11（基于官网<a href="https://docs.docker.com/install/linux/docker-ce/debian/" target="_blank" rel="noopener">Debian安装</a>）。<br>卸载旧版本 如果安装旧版本Docker先删除，未安装的话执行下面的命令会提示未安装。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get remove docker docker-engine docker.io containerd runc</span><br></pre></td></tr></table></figure>
+
+<p>这里使用推荐的仓库安装，更新apt包索引</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br></pre></td></tr></table></figure>
+
+<p>安装 apt 依赖包，用于通过 HTTPS 来获取仓库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install \</span><br><span class="line">    apt-transport-https \</span><br><span class="line">    ca-certificates \</span><br><span class="line">    curl \</span><br><span class="line">    gnupg2 \</span><br><span class="line">    software-properties-common</span><br></pre></td></tr></table></figure>
+
+<p>添加 Docker 的官方 GPG 密钥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add –</span><br></pre></td></tr></table></figure>
+
+<p>9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88 通过搜索指纹的后8个字符，验证您现在是否拥有带有指纹的密钥。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-key fingerprint 0EBFCD88</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200315/1.png" alt></p>
+<s>
+设置稳定版仓库
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository \</span><br><span class="line">   &quot;deb [arch=amd64] https://download.docker.com/linux/debian \</span><br><span class="line">   $(lsb_release -cs) \</span><br><span class="line">   stable&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这里Deepin可能会报could not find a distribution template for Deepin/stable的错误，需要修改Deepin.info文件的Suite，把unstable改成对应的stable（8jessie 7wheezy 6squeeze）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /usr/share/python-apt/templates/Deepin.info</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200315/2.png" alt></p>
+<p>但是更新apt包索引的时候发现仓库里Debian只到wheezy，没有stable<br><img src="/img/20200315/3.png" alt><br></p></s><p></p>
+<p>我这里修改stable为wheezy后，apt包索引更新成功</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository &quot;deb [arch=amd64] https://download.docker.com/linux/debian wheezy stable&quot;</span><br></pre></td></tr></table></figure>
+
+<s>
+要把之前的添加的删除，不然会一直存在在/etc/apt/sources.list里，跟新的时候会继续报错
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository -r \</span><br><span class="line">   &quot;deb [arch=amd64] https://download.docker.com/linux/debian \</span><br><span class="line">   $(lsb_release -cs) \</span><br><span class="line">   stable&quot;</span><br></pre></td></tr></table></figure>
+
+</s>
+
+<p>安装社区版<br>更新 apt 包索引</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br></pre></td></tr></table></figure>
+
+<p>安装最新版本的 Docker Engine-Community 和 containerd</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install docker-ce docker-ce-cli containerd.io</span><br></pre></td></tr></table></figure>
+
+<p>验证是否正确安装了Docker（用<code>docker -v</code>来验证也可以）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run hello-world</span><br></pre></td></tr></table></figure>
+
+<p>打印出以下信息则安装成功<br><img src="/img/20200315/4.png" alt></p>
+<p>配置Docker镜像加速器<br>Docker默认从<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker Hub</a>上下载Docker镜像，拉取有时会有问题，一般都会配置镜像加速器。各大云都有提供加速器，其他像中科大镜像加速器<code>https://docker.mirrors.ustc.edu.cn/</code>也是可以的。这里使用阿里云的镜像加速器，一般地址为<code>[系统分配前缀].mirror.aliyuncs.com</code>，每个阿里账号对应不同的镜像加速器。首先登陆阿里云，进入容器镜像服务。然后进入镜像加速器菜单，里面有账号对应的加速器地址，并附有各个系统的操做文档，直接复制粘贴过来并回车就行，比如Deepin的参考Ubuntu（基于Debian）的。<br><img src="/img/20200315/5.png" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir -p /etc/docker</span><br><span class="line">sudo tee /etc/docker/daemon.json &lt;&lt;-&apos;EOF&apos;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://whjf6e0c.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<p>可以通过<code>cat /etc/docker/daemon.json</code>来查看文件是否写入成功。</p>
+<h3 id="4-Docker命令"><a href="#4-Docker命令" class="headerlink" title="4 Docker命令"></a>4 Docker命令</h3><p>这里简单写一下部分命令，具体命令写法参数等可以查询官方<a href="https://docs.docker.com/engine/reference/commandline/docker/" target="_blank" rel="noopener">Docker Command</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">查看服务状态（active：active (running)运行中，inactive (dead)停止）</span><br><span class="line">systemctl status docker</span><br><span class="line">启动/停止/重启服务</span><br><span class="line">systemctl [start|stop|restart] docker</span><br><span class="line">查看服务是否是开机自动启动（Docker装完默认开机启动）</span><br><span class="line">systemctl is-enabled docker</span><br><span class="line">设置/禁止服务开机自动启动</span><br><span class="line">systemctl [enable|disable] docker</span><br><span class="line">查看所有服务的开机自动启动与禁用情况</span><br><span class="line">systemctl list-unit-files</span><br></pre></td></tr></table></figure>
+
+<p>docker命令需要管理员权限<br>查看镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
+
+<p>REPOSITORY仓库名 TAG版本<br><img src="/img/20200315/6.png" alt></p>
+<p>从仓库搜索镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker search [镜像名]</span><br><span class="line">docker search mysql</span><br></pre></td></tr></table></figure>
+
+<p>OFFICIAL 带[OK]为官方镜像<br><img src="/img/20200315/7.png" alt></p>
+<p>拉取镜像<br>不写版本号为最新版本latest,版本号从Docker Hub上查找<br><img src="/img/20200315/8.png" alt><br>同一行tags是一样的，比如mysql的latest和8是同一个，拉取下来IMAGE ID是一样的<br><img src="/img/20200315/9.png" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull mysql</span><br><span class="line">docker pull mysql:8</span><br></pre></td></tr></table></figure>
+
+<p>删除镜像<br>被容器使用的镜像无法删除，IMAGE ID有多个一样的无法通过IMAGE ID来删除，可以-f强制删除（未尝试）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker rmi [IMAGE ID镜像id|REPOSITORY仓库名:TAG版本]</span><br><span class="line">docker rmi fce289e99eb9</span><br><span class="line">docker rmi mysql:latest</span><br></pre></td></tr></table></figure>
+
+<p>查看容器<br>COMMAND进入容器初始化的命令 STATUS UP运行，Exited停止</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">启动中的容器</span><br><span class="line">docker ps</span><br><span class="line">所有容器</span><br><span class="line">docker ps -a</span><br><span class="line">容器信息</span><br><span class="line">docker inspect [容器名]</span><br></pre></td></tr></table></figure>
+
+<p>创建容器<br>一般参数i（交互模式运行容器，一直运行）和t（为容器重新分配一个伪输入终端）同时使用，创建后直接进入容器，<code>exit</code>退出后会停止。<br><code>-d</code> 后台运行，退出容器不影响运行。<code>-it</code>交互式容器，<code>-id</code>守护式容器<br><code>--name</code> 容器名字</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name=c1 centos:8</span><br><span class="line">docker run -id --name=c2 centos:8</span><br></pre></td></tr></table></figure>
+
+<p>进入容器<br>进入容器后退出，容器不会关闭</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it [容器名] [初始化命令]</span><br><span class="line">docker exec -it c2 /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p><code>exit</code> 退出容器</p>
+<p>启动/停止容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker [start|stop] [容器名]</span><br></pre></td></tr></table></figure>
+
+<p>删除容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm [容器ID|容器名]</span><br></pre></td></tr></table></figure>
+
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
