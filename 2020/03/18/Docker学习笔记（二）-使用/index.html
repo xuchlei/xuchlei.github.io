@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Docker学习笔记（二）-使用 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="Docker学习笔记（二）-使用因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单
+5 Docker数据卷数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">Docker学习笔记（二）-使用</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Docker学习笔记（二）-使用</h1>
+        <div class="stuff">
+            <span>三月 18, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Linux/">Linux</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="Docker学习笔记（二）-使用"><a href="#Docker学习笔记（二）-使用" class="headerlink" title="Docker学习笔记（二）-使用"></a>Docker学习笔记（二）-使用</h2><p><em>因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单</em></p>
+<h3 id="5-Docker数据卷"><a href="#5-Docker数据卷" class="headerlink" title="5 Docker数据卷"></a>5 Docker数据卷</h3><p>数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和文件和文件夹，为了持久化和共享数据。当数据卷目录挂载到容器目录后，修改会立即同步。容器和数据卷都可以一对多。<br><img src="/img/20200318/1.png" alt><br>配置数据卷<br>创建容器时使用<code>-v</code>参数来挂载数据卷，主机目录不写会默认分配一个目录<br>目录必须是绝对路径，目录不存在会自动创建，可以挂载多个数据卷（多个<code>-v</code>）<br><code>docker run ... -v 主机目录（文件）:容器内目录（文件） ...</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name=c3 \</span><br><span class="line">    -v /root/data:/root/data \</span><br><span class="line">    -v /root/data2:/root/data2 \</span><br><span class="line">    centos:8</span><br></pre></td></tr></table></figure>
+
+<p>以上数据卷，容器c3，容器c4的目录操做都会同步（共享数据）。删除容器，数据卷的数据还存在（持久化）。<br>通过<code>docker inspect</code>命令查看容器信息，在HostConfig下的Binds（Mounts里也能）查看绑定数据卷信息。</p>
+<p>配置数据卷容器<br>通过<code>--volume-from</code>参数配置，可以简化数据配置。容器会直接和数据卷关联，删除数据卷容器不影响下面的容器和数据卷的交互。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name=cd1 --volumes-from c3 centos:8</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Docker应用部署"><a href="#6-Docker应用部署" class="headerlink" title="6 Docker应用部署"></a>6 Docker应用部署</h3><p>应用部署一般过程为：搜索镜像，拉取镜像，创建容器。这里以mysql来举例，其他的也差不多，只是容器创建的时候有所不同，比如挂载数据卷之类的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">搜索镜像（版本号需要从Docker Hub上看）</span><br><span class="line">docker search mysql</span><br><span class="line"></span><br><span class="line">拉取镜像</span><br><span class="line">docker pull mysql:8</span><br><span class="line"></span><br><span class="line">创建容器（设置端口映射）</span><br><span class="line">docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -id mysql:8</span><br></pre></td></tr></table></figure>
+
+<p><code>-p 3306:3306</code> 将容器的3306端口映射到主机的3306端口<br><code>-e MYSQL_ROOT_PASSWORD=123456</code> 初始化root用户的密码</p>
+<p>远程连接mysql数据库成功<br><img src="/img/20200318/2.png" alt></p>
+<h3 id="7-Dockerfile"><a href="#7-Dockerfile" class="headerlink" title="7 Dockerfile"></a>7 Dockerfile</h3><p>Docker镜像由一层一层的文件系统（UnionFS联合文件系统）组成，Dockerfile 是一个用来构建镜像的文本文件，文本内容包含了一条条构建镜像所需的指令和说明。<br>镜像制作可以通过容器转为镜像<br>容器转镜像（挂载的目录不会写入镜像，root目录下的生效）<br><code>docker commit [容器id] [镜像名称]:[镜像版本号]</code><br>镜像转压缩文件<br><code>docker save -o [压缩文件名称] [镜像名称]:[镜像版本号]</code><br>压缩文件解压（还原）<br><code>docker load -i [压缩文件名称]</code></p>
+<p>这里用tomcat来举例，简单创建一个tomcat容器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker search tomcat</span><br><span class="line">docker pull tomcat</span><br><span class="line">docker run -id --name mytomcat -p 8080:8080 -v /root/tomcat:/usr/local/tomcat/webapps tomcat</span><br><span class="line">cd /root/tomcat/</span><br><span class="line">mkdir HelloWorld</span><br><span class="line">cd HelloWorld/</span><br><span class="line">vim index.html</span><br><span class="line">写入&lt;h1&gt;Hello World By Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过url访问<br><img src="/img/20200318/3.png" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">容器转镜像</span><br><span class="line">docker commit e3bb40626a58 myimg_tomcat:1.0</span><br><span class="line">进入容器</span><br><span class="line">docker exec -it myimg_tomcat bash</span><br><span class="line">镜像转压缩文件</span><br><span class="line">docker save -o myimg_tomcat.tar myimg_tomcat:1.0</span><br><span class="line">删除原镜像</span><br><span class="line">docker rmi myimg_tomcat:1.0</span><br><span class="line">压缩文件解压（还原）</span><br><span class="line">docker load -i myimg_tomcat.tar</span><br><span class="line">创建新容器</span><br><span class="line">docker run -it --name load_tomcat  myimg_tomcat:1.0 bash</span><br><span class="line">容器内查看webapps目录，原来挂载文件消失</span><br><span class="line">cd /usr/local/tomcat/webapps</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
+
+<p>推荐使用dockerfile来创建自定义镜像<br>书写可以参考Docker Hub上面的Dockerfile文件的写法或者<a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" target="_blank" rel="noopener">官方文档</a>，这里简单列一下关键字。<br><code>FROM</code> 基于那个image构建（scratch为空镜像）<br><code>LABEL</code> 一些标签说明<br><code>RUN</code> 执行命令，在docker build时运行<br><code>CMD</code> 类似RUN，在docker run时运行，可被 docker run 命令行参数中指定要运行的程序所覆盖<br><code>ENTRYPOINT</code> 类似CMD，但其不会被 docker run 的命令行参数指定的指令所覆盖<br><code>EXPOSE</code> 声明端口<br><code>ENV</code> 设置环境变量<br><code>ARG</code> 类似ENV，环境变量仅对 Dockerfile 内有效<br><code>COPY</code> 复制文件或者目录到容器里指定路径<br><code>ADD</code> 类似COPY，同样功能推荐用COPY，ADD可以自动解压压缩文件到目标路径<br><code>VOLUME</code> 定义匿名数据卷<br><code>USER</code> 指定执行后续命令的用户和用户组<br><code>WORKDIR</code> 指定工作目录<br><code>ONBUILD</code> 延迟构建命令的执行<br><code>LABEL</code> 标签<br><code>MAINTAINER</code> 作者信息<br><code>HEALTHCHECK</code> 健康检查<br><code>SHELL</code> 指定执行脚本的shell</p>
+<p>使用Dockerfile创建镜像<br><code>docker build -f [Dockerfile路径] -t [镜像名]</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">这里新建Dockerfile文件来创建镜像</span><br><span class="line">vim tomcat_dockerfile</span><br><span class="line">写入</span><br><span class="line">FROM tomcat:latest</span><br><span class="line">MAINTAINER xuchl&lt;xuchl@xuchunlei.top&gt;</span><br><span class="line"></span><br><span class="line">WORKDIR /usr/local/tomcat/webapps</span><br><span class="line">RUN mkdir HelloWorld</span><br><span class="line">WORKDIR /usr/local/tomcat/webapps/HelloWorld</span><br><span class="line">RUN echo &quot;&lt;h1&gt;Tomcat From Dockerfile&lt;/h1&gt;&quot; &gt; index.html</span><br><span class="line"></span><br><span class="line">创建镜像</span><br><span class="line">docker build -f ./tomcat_dockerfile  -t dcfile_tomcat:1.0 .</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/5.png" alt><br>用Dockerfile Build镜像时Docker client会默认把Dockerfile同级所有文件发给docker Deamon中导致发送内容过大。<br><img src="/img/20200318/4.png" alt><br>可以新建一个空目录放Dockerfile文件，或者使用.dockerignore文件设置黑名单，该文件包含的目录不会被发送到Docker daemon中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">创建容器</span><br><span class="line">docker run --name dcc -p 8080:8080 -d dcfile_tomcat:1.0</span><br></pre></td></tr></table></figure>
+
+<p>通过url访问<br><img src="/img/20200318/6.png" alt></p>
+<h3 id="8-Docker服务编排"><a href="#8-Docker服务编排" class="headerlink" title="8 Docker服务编排"></a>8 Docker服务编排</h3><p>Compose是用于定义和运行多容器Docker应用程序的工具，Compose具有用于管理应用程序整个生命周期的命令，包括启动，停止和重建服务等。</p>
+<blockquote>
+<p>步骤<br>1 使用Dockerfile定义应用环境，以便可以在任何地方复制。<br>2 使用docker-compose.yml定义组成应用程序服务，以便它们可以在隔离的环境中一起运行。<br>3 运行 docker-compose up启动并运行整个应用程序。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">安装Docker Compose的当前稳定版本（下了几次失败，换了国内的地址秒好）</span><br><span class="line">curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` &gt; /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">设置文件可执行权限</span><br><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">查看版本信息来验证是否安装成功</span><br><span class="line">docker-compose -v</span><br></pre></td></tr></table></figure>
+
+<p>简单写一个yml启动的例子（进入容器内加的页面），关键字就不（偷）解释（懒）了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mkdir composeHelloWorld</span><br><span class="line">cd composeHelloWorld/</span><br><span class="line"></span><br><span class="line">vim docker-compose.yml</span><br><span class="line"></span><br><span class="line">version: &apos;3&apos;</span><br><span class="line">services:</span><br><span class="line">  tomcat:</span><br><span class="line">    image: tomcat</span><br><span class="line">    ports:</span><br><span class="line">     - &quot;8090:8080&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/7.png" alt></p>
+<h3 id="9-Docker私有仓库"><a href="#9-Docker私有仓库" class="headerlink" title="9 Docker私有仓库"></a>9 Docker私有仓库</h3><p>私有仓库registry是一个官方提供的镜像。这里仓库放在本机，实际上是要放到不同机器上的。<br>搭建</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">拉取仓库镜像</span><br><span class="line">docker pull registry</span><br><span class="line">创建容器并启动</span><br><span class="line">docker run -id --name registry -p 5000:5000 registry</span><br></pre></td></tr></table></figure>
+
+<p>访问<code>http://私库ip地址:5000/v2</code>出现<code>{}</code>说明运行正常</p>
+<p>上传</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">标记镜像</span><br><span class="line">docker tag centos:8 localhost:5000/centos:8</span><br><span class="line"></span><br><span class="line">推送镜像</span><br><span class="line">docker push localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/8.png" alt><br>访问<code>http://私库ip地址:5000/v2/_catalog</code>出现<code>{&quot;repositories&quot;:[&quot;centos&quot;]}</code>说明上传成功</p>
+<p>拉取</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">拉取镜像</span><br><span class="line">docker pull localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/9.png" alt><br>这里因为是本机，需要先删除才能拉取下来。</p>
+<p>Docker官方提供的私有仓库registry虽然简单但在管理上存在不足。可以通过<a href="https://github.com/goharbor/harbor" target="_blank" rel="noopener">Harbor</a>来弥补以上不足（这里只提一下）。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
