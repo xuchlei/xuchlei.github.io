@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+   <head><meta name="generator" content="Hexo 3.9.0">
+       <meta charset="utf-8">
+   </head>
+   <body style="height: 100%; margin: 0">
+       <div id="container" style="height: 100%"></div>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+       <script type="text/javascript">
+var dom = document.getElementById("container");
+var myChart = echarts.init(dom);
+var app = {};
+option = null;
+var tempData = [
+                {name: '北京',value: 1104},
+                {name: '天津',value: 12},
+                {name: '上海',value: 2229},
+                {name: '重庆',value: 603},
+                {name: '河北',value: 144},
+                {name: '河南',value: 440},
+                {name: '云南',value: 155},
+                {name: '辽宁',value: 1082},
+                {name: '黑龙江',value: 562},
+                {name: '湖南',value: 791},
+                {name: '安徽',value: 1160},
+                {name: '山东',value: 1320},
+                {name: '新疆',value: 1135},
+                {name: '江苏',value: 1292},
+                {name: '浙江',value: 483},
+                {name: '江西',value: 491},
+                {name: '湖北',value: 678},
+                {name: '广西',value: 2113},
+                {name: '甘肃',value: 831},
+                {name: '山西',value: 557},
+                {name: '内蒙古',value: 165},
+                {name: '陕西',value: 813},
+                {name: '吉林',value: 64},
+                {name: '福建',value: 449},
+                {name: '贵州',value: 663},
+                {name: '广东',value: 4121},
+                {name: '青海',value: 0},
+                {name: '西藏',value: 14},
+                {name: '四川',value: 1425},
+                {name: '宁夏',value: 4},
+                {name: '海南',value: 139},
+                {name: '台湾',value: 0},
+                {name: '香港',value: 1},
+                {name: '澳门',value: 0},
+                {name: '海外',value: 168}
+            ]
+// 降序排列
+var desc = function(a, b){return b.value - a.value}
+tempData = tempData.sort(desc);
+
+option = {
+    color: ['#60acfc', '#32d3eb', '#5bc49f', '#feb64d', '#ff7c7c', '#9287e7'],
+    title: {
+        text: 'IP地址分布',
+        left: 'center'
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b} : {c} ({d}%)'
+    },
+    legend: {
+        orient: 'vertical',
+        left: 'left',
+        data: ["北京","天津","上海","重庆","河北","河南","云南","辽宁","黑龙江","湖南","安徽","山东","新疆","江苏","浙江","江西","湖北","广西","甘肃","山西","内蒙古","陕西","吉林","福建","贵州","广东","青海","西藏","四川","宁夏","海南","台湾","香港","澳门","海外"]
+    },
+    series: [
+        {
+            name: '访问来源',
+            type: 'pie',
+            radius: '55%',
+            center: ['50%', '60%'],
+            data: tempData,
+            emphasis: {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            },
+            label: {
+				normal: {
+					show: true,
+					formatter: '{b}{d}%'
+				}
+			}
+        }
+    ]
+};
+;
+if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+}
+       </script>
+   </body>
+</html>

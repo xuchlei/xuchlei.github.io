@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IP地址分布分析(国内) - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="IP地址分布分析(国内)因为工作的原因，简单整理了一下，效率极低，娱乐用
+ip所在地来源因为第一次做这个，没弄数据库和根据ip段来判断，直接请求ip.cn，通过jsoup来获取页面数据。发现GeoI,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">IP地址分布分析(国内)</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">IP地址分布分析(国内)</h1>
+        <div class="stuff">
+            <span>四月 02, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Echarts/">Echarts</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/IP/">IP</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Java/">Java</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="IP地址分布分析-国内"><a href="#IP地址分布分析-国内" class="headerlink" title="IP地址分布分析(国内)"></a>IP地址分布分析(国内)</h2><p><em>因为工作的原因，简单整理了一下，效率极低，娱乐用</em></p>
+<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为第一次做这个，没弄数据库和根据ip段来判断，直接请求<a href="https://ip.cn/" target="_blank" rel="noopener">ip.cn</a>，通过jsoup来获取页面数据。发现GeoIP数据不是很准确，基本以页面<code>所在地理位置</code>的数据为准，在获取不到准确数据的情况下参考页面<code>GeoIP</code>数据。<br>请求是最影响效率的地方，基本每秒请求一次，偶尔会报错（超时，520之类），毕竟是免费的。实际上分析的时候用的多线程（500条为一组），把没获取全的数据单独执行获取，然后在Excel表格里手动修改错误数据，然后整理计算。<br><img src="/img/20200402/1.png" alt></p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>后来（工作完成后）根据获取数据的规律，简单写了下（渣）代码，基本就是读取ip，获取ip所在省份，ip所在省份加一。执行错误，或者有无法识别的IP（国外，本地，特殊IP等）需要手动判断。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br></pre></td><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.net.SocketException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import org.apache.commons.lang3.StringUtils;</span><br><span class="line">import org.jsoup.Connection;</span><br><span class="line">import org.jsoup.Jsoup;</span><br><span class="line">import org.jsoup.nodes.Document;</span><br><span class="line">import org.jsoup.select.Elements;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreater &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line">	</span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		Map&lt;String, Integer&gt; provinceGeoIpMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceGeoIpMap.put(&quot;Beijing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tianjin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Chongqing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hebei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Yunnan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Liaoning&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Heilongjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hunan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Anhui&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shandong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Xinjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangsu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Zhejiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hubei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Gansu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanxi&quot;, 0); // 山西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Inner Mongolia Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shaanxi&quot;, 0); // 陕西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jilin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Fujian&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guizhou&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangdong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Qinghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tibet&quot;, 0); // 西藏</span><br><span class="line">		provinceGeoIpMap.put(&quot;Sichuan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Ningxia Hui Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// 获取ip.cn的页面内容</span><br><span class="line">				Document html = httpGet(&quot;https://ip.cn/?ip=&quot; + ips[i], null);</span><br><span class="line">				Elements pelements = html.getElementsByClass(&quot;well&quot;).get(0).getElementsByTag(&quot;p&quot;);</span><br><span class="line">				// 所在地理位置</span><br><span class="line">				String addresStr = pelements.get(1).getElementsByTag(&quot;code&quot;).text();</span><br><span class="line">				String provinceAddresStr = addresStr.substring(0, 2);</span><br><span class="line">				// GeoIP(局域网以及特殊ip没有)</span><br><span class="line">				String geoIpStr = pelements.size() == 3 ? pelements.get(2).getElementsByTag(&quot;code&quot;).text() : &quot;&quot;;</span><br><span class="line">				String[] geoIpAry = geoIpStr.split(&quot;, &quot;);</span><br><span class="line">				String provinceGeoIpStr = 1 &lt; geoIpAry.length ? geoIpAry[geoIpAry.length - 2]</span><br><span class="line">						: 0 &lt; geoIpAry.length ? geoIpAry[0] : &quot;&quot;;</span><br><span class="line"></span><br><span class="line">				System.out.println(i + &quot;\t&quot; + provinceAddresStr + &quot;\t&quot; + provinceGeoIpStr);</span><br><span class="line">				// 根据所在地理位置判断</span><br><span class="line">				if (provinceMap.get(provinceAddresStr) == null) &#123;</span><br><span class="line">					// 根据GeoIP判断</span><br><span class="line">					if (provinceGeoIpMap.get(provinceGeoIpStr) == null) &#123;</span><br><span class="line">						// 其他</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\t&quot; + addresStr + &quot;\t&quot; + geoIpStr + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceGeoIpMap.put(provinceGeoIpStr, provinceGeoIpMap.get(provinceGeoIpStr) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					provinceMap.put(provinceAddresStr, provinceMap.get(provinceAddresStr) + 1);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (SocketException se) &#123;</span><br><span class="line">			System.out.println(&quot;连接超时，请从最后的下标继续执行，然后手动合并数据。&quot;);</span><br><span class="line">			se.printStackTrace();</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				margeCount(provinceMap, provinceGeoIpMap);</span><br><span class="line">				StringBuffer result = new StringBuffer();</span><br><span class="line">				provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">					result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">				&#125;);</span><br><span class="line">				System.out.println(result.toString());</span><br><span class="line">				System.out.println(other);</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * httGet请求</span><br><span class="line">	 */</span><br><span class="line">	private static Document httpGet(String url, String cookie) throws IOException &#123;</span><br><span class="line">		Connection con = Jsoup.connect(url);</span><br><span class="line">		// 请求头设置</span><br><span class="line">		con.header(&quot;Accept&quot;, &quot;*/*&quot;);</span><br><span class="line">		con.header(&quot;User-Agent&quot;,</span><br><span class="line">				&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&quot;);</span><br><span class="line">		if (StringUtils.isNotEmpty(cookie)) &#123;</span><br><span class="line">			// cookie设置</span><br><span class="line">			con.header(&quot;Cookie&quot;, cookie);</span><br><span class="line">		&#125;</span><br><span class="line">		return con.get();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 数据合并</span><br><span class="line">	 */</span><br><span class="line">	private static void margeCount(Map&lt;String, Integer&gt; targetMap, Map&lt;String, Integer&gt; addMap) &#123;</span><br><span class="line">		targetMap.put(&quot;北京&quot;, targetMap.get(&quot;北京&quot;) + addMap.get(&quot;Beijing&quot;));</span><br><span class="line">		targetMap.put(&quot;天津&quot;, targetMap.get(&quot;天津&quot;) + addMap.get(&quot;Tianjin&quot;));</span><br><span class="line">		targetMap.put(&quot;上海&quot;, targetMap.get(&quot;上海&quot;) + addMap.get(&quot;Shanghai&quot;));</span><br><span class="line">		targetMap.put(&quot;重庆&quot;, targetMap.get(&quot;重庆&quot;) + addMap.get(&quot;Chongqing&quot;));</span><br><span class="line">		targetMap.put(&quot;河北&quot;, targetMap.get(&quot;河北&quot;) + addMap.get(&quot;Hebei&quot;));</span><br><span class="line">		targetMap.put(&quot;河南&quot;, targetMap.get(&quot;河南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">		targetMap.put(&quot;云南&quot;, targetMap.get(&quot;云南&quot;) + addMap.get(&quot;Yunnan&quot;));</span><br><span class="line">		targetMap.put(&quot;辽宁&quot;, targetMap.get(&quot;辽宁&quot;) + addMap.get(&quot;Liaoning&quot;));</span><br><span class="line">		targetMap.put(&quot;黑龙江&quot;, targetMap.get(&quot;黑龙&quot;) + addMap.get(&quot;Heilongjiang&quot;));</span><br><span class="line">		targetMap.remove(&quot;黑龙&quot;);</span><br><span class="line">		targetMap.put(&quot;湖南&quot;, targetMap.get(&quot;湖南&quot;) + addMap.get(&quot;Hunan&quot;));</span><br><span class="line">		targetMap.put(&quot;安徽&quot;, targetMap.get(&quot;安徽&quot;) + addMap.get(&quot;Anhui&quot;));</span><br><span class="line">		targetMap.put(&quot;山东&quot;, targetMap.get(&quot;山东&quot;) + addMap.get(&quot;Shandong&quot;));</span><br><span class="line">		targetMap.put(&quot;新疆&quot;, targetMap.get(&quot;新疆&quot;) + addMap.get(&quot;Xinjiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江苏&quot;, targetMap.get(&quot;江苏&quot;) + addMap.get(&quot;Jiangsu&quot;));</span><br><span class="line">		targetMap.put(&quot;浙江&quot;, targetMap.get(&quot;浙江&quot;) + addMap.get(&quot;Zhejiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江西&quot;, targetMap.get(&quot;江西&quot;) + addMap.get(&quot;Jiangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;湖北&quot;, targetMap.get(&quot;湖北&quot;) + addMap.get(&quot;Hubei&quot;));</span><br><span class="line">		targetMap.put(&quot;广西&quot;, targetMap.get(&quot;广西&quot;) + addMap.get(&quot;Guangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;甘肃&quot;, targetMap.get(&quot;甘肃&quot;) + addMap.get(&quot;Gansu&quot;));</span><br><span class="line">		targetMap.put(&quot;山西&quot;, targetMap.get(&quot;山西&quot;) + addMap.get(&quot;Shanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;内蒙古&quot;, targetMap.get(&quot;内蒙&quot;) + addMap.get(&quot;Inner Mongolia Autonomous Region&quot;));</span><br><span class="line">		targetMap.remove(&quot;内蒙&quot;);</span><br><span class="line">		targetMap.put(&quot;陕西&quot;, targetMap.get(&quot;陕西&quot;) + addMap.get(&quot;Shaanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;吉林&quot;, targetMap.get(&quot;吉林&quot;) + addMap.get(&quot;Jilin&quot;));</span><br><span class="line">		targetMap.put(&quot;福建&quot;, targetMap.get(&quot;福建&quot;) + addMap.get(&quot;Fujian&quot;));</span><br><span class="line">		targetMap.put(&quot;贵州&quot;, targetMap.get(&quot;贵州&quot;) + addMap.get(&quot;Guizhou&quot;));</span><br><span class="line">		targetMap.put(&quot;广东&quot;, targetMap.get(&quot;广东&quot;) + addMap.get(&quot;Guangdong&quot;));</span><br><span class="line">		targetMap.put(&quot;青海&quot;, targetMap.get(&quot;青海&quot;) + addMap.get(&quot;Qinghai&quot;));</span><br><span class="line">		targetMap.put(&quot;西藏&quot;, targetMap.get(&quot;西藏&quot;) + addMap.get(&quot;Tibet&quot;));</span><br><span class="line">		targetMap.put(&quot;四川&quot;, targetMap.get(&quot;四川&quot;) + addMap.get(&quot;Sichuan&quot;));</span><br><span class="line">		targetMap.put(&quot;宁夏&quot;, targetMap.get(&quot;宁夏&quot;) + addMap.get(&quot;Ningxia Hui Autonomous Region&quot;));</span><br><span class="line">		targetMap.put(&quot;海南&quot;, targetMap.get(&quot;海南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据生成的文本替换Echart的数据，展示效果如下。<br><img src="/img/20200402/2.png" alt><br><a href="https://xuchunlei.top/ipDistributionMap" target="_blank">IP地址分布地图Echarts代码页面</a></p>
+<p><img src="/img/20200402/3.png" alt><br><a href="https://xuchunlei.top/ipDistributionPie" target="_blank">IP地址分布饼状图Echarts代码页面</a></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
