@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>如何快速提高打字速度(伪,脚本调用键盘) - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="如何快速提高打字速度(伪,脚本调用键盘)本来想搞一个自动复制代码的脚本，后来发现可以用来打字。但是大部分语言模拟键盘主要为了自动化测试……
+起因最早的起因是在B站看了一个用VBA做游戏的视频（然而过,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">如何快速提高打字速度(伪,脚本调用键盘)</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">如何快速提高打字速度(伪,脚本调用键盘)</h1>
+        <div class="stuff">
+            <span>五月 10, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Java/">Java</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Node-js/">Node.js</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/VBA/">VBA</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/VBS/">VBS</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="如何快速提高打字速度-伪-脚本调用键盘"><a href="#如何快速提高打字速度-伪-脚本调用键盘" class="headerlink" title="如何快速提高打字速度(伪,脚本调用键盘)"></a>如何快速提高打字速度(伪,脚本调用键盘)</h2><p><em>本来想搞一个自动复制代码的脚本，后来发现可以用来打字。但是大部分语言模拟键盘主要为了自动化测试……</em></p>
+<h3 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h3><p>最早的起因是在B站看了一个用VBA做游戏的视频（然而过去了一个多月，咕咕咕），被视频里写代码的速度被震惊到了(其实视频中所写的代码都是提前大致打好草稿的)，然后就有了自动打(复制)代码的想法。<br>效果演示如下。</p>
+<p><img src="/img/20200510/1.gif" alt></p>
+<p>只支持键盘上有的按键（英文和字符）。你有中文键盘的话，就当我没说。</p>
+<p><img src="/img/20200510/2.png" alt></p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><h4 id="1-VBS"><a href="#1-VBS" class="headerlink" title="1 VBS"></a>1 VBS</h4><p>最简单暴力的就是VBS，代码简单，速度可控（对打字的模拟最好），但是Windows限定。<br>有设定2秒延迟，最后会在你鼠标（光标）点的位置开始输出。不过要通过打字程序的验证还是有点问题的，以后的代码都没有做这一步。<br>如果你读取的文件过长，想中途停下只能通过杀进程……</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">&apos;---------------------</span><br><span class="line">&apos;VBS打字脚本</span><br><span class="line">&apos;只支持英文和字符</span><br><span class="line">&apos;author xuchl</span><br><span class="line">&apos;---------------------</span><br><span class="line"></span><br><span class="line">dim wshshell</span><br><span class="line">set wshshell = createobject(&quot;wscript.shell&quot;)</span><br><span class="line">&apos;打开一个记事本</span><br><span class="line">&apos;wshshell.run &quot;notepad&quot;</span><br><span class="line">wscript.sleep 2000</span><br><span class="line"></span><br><span class="line">&apos;随机延迟设定</span><br><span class="line">dim max, min, num</span><br><span class="line">max = 90</span><br><span class="line">min = 40</span><br><span class="line"></span><br><span class="line">dim fso, f, str, schar</span><br><span class="line">set fso = createobject(&quot;Scripting.FileSystemObject&quot;)</span><br><span class="line">&apos;数据来源文件</span><br><span class="line">set f = fso.opentextfile(&quot;C:\Users\xuchl\Desktop\test.txt&quot;, 1, false)</span><br><span class="line"></span><br><span class="line">do until f.atendofstream</span><br><span class="line">	str = f.ReadLine()</span><br><span class="line">	for i = 1 to len(str)</span><br><span class="line">		&apos;逐行逐个读取字符</span><br><span class="line">		schar = mid(str, i, 1)</span><br><span class="line">		&apos;替换特殊字符</span><br><span class="line">		schar = replace(schar, &quot;+&quot;, &quot;+=&quot;)</span><br><span class="line">		schar = replace(schar, &quot;^&quot;, &quot;+6&quot;)</span><br><span class="line">		schar = replace(schar, &quot;%&quot;, &quot;+5&quot;)</span><br><span class="line">		schar = replace(schar, &quot;&#123;&quot;, &quot;+[&quot;)</span><br><span class="line">		schar = replace(schar, &quot;&#125;&quot;, &quot;+]&quot;)</span><br><span class="line">		schar = replace(schar, &quot;(&quot;, &quot;+9&quot;)</span><br><span class="line">		schar = replace(schar, &quot;)&quot;, &quot;+0&quot;)</span><br><span class="line">		schar = replace(schar, &quot;~&quot;, &quot;+`&quot;)</span><br><span class="line">		wshshell.sendkeys schar</span><br><span class="line">		&apos;随机延迟</span><br><span class="line">		num = Int((max - min + 1) * Rnd + min)</span><br><span class="line">		wscript.sleep num</span><br><span class="line">		&apos;打字模拟用-退格(为了让测试成绩通过机器验证)</span><br><span class="line">		if num &lt; 45 then</span><br><span class="line">			wshshell.sendkeys schar</span><br><span class="line">			wscript.sleep Int((max - min + 1) * Rnd + min)</span><br><span class="line">			wshshell.sendkeys &quot;&#123;BACKSPACE&#125;&quot;</span><br><span class="line">		end if</span><br><span class="line">	next</span><br><span class="line">    wshshell.sendkeys &quot;&#123;ENTER&#125;&quot;</span><br><span class="line">loop</span><br><span class="line"></span><br><span class="line">f.Close()</span><br><span class="line">set f = nothing</span><br><span class="line">set fso = nothing</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-5-VBA"><a href="#1-5-VBA" class="headerlink" title="1.5 VBA"></a>1.5 VBA</h4><p>和VBS类似，但是延迟不好控制。本来还想弄个VB.NET的，但是懒于没有环境，都是Microsoft的产品都差不多。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">&apos;---------------------</span><br><span class="line">&apos;VBA打字脚本</span><br><span class="line">&apos;只支持英文和字符</span><br><span class="line">&apos;author xuchl</span><br><span class="line">&apos;---------------------</span><br><span class="line">Sub vbaTyper()</span><br><span class="line"></span><br><span class="line">Dim fileRoot$, curChar$</span><br><span class="line">Dim targetStr</span><br><span class="line"></span><br><span class="line">fileRoot = &quot;C:\Users\xuchl\Desktop\test.txt&quot;</span><br><span class="line"></span><br><span class="line">&apos;读取文本内容</span><br><span class="line">targetStr = Split(ReadUTF(fileRoot), vbCrLf)</span><br><span class="line">If (UBound(targetStr) = 0) Then</span><br><span class="line">    targetStr = Split(targetStr(0), vbLf) &apos;换行符不是\r\n时，以\n重新换行</span><br><span class="line">End If</span><br><span class="line"></span><br><span class="line">&apos;延迟两秒</span><br><span class="line">&apos;延迟毫秒级不好控制，用Windows API函数Sleep可以但是不想</span><br><span class="line">delay (2)</span><br><span class="line"></span><br><span class="line">For i = 0 To UBound(targetStr)</span><br><span class="line">    For m = 1 To Len(targetStr(i))</span><br><span class="line">        curChar = Mid(targetStr(i), m, 1)</span><br><span class="line">        curChar = Replace(curChar, &quot;+&quot;, &quot;+=&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;^&quot;, &quot;+6&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;%&quot;, &quot;+5&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;&#123;&quot;, &quot;+[&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;&#125;&quot;, &quot;+]&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;(&quot;, &quot;+9&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;)&quot;, &quot;+0&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;~&quot;, &quot;+`&quot;)</span><br><span class="line">        </span><br><span class="line">        SendKeys curChar</span><br><span class="line">        delay (0.5)</span><br><span class="line">    Next</span><br><span class="line">Next</span><br><span class="line"></span><br><span class="line">End Sub</span><br><span class="line"></span><br><span class="line">Function ReadUTF(ByVal FileName As String) As String</span><br><span class="line">    With CreateObject(&quot;ADODB.Stream&quot;)</span><br><span class="line">        .Type = 2    &apos;读取文本文件</span><br><span class="line">        .Mode = 3   &apos;读写</span><br><span class="line">        .Open</span><br><span class="line">        .LoadFromFile FileName</span><br><span class="line">        .Charset = &quot;UTF-8&quot;  &apos;设定编码</span><br><span class="line">        .Position = 2</span><br><span class="line">        ReadUTF = .ReadText</span><br><span class="line">        .Close</span><br><span class="line">    End With</span><br><span class="line">End Function</span><br><span class="line"></span><br><span class="line">Function delay(s%)</span><br><span class="line">    tm = Timer</span><br><span class="line">    Do Until Timer - tm &gt; s</span><br><span class="line">        DoEvents</span><br><span class="line">    Loop</span><br><span class="line">End Function</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-Java"><a href="#2-Java" class="headerlink" title="2 Java"></a>2 Java</h4><p>果然这个才是本命，没有VBS简单，不过可以跨平台使用了（未验证）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br></pre></td><td class="code"><pre><span class="line">import java.awt.AWTException;</span><br><span class="line">import java.awt.Robot;</span><br><span class="line">import java.awt.event.KeyEvent;</span><br><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.HashSet;</span><br><span class="line">import java.util.Map;</span><br><span class="line">import java.util.Set;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * java打字</span><br><span class="line"> * 只支持英文和字符</span><br><span class="line"> * @author xuchl</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">public class javaTyper &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			// 键码对照</span><br><span class="line">			Map&lt;String, Integer&gt; keyCodeMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">			keyCodeMap.put(&quot;~&quot;, 0xC0);</span><br><span class="line">			keyCodeMap.put(&quot;-&quot;, 0x2D);</span><br><span class="line">			keyCodeMap.put(&quot;=&quot;, 0x3D);</span><br><span class="line">			keyCodeMap.put(&quot;	&quot;, (int) &apos;\t&apos;);</span><br><span class="line">			keyCodeMap.put(&quot;[&quot;, 0x5B);</span><br><span class="line">			keyCodeMap.put(&quot;]&quot;, 0x5D);</span><br><span class="line">			keyCodeMap.put(&quot;\\&quot;, 0x5C);</span><br><span class="line">			keyCodeMap.put(&quot;;&quot;, 0x3B);</span><br><span class="line">			keyCodeMap.put(&quot;&apos;&quot;, 0xDE);</span><br><span class="line">			keyCodeMap.put(&quot;,&quot;, 0x2C);</span><br><span class="line">			keyCodeMap.put(&quot;.&quot;, 0x2E);</span><br><span class="line">			keyCodeMap.put(&quot;/&quot;, 0x2F);</span><br><span class="line">			keyCodeMap.put(&quot; &quot;, 0x20);</span><br><span class="line"></span><br><span class="line">			// Shift配合用</span><br><span class="line">			keyCodeMap.put(&quot;`&quot;, 0xC0);</span><br><span class="line">			keyCodeMap.put(&quot;!&quot;, 0x31);</span><br><span class="line">			keyCodeMap.put(&quot;@&quot;, 0x32);</span><br><span class="line">			keyCodeMap.put(&quot;#&quot;, 0x33);</span><br><span class="line">			keyCodeMap.put(&quot;$&quot;, 0x34);</span><br><span class="line">			keyCodeMap.put(&quot;%&quot;, 0x35);</span><br><span class="line">			keyCodeMap.put(&quot;^&quot;, 0x36);</span><br><span class="line">			keyCodeMap.put(&quot;&amp;&quot;, 0x37);</span><br><span class="line">			keyCodeMap.put(&quot;*&quot;, 0x38);</span><br><span class="line">			keyCodeMap.put(&quot;(&quot;, 0x39);</span><br><span class="line">			keyCodeMap.put(&quot;)&quot;, 0x30);</span><br><span class="line">			keyCodeMap.put(&quot;_&quot;, 0x2D);</span><br><span class="line">			keyCodeMap.put(&quot;+&quot;, 0x3D);</span><br><span class="line">			keyCodeMap.put(&quot;&#123;&quot;, 0x5B);</span><br><span class="line">			keyCodeMap.put(&quot;&#125;&quot;, 0x5D);</span><br><span class="line">			keyCodeMap.put(&quot;|&quot;, 0x5C);</span><br><span class="line">			keyCodeMap.put(&quot;:&quot;, 0x3B);</span><br><span class="line">			keyCodeMap.put(&quot;\&quot;&quot;, 0xDE);</span><br><span class="line">			keyCodeMap.put(&quot;&lt;&quot;, 0x2C);</span><br><span class="line">			keyCodeMap.put(&quot;&gt;&quot;, 0x2E);</span><br><span class="line">			keyCodeMap.put(&quot;?&quot;, 0x2F);</span><br><span class="line"></span><br><span class="line">			keyCodeMap.put(&quot;0&quot;, 0x30);</span><br><span class="line">			keyCodeMap.put(&quot;1&quot;, 0x31);</span><br><span class="line">			keyCodeMap.put(&quot;2&quot;, 0x32);</span><br><span class="line">			keyCodeMap.put(&quot;3&quot;, 0x33);</span><br><span class="line">			keyCodeMap.put(&quot;4&quot;, 0x34);</span><br><span class="line">			keyCodeMap.put(&quot;5&quot;, 0x35);</span><br><span class="line">			keyCodeMap.put(&quot;6&quot;, 0x36);</span><br><span class="line">			keyCodeMap.put(&quot;7&quot;, 0x37);</span><br><span class="line">			keyCodeMap.put(&quot;8&quot;, 0x38);</span><br><span class="line">			keyCodeMap.put(&quot;9&quot;, 0x39);</span><br><span class="line"></span><br><span class="line">			keyCodeMap.put(&quot;a&quot;, 0x41);</span><br><span class="line">			keyCodeMap.put(&quot;b&quot;, 0x42);</span><br><span class="line">			keyCodeMap.put(&quot;c&quot;, 0x43);</span><br><span class="line">			keyCodeMap.put(&quot;d&quot;, 0x44);</span><br><span class="line">			keyCodeMap.put(&quot;e&quot;, 0x45);</span><br><span class="line">			keyCodeMap.put(&quot;f&quot;, 0x46);</span><br><span class="line">			keyCodeMap.put(&quot;g&quot;, 0x47);</span><br><span class="line">			keyCodeMap.put(&quot;h&quot;, 0x48);</span><br><span class="line">			keyCodeMap.put(&quot;i&quot;, 0x49);</span><br><span class="line">			keyCodeMap.put(&quot;j&quot;, 0x4A);</span><br><span class="line">			keyCodeMap.put(&quot;k&quot;, 0x4B);</span><br><span class="line">			keyCodeMap.put(&quot;l&quot;, 0x4C);</span><br><span class="line">			keyCodeMap.put(&quot;m&quot;, 0x4D);</span><br><span class="line">			keyCodeMap.put(&quot;n&quot;, 0x4E);</span><br><span class="line">			keyCodeMap.put(&quot;o&quot;, 0x4F);</span><br><span class="line">			keyCodeMap.put(&quot;p&quot;, 0x50);</span><br><span class="line">			keyCodeMap.put(&quot;q&quot;, 0x51);</span><br><span class="line">			keyCodeMap.put(&quot;r&quot;, 0x52);</span><br><span class="line">			keyCodeMap.put(&quot;s&quot;, 0x53);</span><br><span class="line">			keyCodeMap.put(&quot;t&quot;, 0x54);</span><br><span class="line">			keyCodeMap.put(&quot;u&quot;, 0x55);</span><br><span class="line">			keyCodeMap.put(&quot;v&quot;, 0x56);</span><br><span class="line">			keyCodeMap.put(&quot;w&quot;, 0x57);</span><br><span class="line">			keyCodeMap.put(&quot;x&quot;, 0x58);</span><br><span class="line">			keyCodeMap.put(&quot;y&quot;, 0x59);</span><br><span class="line">			keyCodeMap.put(&quot;z&quot;, 0x5A);</span><br><span class="line"></span><br><span class="line">			Set&lt;String&gt; specialCodeSet = new HashSet&lt;String&gt;();</span><br><span class="line">			specialCodeSet.add(&quot;~&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;!&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;@&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;#&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;$&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;%&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;^&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&amp;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;*&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;(&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;)&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;_&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;+&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&#123;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&#125;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;|&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;:&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;\&quot;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&lt;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&gt;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;?&quot;);</span><br><span class="line"></span><br><span class="line">			// 数据来源文件</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;C:\\Users\\xuchl\\Desktop\\test.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			char c;</span><br><span class="line"></span><br><span class="line">			// JDK自带Robot类，用于为测试自动化。</span><br><span class="line">			// 能够控制鼠标和键盘，还能屏幕截图。</span><br><span class="line">			Robot r = new Robot();</span><br><span class="line">			r.delay(2000);</span><br><span class="line"></span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				for (int i = 0; i &lt; lineStr.length(); i++) &#123;</span><br><span class="line">					c = lineStr.charAt(i);</span><br><span class="line">					// 按下键盘按键</span><br><span class="line">					if (65 &lt;= c &amp;&amp; c &lt;= 90 || specialCodeSet.contains(String.valueOf(c))) &#123;</span><br><span class="line">						// 大写字母和部分特殊字符按下shift</span><br><span class="line">						r.keyPress(KeyEvent.VK_SHIFT);</span><br><span class="line">					&#125;</span><br><span class="line">					r.keyPress(keyCodeMap.get(String.valueOf(c).toLowerCase()));</span><br><span class="line"></span><br><span class="line">					// 释放键盘按键</span><br><span class="line">					if (65 &lt;= c &amp;&amp; c &lt;= 90 || specialCodeSet.contains(String.valueOf(c))) &#123;</span><br><span class="line">						r.keyRelease(KeyEvent.VK_SHIFT);</span><br><span class="line">					&#125;</span><br><span class="line">					r.keyRelease(keyCodeMap.get(String.valueOf(c).toLowerCase()));</span><br><span class="line">					// 延迟，不随机了</span><br><span class="line">					r.delay(100);</span><br><span class="line">				&#125;</span><br><span class="line">				r.keyPress(KeyEvent.VK_ENTER);</span><br><span class="line">				r.keyRelease(KeyEvent.VK_ENTER);</span><br><span class="line">			&#125;</span><br><span class="line">			br.close();</span><br><span class="line"></span><br><span class="line">		&#125; catch (FileNotFoundException fnfe) &#123;</span><br><span class="line">			fnfe.printStackTrace();</span><br><span class="line">		&#125; catch (IOException ioe) &#123;</span><br><span class="line">			ioe.printStackTrace();</span><br><span class="line">		&#125; catch (AWTException awte) &#123;</span><br><span class="line">			awte.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-Node-js"><a href="#3-Node-js" class="headerlink" title="3 Node.js"></a>3 Node.js</h4><p>有自己库的语言就是强大啊，比如Python，Go（这两个都不写了，go的go-vgo/robotgo加载不下来），用的第三方的robotjs，不同系统需要的环境不同。<br>本来很简单就写完了，但是朋友的Deepin跑出的效果和Win10不同。然后在自己的的Deepin中验证，效果一样（主要为<code>&lt;</code>和<code>“</code>的问题）。刚开始以为是Deepin自己的问题，然后又装了CentOS7（8太大，7下了第三个镜像才搞定GUI），最后效果一样，不知道是不是官方的锅。提了一个issue，还拉上一个英语老师给我看看英语写的对不对，但愿对方能看懂吧。<br>Node.js也不是很复杂，但是速度不能往小里调。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">  nodejs打字</span><br><span class="line">  只支持英文和字符</span><br><span class="line">  author xuchl</span><br><span class="line">*/</span><br><span class="line">const robot = require(&quot;robotjs&quot;);</span><br><span class="line">const fs = require(&apos;fs&apos;);</span><br><span class="line">const readline = require(&apos;readline&apos;);</span><br><span class="line"></span><br><span class="line">// 速度调低明显，把数值调大效果不大</span><br><span class="line">// 800 : Characters per minute</span><br><span class="line">//robot.typeStringDelayed(&quot;`1234567890-=[]\;&apos;,./~!@#$%^&amp;*()_+&quot;, 800);</span><br><span class="line"></span><br><span class="line">// 速度调低明显，把数值调小效果不大</span><br><span class="line">// Sets the delay in milliseconds to sleep after a keyboard event. This is 10ms by default.</span><br><span class="line">//robot.setKeyboardDelay(5);</span><br><span class="line"></span><br><span class="line">// ==========2 start==========</span><br><span class="line">// deepin,centos(Linux)中robotjs特殊字符对应(&lt;, &quot;更为特殊)</span><br><span class="line">const specialCodeAry = [&quot;~&quot;, &quot;!&quot;, &quot;@&quot;, &quot;#&quot;, &quot;$&quot;, &quot;%&quot;, &quot;^&quot;, &quot;&amp;&quot;, &quot;*&quot;, &quot;(&quot;, &quot;)&quot;, &quot;_&quot;, &quot;+&quot;, &quot;&#123;&quot;, &quot;&#125;&quot;, &quot;|&quot;, &quot;:&quot;, &quot;&gt;&quot;, &quot;?&quot;];</span><br><span class="line">// ==========2 end==========</span><br><span class="line"></span><br><span class="line">setTimeout(function() &#123;</span><br><span class="line">	const readInterface = readline.createInterface(&#123;</span><br><span class="line">		input: fs.createReadStream(&apos;../test.txt&apos;)</span><br><span class="line">	&#125;);</span><br><span class="line"></span><br><span class="line">	readInterface.on(&apos;line&apos;, function(line) &#123;</span><br><span class="line">		for (let i = 0; i &lt; line.length; i++) &#123;</span><br><span class="line">			//robot.keyTap(line.charAt(i)); // 需要配合SHIFT的按键字符会变成不按SHIFT的状态，比如大写字母变小写，*变8</span><br><span class="line">			// ==========1 start==========</span><br><span class="line">			//robot.typeString(line.charAt(i)); // 所见即所得(windows限定,在Linux里不好使，keyTap效果一样但是大写字母与&lt;除外)</span><br><span class="line">			// ==========1 end==========</span><br><span class="line">			// ==========2 start==========</span><br><span class="line">			// deepin,centos(Linux)中robotjs特殊字符对应(&lt;, &quot;更为特殊)</span><br><span class="line">			let curChar = line.charAt(i);</span><br><span class="line">			if (curChar === &quot;\&quot;&quot;) &#123;</span><br><span class="line">				robot.keyTap(&quot;&apos;&quot;, [&quot;shift&quot;]);</span><br><span class="line">			&#125; else if (-1 &lt; specialCodeAry.indexOf(curChar)) &#123;</span><br><span class="line">				robot.keyTap(curChar, [&quot;shift&quot;]);</span><br><span class="line">			&#125; else &#123;</span><br><span class="line">				robot.typeString(curChar);</span><br><span class="line">			&#125;</span><br><span class="line">			// ==========2 end==========</span><br><span class="line">		&#125;</span><br><span class="line">		robot.keyTap(&quot;enter&quot;);</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;, 2000);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h4 id="我的安装过程，可以忽略"><a href="#我的安装过程，可以忽略" class="headerlink" title="我的安装过程，可以忽略"></a>我的安装过程，可以忽略</h4><p>robotjs编译环境<br><img src="/img/20200510/3.png" alt></p>
+<blockquote>
+<p>Win10<br>因为笔记本换成了NUC，安装时提示没有Python，装了最新的Python（但是它只支持2.7的），然后再安装又提示没有VS库。<br><img src="/img/20200510/4.png" alt><br>执行一句<code>npm install --global --production windows-build-tools</code>环境就齐了（Python2.7也装上了）</p>
+</blockquote>
+<blockquote>
+<p>Deepin<br>因为之前搞过别的，基本环境都有。提示缺少X11/extensions/XTest.h<br>执行<code>sudo apt-get install libx11-dev</code>和<code>sudo apt-get install xorg-dev</code>后安装成功</p>
+</blockquote>
+<blockquote>
+<p>CentOS7<br>这个就比较痛苦了，需要先装系统<br>使用官网二进制数据包安装Node.js<br><code>wget https://nodejs.org/dist/v12.16.3/node-v12.16.3-linux-x64.tar.xz</code><br><code>tar -xvf node-v12.16.3-linux-x64.tar.xz</code><br><code>ln -s /home/xuchl/桌面/node-v12.16.3-linux-x64/bin/node /usr/bin/node</code><br><code>ln -s /home/xuchl/桌面/node-v12.16.3-linux-x64/bin/npm /usr/bin/npm</code><br><code>node -v</code><br><code>npm -v</code><br>显示版本号，安装成功<br>执行<code>npm i robotjs</code>报错<br>sh: prebuild-install: 未找到命令<br>sh: node-gyp: 未找到命令<br>然后没有解决问题，明明Deepin也是这么装的<br>应该是Node.js安装问题，然后尝试使用yum安装<br><code>curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -</code><br><code>sudo yum install nodejs</code><br>执行<code>npm i robotjs</code>报错<br>make: g++：命令未找到<br>执行<code>yum install gcc-c++</code>安装<br>再安装报错：../src/mouse.c:12:35: 致命错误：X11/extensions/XTest.h：没有那个文件或目录<br>执行以下命令依旧报错<br><code>yum install libX11*</code><br><code>yum install xorg*</code><br><code>yum install libxtst*</code><br><code>yum install libpng*</code><br>然后放弃了，真香警告<br>放大招<code>yum -y upgrade</code>,此命令慎用，因为我是新环境无所谓<br>执行<code>yum install libXtst-devel</code>后安装成功<br>跑出结果已经过了晚上12点了</p>
+</blockquote>
+</blockquote>
+<h4 id="4-没有其他了"><a href="#4-没有其他了" class="headerlink" title="4 没有其他了"></a>4 没有其他了</h4><p>本来还想用别的语言写的，只有能够调用键盘，应该都能写。除了上面写过以及提到过的语言，其他的比如C，PHP都可以实现。但是被Node.js搞的头大，就不了了之了，实现逻辑也都差不多。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
