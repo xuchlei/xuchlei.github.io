@@ -1,0 +1,20 @@
+div {
+	margin: 0px; padding: 0px;
+}
+a {
+	color: rgb(61, 101, 141); text-decoration: none;
+}
+a img:hover {
+	background: 0px; border: 0px currentColor; border-image: none;
+}
+#rotate {
+	margin: 20px auto; /*width: 180px; height: 150px;*/ width:100%; height:100%; position: relative;
+}
+#rotate a {
+	padding: 3px 6px; left: 0px; top: 0px; color: rgb(153, 153, 153); font-size: 12px; font-weight: bold; position: absolute;
+}
+#rotate a:hover {
+	background: rgb(42, 166, 221); border-radius: 5px; border: 1px solid rgb(42, 166, 221); border-image: none; color: rgb(255, 255, 255);
+}
+
+html, body {height:100%;}

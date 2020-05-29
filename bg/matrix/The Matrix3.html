@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Matrix Canvas</title>
+<!-- change by http://cssdeck.com/labs/the-matrix -->
+</head>
+<body>
+<canvas id="q"></canvas>
+
+<script>
+var s = window.screen;
+var ctx=q.getContext('2d')
+var width  =q.width= s.width;
+var height  =q.height= s.height;
+var letters = Array(width/10+1).join(1).split('');
+
+var charts = [0,1,2,3,4,5,6,7,8,9,0];
+// 英文字母
+for (var i = 65; i < 91; i++) {
+  charts.push(String.fromCharCode(i))
+}
+for (var i = 97; i < 123; i++) {
+  charts.push(String.fromCharCode(i))
+}
+// 日文片假名
+for (var i = 12449; i < 12539; i++) {
+  charts.push(String.fromCharCode(i))
+}
+
+var draw = function () {
+    ctx.fillStyle='rgba(0,0,0,.05)';
+    ctx.fillRect(0,0,width,height);
+    ctx.fillStyle='#0F0';
+    letters.map(function(y_pos, index){
+    text = charts[Math.floor(Math.random()*charts.length)]
+    x_pos = index * 10;
+    ctx.fillText(text, x_pos, y_pos);
+    letters[index] = (y_pos > 758 + Math.random() * 1e4) ? 0 : parseInt(y_pos) + 10;
+  });
+};
+setInterval(draw, 33);
+</script>
+</body>
+</html>
