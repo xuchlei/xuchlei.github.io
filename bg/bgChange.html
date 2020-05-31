@@ -1,0 +1,434 @@
+<html>
+ <head><meta name="generator" content="Hexo 3.9.0">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="dns-prefetch" href="//www.mygalgame.com">
+  <title>背景替换和右键显示</title>
+  <style>
+body {
+	background: #000;
+	background-attachment: fixed;
+	word-wrap: break-word;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+ul {
+	list-style-type: none;
+}
+
+.cb-slideshow, .cb-slideshow:after {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	z-index: -2;
+}
+
+.cb-slideshow:after {
+	content: '';
+}
+
+.cb-slideshow li span {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	color: transparent;
+	background-size: cover;
+	background-position: 50% 50%;
+	background-repeat: none;
+	opacity: 0;
+	z-index: -2;
+	-webkit-backface-visibility: hidden;
+	-webkit-animation: imageAnimation 36s linear infinite 0s;
+	-moz-animation: imageAnimation 36s linear infinite 0s;
+	-o-animation: imageAnimation 36s linear infinite 0s;
+	-ms-animation: imageAnimation 36s linear infinite 0s;
+	animation: imageAnimation 36s linear infinite 0s;
+}
+
+.cb-slideshow li div {
+	z-index: 0;
+	position: absolute;
+	bottom: 10px;
+	left: 0px;
+	width: 100%;
+	text-align: right;
+	opacity: 0;
+	-webkit-animation: titleAnimation 36s linear infinite 0s;
+	-moz-animation: titleAnimation 36s linear infinite 0s;
+	-o-animation: titleAnimation 36s linear infinite 0s;
+	-ms-animation: titleAnimation 36s linear infinite 0s;
+	animation: titleAnimation 36s linear infinite 0s;
+}
+
+.cb-slideshow li div h3 {
+	font-family: 黑体, Arial, sans-serif;
+	font-size: 50px;
+	padding: 0 30px;
+	line-height: 130px;
+	color: rgba(169, 3, 41, 0.8);
+}
+
+.cb-slideshow li:nth-child(1) span {
+}
+
+.cb-slideshow li:nth-child(2) span {
+	-webkit-animation-delay: 6s;
+	-moz-animation-delay: 6s;
+	-o-animation-delay: 6s;
+	-ms-animation-delay: 6s;
+	animation-delay: 6s;
+}
+
+.cb-slideshow li:nth-child(3) span {
+	-webkit-animation-delay: 12s;
+	-moz-animation-delay: 12s;
+	-o-animation-delay: 12s;
+	-ms-animation-delay: 12s;
+	animation-delay: 12s;
+}
+
+.cb-slideshow li:nth-child(4) span {
+	-webkit-animation-delay: 18s;
+	-moz-animation-delay: 18s;
+	-o-animation-delay: 18s;
+	-ms-animation-delay: 18s;
+	animation-delay: 18s;
+}
+
+.cb-slideshow li:nth-child(5) span {
+	-webkit-animation-delay: 24s;
+	-moz-animation-delay: 24s;
+	-o-animation-delay: 24s;
+	-ms-animation-delay: 24s;
+	animation-delay: 24s;
+}
+
+.cb-slideshow li:nth-child(6) span {
+	-webkit-animation-delay: 30s;
+	-moz-animation-delay: 30s;
+	-o-animation-delay: 30s;
+	-ms-animation-delay: 30s;
+	animation-delay: 30s;
+}
+
+.cb-slideshow li:nth-child(2) div {
+	-webkit-animation-delay: 6s;
+	-moz-animation-delay: 6s;
+	-o-animation-delay: 6s;
+	-ms-animation-delay: 6s;
+	animation-delay: 6s;
+}
+
+.cb-slideshow li:nth-child(3) div {
+	-webkit-animation-delay: 12s;
+	-moz-animation-delay: 12s;
+	-o-animation-delay: 12s;
+	-ms-animation-delay: 12s;
+	animation-delay: 12s;
+}
+
+.cb-slideshow li:nth-child(4) div {
+	-webkit-animation-delay: 18s;
+	-moz-animation-delay: 18s;
+	-o-animation-delay: 18s;
+	-ms-animation-delay: 18s;
+	animation-delay: 18s;
+}
+
+.cb-slideshow li:nth-child(5) div {
+	-webkit-animation-delay: 24s;
+	-moz-animation-delay: 24s;
+	-o-animation-delay: 24s;
+	-ms-animation-delay: 24s;
+	animation-delay: 24s;
+}
+
+.cb-slideshow li:nth-child(6) div {
+	-webkit-animation-delay: 30s;
+	-moz-animation-delay: 30s;
+	-o-animation-delay: 30s;
+	-ms-animation-delay: 30s;
+	animation-delay: 30s;
+}
+
+@-webkit-keyframes imageAnimation {
+	0% {
+		opacity: 0;
+		-webkit-animation-timing-function: ease-in;
+	}
+	8% {
+		opacity: 1;
+		-webkit-transform: scale(1.05);
+		-webkit-animation-timing-function: ease-out;
+	}
+	17% {
+		opacity: 1;
+		-webkit-transform: scale(1.1) rotate(0deg);
+	}
+	25% {
+		opacity: 0;
+		-webkit-transform: scale(1.1) rotate(0deg);
+	}
+	100% {
+		opacity: 0
+	}
+}
+
+@-moz-keyframes imageAnimation {
+	0% {
+		opacity: 0;
+		-moz-animation-timing-function: ease-in;
+	}
+	8% {
+		opacity: 1;
+		-moz-transform: scale(1.05);
+		-moz-animation-timing-function: ease-out;
+	}
+	17% {
+		opacity: 1;
+		-moz-transform: scale(1.1) rotate(0deg);
+	}
+	25% {
+		opacity: 0;
+		-moz-transform: scale(1.1) rotate(0deg);
+	}
+	100% {
+		opacity: 0
+	}
+}
+
+@-o-keyframes imageAnimation {
+	0% {
+		opacity: 0;
+		-o-animation-timing-function: ease-in;
+	}
+	8% {
+		opacity: 1;
+		-o-transform: scale(1.05);
+		-o-animation-timing-function: ease-out;
+	}
+	17% {
+		opacity: 1;
+		-o-transform: scale(1.1) rotate(0deg);
+	}
+	25% {
+		opacity: 0;
+		-o-transform: scale(1.1) rotate(0deg);
+	}
+	100% {
+		opacity: 0
+	}
+}
+
+@-ms-keyframes imageAnimation {
+	0% {
+		opacity: 0;
+		-ms-animation-timing-function: ease-in;
+	}
+	8% {
+		opacity: 1;
+		-ms-transform: scale(1.05);
+		-ms-animation-timing-function: ease-out;
+	}
+	17% {
+		opacity: 1;
+		-ms-transform: scale(1.1) rotate(0deg);
+	}
+	25% {
+		opacity: 0;
+		-ms-transform: scale(1.1) rotate(0deg);
+	}
+	100% {
+		opacity: 0
+	}
+}
+
+@keyframes imageAnimation {
+	0% {
+		opacity: 0;
+		animation-timing-function: ease-in;
+	}
+	8% {
+		opacity: 1;
+		transform: scale(1.05);
+		animation-timing-function: ease-out;
+	}
+	17% {
+		opacity: 1;
+		transform: scale(1.1) rotate(0deg);
+	}
+	25% {
+		opacity: 0;
+		transform: scale(1.1) rotate(0deg);
+	}
+	100% {
+		opacity: 0
+	}
+}
+
+#overlay {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
+	left: 0;
+	top: 0;
+	display: none;
+	z-index: 1000001;
+	opacity: 1;
+}
+
+.magnify {
+	width: 2000px;
+	position: relative;
+}
+
+@media (min-width: 767px) {
+	.large {
+		width: 200px;
+		height: 200px;
+		position: fixed;
+		border-radius: 100%;
+		display: none;
+	}
+}
+
+.small {
+	max-width: initial;
+	max-height: initial;
+	opacity: 0;
+}
+  </style>
+  <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+ </head>
+ <body>
+  <section>
+   <ul class="cb-slideshow">
+	<li><span class="li_img1" style="background-image: url(https://s1.ax1x.com/2020/05/31/t3NCw9.png);"></span></li>
+	<li><span class="li_img2" style="background-image: url(https://s1.ax1x.com/2020/05/31/t3N9eJ.jpg);"></span></li>
+	<li><span class="li_img3" style="background-image: url(https://s1.ax1x.com/2020/05/31/t3txQU.jpg);"></span></li>
+	<li><span class="li_img4" style="background-image: url(https://s1.ax1x.com/2020/05/31/t3tjzT.jpg);"></span></li>
+	<li><span class="li_img5" style="background-image: url(https://s1.ax1x.com/2020/05/31/t3tXWV.jpg);"></span></li>
+	<li><span class="li_img6" style="background-image: url(https://s1.ax1x.com/2020/05/31/t3tOJ0.jpg);"></span></li>
+   </ul>
+  </section>
+  <div id="overlay" class="magnify" style="display:block;">
+   <div class="large h_img" style="background: no-repeat url(https://s1.ax1x.com/2020/05/31/t3dKw4.jpg);"></div>
+  </div>
+  <script>
+	jQuery(document).ready(function() {
+	
+	// 路过图床链接（可以自己定义，原版定义了长度1500的数组）
+	var post_thumbnail_link = new Array();
+	post_thumbnail_link[0] = "https://s1.ax1x.com/2020/05/31/t3YVtx.jpg";
+	post_thumbnail_link[1] = "https://s1.ax1x.com/2020/05/31/t3tP8f.jpg";
+	post_thumbnail_link[2] = "https://s1.ax1x.com/2020/05/31/t3ti28.jpg";
+	post_thumbnail_link[3] = "https://s1.ax1x.com/2020/05/31/t3tp5t.jpg";
+	post_thumbnail_link[4] = "https://s1.ax1x.com/2020/05/31/t3tCPP.jpg";
+	post_thumbnail_link[5] = "https://s1.ax1x.com/2020/05/31/t3tSUI.jpg";
+	post_thumbnail_link[6] = "https://s1.ax1x.com/2020/05/31/t3tFxS.jpg";
+	post_thumbnail_link[7] = "https://s1.ax1x.com/2020/05/31/t3tAKg.jpg";
+	post_thumbnail_link[8] = "https://s1.ax1x.com/2020/05/31/t3tErQ.jpg";
+	post_thumbnail_link[9] = "https://s1.ax1x.com/2020/05/31/t3tVbj.jpg";
+	post_thumbnail_link[10] = "https://s1.ax1x.com/2020/05/31/t3tWJP.jpg";
+	post_thumbnail_link[11] = "https://s1.ax1x.com/2020/05/31/t3tgII.jpg";
+	post_thumbnail_link[12] = "https://s1.ax1x.com/2020/05/31/t3tcdA.jpg";
+	post_thumbnail_link[13] = "https://s1.ax1x.com/2020/05/31/t3tRit.jpg";
+	post_thumbnail_link[14] = "https://s1.ax1x.com/2020/05/31/t3tsqH.jpg";
+	post_thumbnail_link[15] = "https://s1.ax1x.com/2020/05/31/t3tfRf.jpg";
+	post_thumbnail_link[16] = "https://s1.ax1x.com/2020/05/31/t3thz8.jpg";
+	post_thumbnail_link[17] = "https://s1.ax1x.com/2020/05/31/t3t5QS.jpg";
+	post_thumbnail_link[18] = "https://s1.ax1x.com/2020/05/31/t3tIsg.jpg";
+	post_thumbnail_link[19] = "https://s1.ax1x.com/2020/05/31/t3t7Zj.jpg";
+	post_thumbnail_link[20] = "https://s1.ax1x.com/2020/05/31/t3tHds.jpg";
+	post_thumbnail_link[21] = "https://s1.ax1x.com/2020/05/31/t3tbon.jpg";
+	post_thumbnail_link[22] = "https://s1.ax1x.com/2020/05/31/t3tLiq.jpg";
+	post_thumbnail_link[23] = "https://s1.ax1x.com/2020/05/31/t3tOJ0.jpg";
+	post_thumbnail_link[24] = "https://s1.ax1x.com/2020/05/31/t3tXWV.jpg";
+	post_thumbnail_link[25] = "https://s1.ax1x.com/2020/05/31/t3tjzT.jpg";
+	post_thumbnail_link[26] = "https://s1.ax1x.com/2020/05/31/t3txQU.jpg";
+	post_thumbnail_link[27] = "https://s1.ax1x.com/2020/05/31/t3N9eJ.jpg";
+	post_thumbnail_link[28] = "https://s1.ax1x.com/2020/05/31/t3NCw9.png";
+
+	var post_thumbnail_h_link = new Array();
+	post_thumbnail_h_link[0] = "https://s1.ax1x.com/2020/05/31/t3dlk9.jpg";
+	post_thumbnail_h_link[1] = "https://s1.ax1x.com/2020/05/31/t3dKw4.jpg";
+	post_thumbnail_h_link[2] = "https://s1.ax1x.com/2020/05/31/t3dMTJ.jpg";
+	post_thumbnail_h_link[3] = "https://s1.ax1x.com/2020/05/31/t3d3f1.jpg";
+	
+	
+	i = Math.floor(Math.random()*(Math.floor(post_thumbnail_link.length)));
+	j = Math.floor(Math.random()*(Math.floor(post_thumbnail_link.length)));
+	k = Math.floor(Math.random()*(Math.floor(post_thumbnail_link.length)));
+	l = Math.floor(Math.random()*(Math.floor(post_thumbnail_link.length)));
+	m = Math.floor(Math.random()*(Math.floor(post_thumbnail_link.length)));
+	n = Math.floor(Math.random()*(Math.floor(post_thumbnail_link.length)));
+	h = Math.floor(Math.random()*(Math.floor(post_thumbnail_h_link.length)));
+
+	$(".li_img1").css('backgroundImage','url(' + post_thumbnail_link[i] + ')');
+	$(".li_img2").css('backgroundImage','url(' + post_thumbnail_link[j] + ')');
+	$(".li_img3").css('backgroundImage','url(' + post_thumbnail_link[k] + ')');
+	$(".li_img4").css('backgroundImage','url(' + post_thumbnail_link[l] + ')');
+	$(".li_img5").css('backgroundImage','url(' + post_thumbnail_link[m] + ')');
+	$(".li_img6").css('backgroundImage','url(' + post_thumbnail_link[n] + ')');
+	$(".h_img").css('background','url(' + post_thumbnail_h_link[h] + ')');
+	
+	// 原版为每次刷新固定6张（以上代码），这里全部随机
+	var index = 1;
+	setTimeout(function(){
+		var o = Math.floor(Math.random()*(Math.floor(post_thumbnail_link.length)));
+		$(".li_img" + index).css('backgroundImage','url(' + post_thumbnail_link[o] + ')');
+		index ++;
+
+		setInterval(function(){
+			var o = Math.floor(Math.random()*(Math.floor(Math.floor(29))));
+			if (index == 7) {
+				index = 1
+			}
+			$(".li_img" + index).css('backgroundImage','url(' + post_thumbnail_link[o] + ')');
+			index ++;
+		}, 6000);
+	}, 9000);
+
+	$(this).on('contextmenu', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		$("#overlay").toggle();
+	})
+
+	jQuery(".magnify").mousemove(function(e) {
+		var b = jQuery(this).offset();
+		var c = e.pageX - b.left;
+		var d = e.pageY - b.top;
+		if (c < jQuery(this).width() && d < jQuery(this).height() && c > 0 && d > 0) {
+			jQuery(".large").fadeIn(100)
+		} else {
+			jQuery(".large").fadeOut(100)
+		}
+		if (jQuery(".large").is(":visible")) {
+			var f = Math.round(c - jQuery(".large").width() / 2) * -1;
+			var g = Math.round(d - jQuery(".large").height() / 2) * -1;
+			var h = f + "px " + g + "px";
+			var i = c - jQuery(".large").width() / 2;
+			var j = d - jQuery(".large").height() / 2;
+			jQuery(".large").css({
+				left: i,
+				top: j,
+				backgroundPosition: h
+			})
+		}
+	})
+	})
+  </script>
+ </body>
+</html>
