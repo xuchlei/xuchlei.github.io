@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css">
+    <title>地图显示</title>
+    <style>
+        html,
+        body,
+        #container {
+          width: 100%;
+          height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<!-- 加载地图JSAPI脚本 -->
+<script src="https://webapi.amap.com/maps?v=1.4.4&key=ab90646a4f5e056555ba2e086181d327&plugin=AMap.Geocoder"></script>
+<script>
+var map = new AMap.Map('container');
+
+var markers = [];
+var contentAry = ["注册", "发函", "回函"];
+var lineStyleAry = ["#80d8ff", "#ff304e"];
+var textStyleAry = [
+	{"background-color": "#29b6f6", "border-color": "#e1f5fe", "font-size": "12px"},
+	{"background-color": "#f62972", "border-color": "#fee1ee", "font-size": "12px"}
+]
+
+// 地理编码，什么时候检索完不可控（顺序有时也会变）
+var index = 0;
+/*
+var geocoder = new AMap.Geocoder({
+	city: "010", //城市设为北京，默认：“全国”
+});
+geoCode("八大胡同");
+geoCode("三里屯");
+geoCode("中关村");
+
+function geoCode(address) {
+	geocoder.getLocation(address, function(status, result) {
+		if (status === 'complete' && result.geocodes.length) {
+			var lnglat = result.geocodes[0].location;
+			var marker = new AMap.Marker();
+			marker.setPosition(lnglat);
+			map.add(marker);
+			marker.setLabel({
+				offset: new AMap.Pixel( - 7, -6),
+				direction: "center",
+				content: contentAry[index]
+			});
+			markers[index] = marker;
+			map.setFitView(marker);
+			index++;
+		}
+	});
+}
+*/
+// TODO 坐标点写死
+markers = [[116.386511, 39.891422], [116.457960, 39.928583], [116.315869, 39.981125]];
+// 标记点
+markers.forEach(function(marker) {
+	var mk = new AMap.Marker({
+	  map: map,
+	  position: [marker[0], marker[1]]
+	});
+	mk.setLabel({
+	  offset: new AMap.Pixel(-7, -6),
+	  direction: "center",
+	  content: contentAry[index]
+	});
+	index++;
+});
+
+// TODO 坐标点写死
+var p1 = new AMap.LngLat(116.386511, 39.891422);
+var p2 = new AMap.LngLat(116.457960, 39.928583);
+var p3 = new AMap.LngLat(116.315869, 39.981125);
+// 连线标记距离
+drawLineDistance(p1, p2, lineStyleAry[0], textStyleAry[0]);
+drawLineDistance(p2, p3, lineStyleAry[1], textStyleAry[1]);
+
+// 根据地图上添加的覆盖物分布情况，自动缩放地图到合适的视野级别，参数均可缺省
+map.setFitView();
+
+function drawLineDistance(p1, p2, lineStyle, textStyle) {
+	var textPos = p1.divideBy(2).add(p2.divideBy(2));
+	// 距离
+	var distance = Math.round(p1.distance(p2));
+	var path = [p1, p2];
+
+	var line = new AMap.Polyline({
+		map: map,
+		strokeColor: lineStyle,
+		isOutline: true,
+		outlineColor: "white",
+		path: path
+	});
+	// 连线
+	line.setPath(path);
+	// 设置文本
+	var text = new AMap.Text({
+		text: "两点相距" + distance + "米",
+		position: textPos,
+		map: map,
+		style: textStyle
+	});
+}
+</script>
+</body>
+</html>
