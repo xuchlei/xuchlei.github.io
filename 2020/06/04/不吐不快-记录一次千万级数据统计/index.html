@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>不吐不快-记录一次千万级数据统计 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="不吐不快-记录一次千万级数据统计吐槽专用，没啥干货
+数据甲方发来了两个压缩包，一个Google的，一个IOS的游戏充值数据。因为数据量较大，超出了Excel的处理范围，只好让我们来处理分析。Goog,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">不吐不快-记录一次千万级数据统计</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">不吐不快-记录一次千万级数据统计</h1>
+        <div class="stuff">
+            <span>六月 04, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/吐槽/">吐槽</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="不吐不快-记录一次千万级数据统计"><a href="#不吐不快-记录一次千万级数据统计" class="headerlink" title="不吐不快-记录一次千万级数据统计"></a>不吐不快-记录一次千万级数据统计</h2><p><em>吐槽专用，没啥干货</em></p>
+<h2 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h2><p>甲方发来了两个压缩包，一个Google的，一个IOS的游戏充值数据。因为数据量较大，超出了Excel的处理范围，只好让我们来处理分析。Google里面原始数据有10G，还有他们自己拆分的csv文件（Excel超过1048576行后无法完全加载文件），这也为以后的操做埋下了雷。IOS的很小，txt文本文件，合计15M，但是后期计算却花费了不少时间。<br>Google字段：<code>Description</code>,<code>Transaction Date</code>,<code>Transaction Time</code>,<code>Tax Type</code>,<code>Transaction Type</code>,<code>Refund Type</code>,<code>Product Title</code>,<code>Product id</code>,<code>Product Type</code>,<code>Sku Id</code>,<code>Hardware</code>,<code>Buyer Country</code>,<code>Buyer State</code>,<code>Buyer Postal Code</code>,<code>Buyer Currency</code>,<code>Amount (Buyer Currency)</code>,<code>Currency Conversion Rate</code>,<code>Merchant Currency</code>,<code>Amount (Merchant Currency)</code><br>IOS字段：<code>Start Date</code>,<code>End Date</code>,<code>UPC</code>,<code>ISRC/ISBN</code>,<code>Vendor Identifier</code>,<code>Quantity</code>,<code>Partner Share</code>,<code>Extended Partner Share</code>,<code>Partner Share Currency</code>,<code>Sales or Return</code>,<code>Apple Identifier</code>,<code>Artist/Show/Developer/Author</code>,<code>Title</code>,<code>Label/Studio/Network/Developer/Publisher</code>,<code>Grid</code>,<code>Product Type Identifier</code>,<code>ISAN/Other Identifier</code>,<code>Country Of Sale</code>,<code>Pre-order Flag</code>,<code>Promo Code</code>,<code>Customer Price</code>,<code>Customer Currency</code></p>
+<h2 id="处理"><a href="#处理" class="headerlink" title="处理"></a>处理</h2><ol>
+<li><p>首先对Google的一个渠道数据进行处理，先用了他们给的拆分数据，根据月份划分文件夹，每个文件夹里有3个csv文件。通过批处理复制到同一目录下，通过<code>copy *.csv all.csv</code>来合并为一个csv文件。因为之前的数据分析用的SQLServer数据库，效率比较好，一亿多的数据量秒级导入。但是这次就不行了，ManagementStudio的导入无法识别csv文件，通过平面文件源只能以<code>,</code>号来分割。但是因为有107格式的英文日期<code>Jan 1, 2019</code>，导致列错位。另外字段<code>Buyer State</code>是按照当地语言的，乱码导致无法通过验证。尝试了很久无果，就用Navicate导入，但是速度很慢。<br>第一次导入1800万数据，用时接近3小时，传输速率在7Mbps左右。<br><img src="/img/20200604/1.png" alt><br>然后根据月份分组查看，发现缺少2月份的数据（11月份拆分数据异常，只有1k，未导入）。然后用<code>certutil -hashfile filename MD5</code>复查数据，发现拆分好的数据1月和2月居然是一样的（想打人），压缩包的CRC32也是一样的。<br><img src="/img/20200604/2.png" alt><br>无奈和甲方沟通，让使用原始数据……然后又导入一遍，1900万数据，用时3个多小时，弄到公司只剩我一个人。<br><img src="/img/20200604/3.png" alt></p>
+</li>
+<li><p>第二天对另外一个渠道进行处理，这次鉴于前面的情况，直接用原始数据。然而二月份的压缩包居然是坏的（被他们玩坏了吧），经过沟通让使用他们拆分好的文件。这次按照季度汇总，分了四个表，四倍速导入。千兆带宽还是很给力的。<br><img src="/img/20200604/4.png" alt><br>导入3000多万数据，一个半小时，传输速率在30Mbps左右。<br><img src="/img/20200604/5.png" alt><br>然后计算的时候又暴雷了（哎）。经排查2月份部分数据因为拆分出的字段<code>Buyer State</code>乱码，导致后面的字段全部向前偏移。因为要用到后面的字段就通过update语句修改了数据。然而把字段位置修正，然而格式转换的时候还是报错，看数据没啥问题，复制粘贴出来，感觉多出一个换号符，然后通过Len发现确实多了一个长度，通过replace替换CHAR(13)后转换正常。</p>
+</li>
+<li><p>又过了一天，最后对IOS的数据处理，以为很快，然而也是个坑。就14万数据，导入很快，没啥问题，就是计算的时候来回沟通了好几次。Google是每条都计算好的，IOS不是，没有汇率，只有客户的货币。不是很清除游戏划分种类，根据字段<code>Vendor Identifier</code>（和<code>Apple Identifier</code>一一对应）来划分，有1170种……再按月份，货币划分，最后统计出9万数据。显然这个不行，后来的想法是根据新提供过来的每月汇率来来计算出人民币。没有汇率的货币就远远本本表示，最后各整理出8千和9千的数据。不知道以后还会提出啥要求。以防万一，SQL都保存了，因为写的比较复杂。</p>
+</li>
+</ol>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>还好是按工作量算钱的，不过甲方就是甲方。<br>能看完的都是勇士（手动滑稽）。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
