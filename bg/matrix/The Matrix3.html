@@ -1,18 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html style="height:100%;margin:0;padding:0">
 <head><meta name="generator" content="Hexo 3.9.0">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Matrix Canvas</title>
 <!-- change by http://cssdeck.com/labs/the-matrix -->
 </head>
-<body>
-<canvas id="q"></canvas>
+<body style="height:100%;margin:0;padding:0">
+<canvas id="q" style="margin:0;padding:0"></canvas>
 
 <script>
-var s = window.screen;
+//var s = window.screen;
+var s = document.body;
 var ctx=q.getContext('2d')
-var width  =q.width= s.width;
-var height  =q.height= s.height;
+//var width  =q.width= s.width;
+//var height  =q.height= s.height;
+var width  =q.width= s.clientWidth;
+var height  =q.height= s.clientHeight;
 var letters = Array(parseInt(width/10+1)).join(1).split('');
 
 var charts = [0,1,2,3,4,5,6,7,8,9,0];
