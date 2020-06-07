@@ -9,40 +9,60 @@
 <canvas id="q" style="margin:0;padding:0"></canvas>
 
 <script>
-//var s = window.screen;
-var s = document.body;
-var ctx=q.getContext('2d')
-//var width  =q.width= s.width;
-//var height  =q.height= s.height;
-var width  =q.width= s.clientWidth;
-var height  =q.height= s.clientHeight;
-var letters = Array(parseInt(width/10+1)).join(1).split('');
+var it;
+function init() {
 
-var charts = [0,1,2,3,4,5,6,7,8,9,0];
-// 英文字母
-for (var i = 65; i < 91; i++) {
-  charts.push(String.fromCharCode(i))
-}
-for (var i = 97; i < 123; i++) {
-  charts.push(String.fromCharCode(i))
-}
-// 日文片假名
-for (var i = 12449; i < 12539; i++) {
-  charts.push(String.fromCharCode(i))
+	var ctx = q.getContext('2d')
+	// 清除Canvas
+	ctx.clearRect(0,0, document.getElementById("q").width, document.getElementById("q").height);
+	document.getElementById("q").width = 0;
+	document.getElementById("q").height = 0;
+
+	var b = document.body;
+	var d = document.documentElement;
+	fullw = Math.max(b.clientWidth , b.scrollWidth, d.scrollWidth, d.clientWidth);
+	fullh = Math.max(b.clientHeight , b.scrollHeight, d.scrollHeight, d.clientHeight);
+
+	var width =q.width = fullw;
+	var height =q.height = fullh;
+	var letters = Array(parseInt(width/10+1)).join(1).split('');
+
+	var charts = [0,1,2,3,4,5,6,7,8,9,0];
+	// 英文字母
+	for (var i = 65; i < 91; i++) {
+		charts.push(String.fromCharCode(i))
+	}
+	for (var i = 97; i < 123; i++) {
+		charts.push(String.fromCharCode(i))
+	}
+	// 日文片假名
+	for (var i = 12449; i < 12539; i++) {
+		charts.push(String.fromCharCode(i))
+	}
+
+	var draw = function () {
+		ctx.fillStyle='rgba(0,0,0,.05)';
+		ctx.fillRect(0,0,width,height);
+		ctx.fillStyle='#0F0';
+		letters.map(function(y_pos, index){
+			text = charts[Math.floor(Math.random()*charts.length)]
+			x_pos = index * 10;
+			ctx.fillText(text, x_pos, y_pos);
+			letters[index] = (y_pos > 758 + Math.random() * 1e4) ? 0 : parseInt(y_pos) + 10;
+		});
+	};
+	
+	clearInterval(it);
+	it = setInterval(draw, 33);
 }
 
-var draw = function () {
-    ctx.fillStyle='rgba(0,0,0,.05)';
-    ctx.fillRect(0,0,width,height);
-    ctx.fillStyle='#0F0';
-    letters.map(function(y_pos, index){
-    text = charts[Math.floor(Math.random()*charts.length)]
-    x_pos = index * 10;
-    ctx.fillText(text, x_pos, y_pos);
-    letters[index] = (y_pos > 758 + Math.random() * 1e4) ? 0 : parseInt(y_pos) + 10;
-  });
-};
-setInterval(draw, 33);
+init();
+
+// 屏幕大小变更重绘
+window.onresize = function() {
+clearInterval(it);
+	init();
+}
 </script>
 </body>
 </html>
