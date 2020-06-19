@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vue element-china-area-data 数据源修改 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="Vue前台需要省市区三级联动，但是element-china-area-data的regionData数据太旧了，而且有部分数据不符合现有系统的逻辑。于是乎……
+起因为前台需要省市区三级联动的控件，,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">Vue element-china-area-data 数据源修改</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Vue element-china-area-data 数据源修改</h1>
+        <div class="stuff">
+            <span>六月 19, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Java/">Java</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Vue-js/">Vue.js</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>Vue前台需要省市区三级联动，但是element-china-area-data的regionData数据太旧了，而且有部分数据不符合现有系统的逻辑。于是乎……</em></p>
+<h3 id="起"><a href="#起" class="headerlink" title="起"></a>起</h3><p>因为前台需要省市区三级联动的控件，就选用了<a href="https://github.com/Plortinus/element-china-area-data" target="_blank" rel="noopener">element-china-area-data</a>来实现。但是实际使用中发现并不能满足现有系统的需求，最主要的原因是数据太旧了。数据来源<a href="https://github.com/airyland/china-area-data" target="_blank" rel="noopener">china-area-data</a>已经3年多没有更新了。以山东省济南市莱芜区为例，element-china-area-data中依然是市级行政单位。<br><img src="/img/20200619/1.png" alt><br>element-china-area-data使用的是<a href="https://element.eleme.cn/#/zh-CN/component/cascader" target="_blank" rel="noopener">Element-Cascader级联选择器</a>，稍微封装了一些方法，于是决定直接使用Element-Cascader级联选择器，后台生成需要的数据。</p>
+<h3 id="承"><a href="#承" class="headerlink" title="承"></a>承</h3><p>首先是数据来源，获取国务院-民政部最新的行政区划代码<a href="http://www.mca.gov.cn/article/sj/xzqh/2020/2020/202003301019.html" target="_blank" rel="noopener"><br>2020年2月中华人民共和国县以上行政区划代码</a>，通过Excel结合公式，来生成符合数据库表结构的数据。<br>复制粘贴下来是这样的，需要把空格替换掉（不间断空格\u00A0，复制粘贴表格中的一个空格通过Excle替换）<br><img src="/img/20200619/2.png" alt><br>然后根据我们系统中表结构分列，id和code就是行政区划代码，name对应地区名，parent_id对应上级id，parent_ids对应上级所有id，type对应省市区三级……<br>Excle公式计算如下：</p>
+<ol>
+<li>先判断级别类型type，根据行政区域代码结尾<code>0</code>的数量，4个为1省级，2个为2市级，其余为3区县。公式<code>=IF(RIGHT(F2,4)=&quot;0000&quot;,1,IF(RIGHT(F2,2)=&quot;00&quot;,2, 3))</code></li>
+<li>parent_id，根据type，1省级为0，2市级为行政区域代码前两位拼接<code>0000</code>，3区县为行政区域代码前四位拼接<code>00</code>为公式<code>=IF(G2=1,0,IF(G2=2,LEFT(A2,2)&amp;&quot;0000&quot;,IF(G2=3,LEFT(A2,4)&amp;&quot;00&quot;)))</code></li>
+<li>parent_ids，根据type和parent_id的结果拼接。公式<code>=IF(G2=1,B2,IF(G2=2,&quot;0,&quot;&amp;B2,IF(G2=3,&quot;0,&quot;&amp;LEFT(B2,2)&amp;&quot;0000,&quot;&amp;B2)))</code></li>
+<li>sort，排序用，公式<code>=ROW()-1</code>。其他字段填充就行。</li>
+</ol>
+<p>因为是三级联动，4个直辖市没有中间一层，需要手动补充。在相应位置复制粘贴4个直辖市数据，把id和code的第四位从<code>0</code>改为<code>1</code>即可。<br><img src="/img/20200619/3.png" alt></p>
+<h3 id="转"><a href="#转" class="headerlink" title="转"></a>转</h3><p>然后还有没有市级的区县，和没有区县的地级市……不过这个是在使用中发现的。上面的数据导入到数据库中，后台报错（根据上面的公式逻辑，存在没有父类的区县）。<br><img src="/img/20200619/4.png" alt><br>通过高德的地理编码，可以判断以上数据均为区县。<br><img src="/img/20200619/5.png" alt><br>重庆市的直接把<code>500200</code>的改为<code>500100</code>，sql<code>UPDATE sys_area SET parent_id = &#39;500100&#39;, parent_ids = &#39;0,500000,500100&#39; WHERE parent_id = &#39;500200&#39;</code>。其余的在中间加一层name为县的市级行政区（为了保证有3级数据），添加了4条数据。<br><img src="/img/20200619/6.png" alt><br>然后使用中发现还没有下一级的。<br><img src="/img/20200619/7.png" alt><br>然后又多加了一层，添加了5条数据。<br><img src="/img/20200619/8.png" alt><br>到此，全部的数据都能三级联动。数据这块根据实际需要来做吧，因为我们必须要存在三级。</p>
+<h3 id="合"><a href="#合" class="headerlink" title="合"></a>合</h3><p>数据全部修改完成后，重新生成左右值（左右值和三联没有联系，可忽略，如何生成可以参考以前写的：<a href="https://mp.weixin.qq.com/s?__biz=MzIwMjgwNTI0Mg==&mid=100000187&idx=1&sn=c968907ff5d984733e44cedc719c19b7&scene=19#wechat_redirect" target="_blank" rel="noopener">从bug中学习左右值树</a>），最终后台控制页面部分显示如下。<br><img src="/img/20200619/9.png" alt></p>
+<p>数据生成部分java逻辑（主要）代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public List&lt;AreaData&gt; initAreaData() &#123;</span><br><span class="line">    List&lt;Map&lt;String, Object&gt;&gt; list = systemDao.findAreaDataList(&quot;sys_area&quot;);</span><br><span class="line">    List&lt;AreaData&gt; areaData =  createAreaData(&quot;0&quot;, null, list, new AreaData());</span><br><span class="line">    return areaData;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private List&lt;AreaData&gt; createAreaData(String parentId, String name, List&lt;Map&lt;String, Object&gt;&gt; list, AreaData areaData) &#123;</span><br><span class="line">    List&lt;Map&lt;String, Object&gt;&gt; childrenList = list.stream().filter(e -&gt; &#123;</span><br><span class="line">        return e.get(&quot;parentId&quot;).toString().equals(parentId);</span><br><span class="line">    &#125;).collect(Collectors.toList());</span><br><span class="line">    List&lt;AreaData&gt; children = Lists.newArrayList();</span><br><span class="line">    for (Map&lt;String, Object&gt; o : childrenList) &#123;</span><br><span class="line">        AreaData ad = new AreaData();</span><br><span class="line">        ad.setValue(String.valueOf(o.get(&quot;id&quot;)));</span><br><span class="line">        ad.setLabel(String.valueOf(o.get(&quot;name&quot;)));</span><br><span class="line">        List&lt;AreaData&gt; adchildrenList = Lists.newArrayList();</span><br><span class="line">        // 递归调用</span><br><span class="line">        adchildrenList = createAreaData(o.get(&quot;id&quot;).toString(), String.valueOf(o.get(&quot;name&quot;)), list, new AreaData());</span><br><span class="line">        if (0 &lt; adchildrenList.size()) &#123;</span><br><span class="line">            ad.setChildren(adchildrenList);</span><br><span class="line">        &#125;</span><br><span class="line">        children.add(ad);</span><br><span class="line">    &#125;</span><br><span class="line">    return children;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后<code>npm uninstall element-china-area-data -S</code>卸载，Vue前台修改如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&lt;el-cascader</span><br><span class="line">  size=&quot;large&quot;</span><br><span class="line">  style=&quot;width:100%&quot;</span><br><span class="line">  :options=&quot;options&quot;</span><br><span class="line">  v-model=&quot;cuSelectedOptions&quot;</span><br><span class="line">  @change=&quot;cuHandleChange&quot;</span><br><span class="line">&gt;&lt;/el-cascader&gt;</span><br><span class="line"></span><br><span class="line">export default &#123;</span><br><span class="line">  data() &#123;</span><br><span class="line">    return &#123;</span><br><span class="line">      options: [], // 清空掉</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    fetchData() &#123;</span><br><span class="line">      // 具体根据自己的写</span><br><span class="line">      areaDataList(this.query).then(</span><br><span class="line">        response =&gt; &#123;</span><br><span class="line">          this.options = response.data;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后效果如下<br><img src="/img/20200619/10.png" alt><br>因为只有数据，element-china-area-data的方法用不了，但是都有替代方案。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
