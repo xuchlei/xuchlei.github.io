@@ -42,7 +42,7 @@ for(var i = 0; i < datas.length; i++) {
   }
 }
 getBoundary();
-var iw = new BMap.InfoWindow("<span style='float:left;width:48%;text-indent:2em'>点击标记打开信息窗口（有的话）</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 300, height: 100}); // 创建信息窗口对象
+var iw = new BMap.InfoWindow("<span style='float:left;width:55%;font-size:14px;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/><br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 335, height: 100}); // 创建信息窗口对象
 map.openInfoWindow(iw, point); //开启信息窗口
 
 var points = [
@@ -179,7 +179,11 @@ var points = [
 	{"lng":113.93525068474474,"lat":22.575298829127266,"title":"","content":""},
 	// 临沂
 	{"lng":118.36301037086804,"lat":35.109582923417925,"title":"","content":""},
-	{"lng":118.36960900873741,"lat":35.027447163435276,"title":"","content":""}
+	{"lng":118.36960900873741,"lat":35.027447163435276,"title":"","content":""},
+	// 哈尔滨
+	{"lng":126.25385679901385,"lat":45.63556624656899,"title":"","content":""},
+	{"lng":126.50672980007423,"lat":45.80611514791199,"title":"","content":""},
+	{"lng":126.59400489870679,"lat":45.76310576133965,"title":"","content":""}
 	]
 
 function addMarker(point){
