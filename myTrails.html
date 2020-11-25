@@ -47,9 +47,9 @@ map.openInfoWindow(iw, point); //开启信息窗口
 
 var points = [
 	// 在东京(遗憾啊,没好好逛过，基本按照时间顺序）
-	{"lng":140.392831, "lat":35.772015, "title":"成田机场", "content":"第一次到日本的地方，日本的环境是真的好"},
+	{"lng":140.392831, "lat":35.772015, "title":"", "content":""}, // 成田机场 第一次到日本的地方，日本的环境是真的好
 	{"lng":139.77115411219123, "lat":35.72756533558696, "title":"", "content":""}, // 日暮里 中转站，スカイライナー很快
-	{"lng":139.70050238383146, "lat":35.68978747120823, "title":"新宿", "content":"大车站，真的很大。可惜新宿只在车站里转悠"},
+	{"lng":139.70050238383146, "lat":35.68978747120823, "title":"", "content":""}, // 新宿 大车站，真的很大。可惜新宿只在车站里转悠
 	{"lng":139.450899, "lat":35.623931, "title":"多摩市", "content":"第一次在日本住的地方，3个多月。赶上樱花盛开。紫阳花也很漂亮。被大神拉去锻炼，跑过10公里。因为当时的原因，留下满满的遗憾……",
 	"img":"img/map/duomo.jpg"},
 	{"lng":139.4462998906179, "lat":35.63700672609453, "title":"", "content":""}, // 市政厅，在留卡入驻
@@ -78,7 +78,7 @@ var points = [
 	{"lng":139.450212, "lat":35.653337, "title":"多摩川", "content":"", "img":"img/map/duomochuan.jpg"},
 	{"lng":139.53331425384192, "lat":35.63374320118872, "title":"", "content":""}, // 京王稻田堤→稻田堤
 	{"lng":139.61032149368478, "lat":35.5997212024177, "title":"", "content":""}, // 武藏沟口→沟口
-	{"lng":139.627906, "lat":35.6119, "title":"二子玉川", "content":"第一次在日本做出租车"}, // 二子玉川（附近面试）
+	{"lng":139.627906, "lat":35.6119, "title":"", "content":""}, // 二子玉川（附近面试） 第一次在日本做出租车
 	{"lng":139.76155122628955, "lat":35.703395738457864, "title":"", "content":""}, // 御茶水附近 富士ビル（面试）
 	{"lng":139.7638239392298, "lat":35.67559779026176, "title":"", "content":""}, // 有乐町，路痴加日语渣换乘太难了
 	{"lng":139.796006, "lat":35.655449, "title":"", "content":""}, // 丰州（附近面试）
@@ -104,7 +104,7 @@ var points = [
 	{"lng":136.920489, "lat":35.163722, "title":"", "content":""}, // バロー 新栄店（活动范围扩大 超市）
 	{"lng":136.918935, "lat":35.155504, "title":"", "content":""}, // 鹤舞公园
 	{"lng":137.1558723657169, "lat":35.087070282131116, "title":"", "content":""}, // 豊田 本来打算从这里去香岚溪的额，发现bus都错过了，然后去的猿投做的bus
-	{"lng":137.1785500883163, "lat":35.1219604328598, "title":"猿投", "content":"第一次体验日本的bus"},
+	{"lng":137.1785500883163, "lat":35.1219604328598, "title":"", "content":""}, // 猿投 第一次体验日本的bus
 	{"lng":137.313256, "lat":35.130291, "title":"香岚溪", "content":"赏枫叶的地方，可惜去的有点晚，枫叶的状态不是很好。"},
 	// 京都，遍地古建筑，记录不全。后来知道本能寺，五条大桥之类的，都擦肩而过……
 	{"lng":135.7598831455734, "lat":34.98524102168604, "title":"京都", "content":"大晦日和朋友出行第一站，JR站了一路，不过速度挺快的"},
@@ -149,7 +149,7 @@ var points = [
 	// 北京
 	{"lng":116.38514905887304, "lat":39.87119755935899, "title":"", "content":""}, // 北京到达
 	{"lng":116.40396855930707, "lat":39.91394167597157, "title":"北京", "content":"天安门附近必逛，带着瓶老干妈过安检被要求开箱，人挺多的。当时北京的雾霾还是很严重的"},
-	{"lng":116.41857051537177, "lat":39.91594778164794, "title":"王府井", "content":"北京第一顿饭，吃的日式料理，因为国内的太贵"},
+	{"lng":116.41857051537177, "lat":39.91594778164794, "title":"", "content":""}, // 王府井 北京第一顿饭，吃的日式料理，因为国内的太贵
 	{"lng":116.64467401223321, "lat":40.04072158492817, "title":"", "content":""}, // （住宿一晚）
 	{"lng":116.44312569648702, "lat":39.94288957311585, "title":"", "content":""}, // 附近溜达过，吃过晚饭，具体地点忘了
 	{"lng":116.60931670736048, "lat":40.08374541109134, "title":"", "content":""}, // 第一次做飞机，还是国际航线，目标东京
@@ -188,13 +188,15 @@ var points = [
 
 function addMarker(point){
 	var curpoint = new BMap.Point(point.lng, point.lat);
-	var marker = new BMap.Marker(curpoint);
+	var myIcon = new BMap.Icon("img/map/marker_blue_sprite.png", new BMap.Size(19, 25), {anchor: new BMap.Size(8, 25)}); // 自定义标记图片，设置anchor使图片位置和默认标记位置一致
+	var marker = new BMap.Marker(curpoint); // 自定义标记图片，直接使用参数{icon: myIcon}会丢失自动添加的阴影
 	map.addOverlay(marker);
 	if (point.title !== "") {
 		var opts = {
 			width : 300,     // 信息窗口宽度
 			height: 125,     // 信息窗口高度
-			title : point.title
+			title : point.title,
+			offset: new BMap.Size(0, -25) // 自定义标记图片，设置offset使信息窗口位置和默认信息窗口位置一致
 		}
 		var contentLen = point.content.length;
 		point.content = "<span style='text-indent:2em'>" + point.content + "</span>";
@@ -206,6 +208,7 @@ function addMarker(point){
 		if (point.img && point.img !== "") {
 			point.content = point.content.replace("text-indent:2em", "text-indent:2em;float:left;width:48%;") + "<img style='float:right;' src='" + point.img + "' width='150' height='100' />"
 		}
+		marker.setIcon(myIcon); // 自定义标记图片，使用marker.setIcon()会自动添加阴影
 		var infoWindow = new BMap.InfoWindow(point.content, opts); // 创建信息窗口对象
 		marker.addEventListener("click", function(){
 			this.openInfoWindow(infoWindow);
