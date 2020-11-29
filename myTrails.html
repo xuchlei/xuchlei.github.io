@@ -201,13 +201,14 @@ function addMarker(point){
 		}
 		var contentLen = point.content.length;
 		point.content = "<span style='text-indent:2em'>" + point.content + "</span>";
-		// 内容过多时，调整字体大小
-		if (40 < contentLen) {
-			point.content = point.content.replace("text-indent:2em", "font-size:12px;text-indent:2em");
-		}
 		// 有图片时，调整内容
 		if (point.img && point.img !== "") {
-			point.content = point.content.replace("text-indent:2em", "text-indent:2em;float:left;width:48%;") + "<img style='float:right;' src='" + point.img + "' width='150' height='100' />"
+			// 内容过多时，调整字体大小
+			var reFontSize = "";
+			if (34 < contentLen) {
+				reFontSize = "font-size:12px;"
+			}
+			point.content = point.content.replace("text-indent:2em", reFontSize + "text-indent:2em;float:left;width:48%;") + "<img style='float:right;' src='" + point.img + "' width='150' height='100' />"
 		}
 		marker.setIcon(myIcon); // 自定义标记图片，使用marker.setIcon()会自动添加阴影
 		var infoWindow = new BMap.InfoWindow(point.content, opts); // 创建信息窗口对象
