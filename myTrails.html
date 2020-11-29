@@ -42,7 +42,7 @@ for(var i = 0; i < datas.length; i++) {
   }
 }
 getBoundary();
-var iw = new BMap.InfoWindow("<span style='float:left;width:55%;font-size:12px;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/><br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 335, height: 100}); // 创建信息窗口对象
+var iw = new BMap.InfoWindow("<span style='float:left;width:55%;font-size:14px;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/><br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 335, height: 125, title: "　"}); // 创建信息窗口对象
 map.openInfoWindow(iw, point); //开启信息窗口
 
 var points = [
@@ -195,7 +195,7 @@ function addMarker(point){
 	if (point.title !== "") {
 		var opts = {
 			width : 300,     // 信息窗口宽度
-			height: 125,     // 信息窗口高度
+			height: 130,     // 信息窗口高度
 			title : point.title,
 			offset: new BMap.Size(0, -25) // 自定义标记图片，设置offset使信息窗口位置和默认信息窗口位置一致
 		}
@@ -215,8 +215,8 @@ function addMarker(point){
 			this.openInfoWindow(infoWindow);
 			// 移动显示
 			map.panTo(point);
-			if (map.getZoom() < 14) {
-				map.setZoom(14);
+			if (map.getZoom() < 12) {
+				map.setZoom(12);
 			}
 		});
 	}
