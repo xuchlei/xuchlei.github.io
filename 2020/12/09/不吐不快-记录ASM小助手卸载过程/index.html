@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>不吐不快-记录ASM小助手卸载过程 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="不吐不快-记录ASM小助手卸载过程吐槽专用，图片是卸载的时候弄的，不是很全
+起因因为去别人的公司出差，需要通过公司Wifi来连接互联网（本来一般都是用自己手机热点的，现在就是后悔，非常后悔），连接上,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">不吐不快-记录ASM小助手卸载过程</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">不吐不快-记录ASM小助手卸载过程</h1>
+        <div class="stuff">
+            <span>十二月 09, 2020</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/吐槽/">吐槽</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="不吐不快-记录ASM小助手卸载过程"><a href="#不吐不快-记录ASM小助手卸载过程" class="headerlink" title="不吐不快-记录ASM小助手卸载过程"></a>不吐不快-记录ASM小助手卸载过程</h2><p><em>吐槽专用，图片是卸载的时候弄的，不是很全</em></p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>因为去别人的公司出差，需要通过公司Wifi来连接互联网（本来一般都是用自己手机热点的，现在就是后悔，非常后悔），连接上Wifi后输入申请的账号，然后需要下载一个插件来做安全检查。这个插件需要管理员权限来运行，也就是今天的主角-ASM小助手，当时没把它当回事。后来回到自己公司，通过git提交代码时候超时，GitHub无法访问，然后寻找原因就发现了它的存在。</p>
+<div align="center"><img src="/img/20201209/1.png"></div>
+
+<h2 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h2><p>这个插件貌似以前朋友提到过，说无法卸载，大概说的就是这个。网上很多用360文件粉碎的，想了想还要装360就算了吧。<br>刚开始打开win10的应用和功能，发现列表里根本没有这个软件……然后从任务栏图标打开程序选择卸载却发现一点反应没有。通过任务管理器找到软件安装位置，然后惊了，居然装在<code>Windows/SysWOW64</code>下面，<code>System32</code>下居然也有，这可以系统文件夹啊。安装的时候啥也没提示，直接让你用管理员权限安装。经过研究，发现安装和卸载使用的同一个可执行文件IsaSetup.exe，只是传递不同的参数而已。以管理员权限运行命令提示符，通过<code>IsaSetup.exe -Remove</code>来执行卸载，结果需要输入验证码……大概需要通过内部服务器进行申请，也就是说对于脱离了他们公司内网的情况下，要获取验证码是不可能的。<br><img src="/img/20201209/2.png" alt></p>
+<p>然后转换思路，开始进行物理删除。刚开始在任务管理器的用户标签页发现结束进程后，会自己重新启动。刚开始以为是有别的进程唤醒，其实不是，需要在进程标签页结束进程才能彻底结束。因为涉及到系统文件夹，删除要格外小心，我根据名字和时间排序，基本定位了所有文件，但是有部分文件无法删除，还是有进程在占用着。</p>
+<p>在任务管理器的程序标签页显示命令行信息，但是没有找到类似的路径信息。然后打开注册表全局搜索安装目录IsAgent，然后找到了关键信息，原来还有一个服务没有干掉。因为调用的系统镜像加上服务被折叠而没有发现。<br><img src="/img/20201209/3.png" alt><br><img src="/img/20201209/4.png" alt></p>
+<p>然后结束服务，并把注册表里的条目删除，后发现还有一个文件不能被删除，提示我没有管理员权限……</p>
+<div align="center"><img src="/img/20201209/5.png"></div>
+
+<p>打开文件属性，发现安全标签页无法查看，就是没有权限呗。然后打开高级选项把文件所有者改为当前用户，这样还是删除不掉，还需要把显示出来的权限所有拒绝权限条目删除。<br><img src="/img/20201209/6.png" alt></p>
+<p>至此，所有文件都进入回收站了，然后右键清空。<br><img src="/img/20201209/7.png" alt></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>上次这么搞还是Office365的弹出广告来着，不过那个和这个比起来友好多了。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top">Top &uarr;</a>
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
