@@ -42,7 +42,7 @@ for(var i = 0; i < datas.length; i++) {
   }
 }
 getBoundary();
-var iw = new BMap.InfoWindow("<span style='float:left;width:55%;font-size:14px;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/><br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 335, height: 125, title: "　"}); // 创建信息窗口对象
+var iw = new BMap.InfoWindow("<span style='float:left;width:40%;font-size:10px;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 335, height: 150, title: "　"}); // 创建信息窗口对象
 map.openInfoWindow(iw, point); //开启信息窗口
 
 var points = [
@@ -169,6 +169,9 @@ var points = [
 	{"lng":114.61565967664019, "lat":30.4685575453525, "title":"", "content":""},
 	{"lng":114.44859434501387, "lat":30.45830077799561, "title":"", "content":""},
 	{"lng":114.22040677936927, "lat":30.773619550126842, "title":"", "content":""},
+	{"lng":114.2981190992069,"lat":30.553641458451313,"title":"武汉长江大桥","content":"年代久远的大桥，没有想象中的惊艳","img":"img/map/whcjdq.jpg"},
+	{"lng":114.31799410861515,"lat":30.547926748259737,"title":"首义公园","content":""},
+	{"lng":114.37070420560053,"lat":30.569735779851005,"title":"湖北省博物馆","content":"路过，因为现场预约名额已满，没有进去","img":"img/map/hbsbwg.jpg"},
 	// 深圳
 	{"lng":113.81837130372398, "lat":22.637309356687478, "title":"", "content":""}, // 第一次在机场吃饭，一碗面50多，好贵。发现做飞机多了，什么事都能碰上，比如廊桥坏了……
 	{"lng":114.03948915778263, "lat":22.75215205681878, "title":"", "content":""},
@@ -230,7 +233,8 @@ function addMarker(point){
 		});
 	}
 }
-for (var i = 0; i < points.length; i ++) {
+
+for (var i = 0; i < points.length; i++) {
 	addMarker(points[i]);
 }
 </script>
