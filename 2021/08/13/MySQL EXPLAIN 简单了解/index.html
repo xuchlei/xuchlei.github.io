@@ -1,0 +1,401 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MySQL EXPLAIN 简单了解 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,"> 
+    <meta name="description" content="帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_s,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="icon-play"></div>
+    <h3 class="subtitle">MySQL EXPLAIN 简单了解</h3>
+    <div class="social">
+        <!--<div class="like-icon">-->
+            <!--<a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
+        <!--</div>-->
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">MySQL EXPLAIN 简单了解</h1>
+        <div class="stuff">
+            <span>八月 13, 2021</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/MySQL/">MySQL</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_size的大小，然并卵；用SQL_BIG_RESULT强制跑，结果把C盘100多G的空间干满了，No space left on device；最后用了EXPLAIN分析SQL语句的执行计划信息，来去除临时表，然后问题解决。了解到了以前不了解的知识，比如最左(前缀)匹配原则。为了以后不在踩坑，这里简单写以下EXPLAIN的信息以备后用。</em></p>
+<h3 id="EXPLAIN简介"><a href="#EXPLAIN简介" class="headerlink" title="EXPLAIN简介"></a>EXPLAIN简介</h3><p><code>EXPLAIN</code>可以获取SQL语句的执行计划信息，可用于<code>SELECT</code>，<code>DELETE</code>，<code>INSERT</code>，<code>REPLACE</code>，和<code>UPDATE</code>语句，用来分析优化SQL以及表结构。执行（<code>EXPLAIN</code> + SQL语句）效果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select 1 from dual;</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra          |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">|  1 | SIMPLE      | NULL  | NULL       | NULL | NULL          | NULL | NULL    | NULL | NULL |     NULL | No tables used |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<h3 id="EXPLAIN列信息"><a href="#EXPLAIN列信息" class="headerlink" title="EXPLAIN列信息"></a>EXPLAIN列信息</h3><ul>
+<li><p>id<br>SELECT的标识符，按照SELECT出现顺序增长，UNION查询id为NULL。</p>
+</li>
+<li><p>select_type<br>SELECT的类型</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">SIMPLE</td>
+<td align="left">简单查询（不使用UNION和子查询）</td>
+</tr>
+<tr>
+<td align="center">PRIMARY</td>
+<td align="left">复杂查询最外层的SELECT</td>
+</tr>
+<tr>
+<td align="center">UNION</td>
+<td align="left">UNION中第二个或以后的SELECT</td>
+</tr>
+<tr>
+<td align="center">DEPENDENT UNION</td>
+<td align="left">UNION中第二个或以后的SELECT（依赖于外部查询）</td>
+</tr>
+<tr>
+<td align="center">UNION RESULT</td>
+<td align="left">UNION的结果</td>
+</tr>
+<tr>
+<td align="center">SUBQUERY</td>
+<td align="left">子查询第一个SELECT</td>
+</tr>
+<tr>
+<td align="center">DEPENDENT SUBQUERY</td>
+<td align="left">子查询第一个SELECT（依赖于外部查询）</td>
+</tr>
+<tr>
+<td align="center">DERIVED</td>
+<td align="left">派生表</td>
+</tr>
+<tr>
+<td align="center">MATERIALIZED</td>
+<td align="left">物化子查询</td>
+</tr>
+<tr>
+<td align="center">UNCACHEABLE SUBQUERY</td>
+<td align="left">子查询无法被物化，每次都需要重新评估</td>
+</tr>
+<tr>
+<td align="center">UNCACHEABLE UNION</td>
+<td align="left">UNION中第二个或以后的无法被物化的SELECT（类似UNCACHEABLE SUBQUERY）</td>
+</tr>
+</tbody></table>
+<ul>
+<li>table<br>输出行所引用表名，或者以下值：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">&lt;unionM,N&gt;</td>
+<td align="left">id为M和N行的并集</td>
+</tr>
+<tr>
+<td align="center">&lt;derivedN&gt;</td>
+<td align="left">id为N行的派生表结果</td>
+</tr>
+<tr>
+<td align="center">&lt;subqueryN&gt;</td>
+<td align="left">id为N行的物化子查询结果</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>partitions<br>匹配记录所在的分区（非分区表该值为NULL）</p>
+</li>
+<li><p>type<br>连接类型，效率从高到低排列为：</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">system</td>
+<td align="left">表只有一行（类似系统表，const连接类型的一个特例）</td>
+</tr>
+<tr>
+<td align="center">const</td>
+<td align="left">该表最多有一个匹配行，该列的值可以被优化器的其余部分视为常量</td>
+</tr>
+<tr>
+<td align="center">eq_ref</td>
+<td align="left">从该表中读取一行与前一张表的所有行组合（使用主键索引或唯一非空索引）</td>
+</tr>
+<tr>
+<td align="center">ref</td>
+<td align="left">从该表中读取具有匹配索引值的所有行与前一张表的所有行的组合（不使用唯一索引，使用普通索引或唯一性索引的部分前缀）</td>
+</tr>
+<tr>
+<td align="center">fulltext</td>
+<td align="left">使用全文索引</td>
+</tr>
+<tr>
+<td align="center">ref_or_null</td>
+<td align="left">类似ref，但是需要额外搜索NULL</td>
+</tr>
+<tr>
+<td align="center">index_merge</td>
+<td align="left">使用索引合并的优化方法</td>
+</tr>
+<tr>
+<td align="center">unique_subquery</td>
+<td align="left">替代了 value IN (SELECT primary_key FROM single_table WHERE some_expr) 形式的eq_ref一些IN子查询</td>
+</tr>
+<tr>
+<td align="center">index_subquery</td>
+<td align="left">类似unique_subquery，替代了IN子查询，适用于 value IN (SELECT key_column FROM single_table WHERE some_expr) 形式的子查询中的非唯一索引</td>
+</tr>
+<tr>
+<td align="center">range</td>
+<td align="left">使用索引来检索给定范围的行</td>
+</tr>
+<tr>
+<td align="center">index</td>
+<td align="left">与ALL一样，但是扫描索引树（全索引扫描）</td>
+</tr>
+<tr>
+<td align="center">ALL</td>
+<td align="left">全表扫描</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>possible_keys<br>该表中可以使用哪个索引去查找行</p>
+</li>
+<li><p>key<br>该表中实际使用索引去查找行</p>
+</li>
+<li><p>key_len<br>该表中实际使用索引长度（可以推断使用组合索引中的多少）</p>
+</li>
+<li><p>ref<br>key列记录的索引中，表查找值所用到的列，常量（const）或函数（func）</p>
+</li>
+<li><p>rows<br>读取并检测的行数</p>
+</li>
+<li><p>filtered<br>按表条件过滤的行的估计百分比，最大值为100（没有发生行过滤）</p>
+</li>
+<li><p>Extra<br>附加信息，比较常见重要的如下</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Using index</td>
+<td align="left">使用索引树中的信息从表中检索列信息</td>
+</tr>
+<tr>
+<td align="center">Using where</td>
+<td align="left">使用WHERE限制返回的行</td>
+</tr>
+<tr>
+<td align="center">Using temporary</td>
+<td align="left">需要创建一个临时表来保存结果（比如GROUP BY和ORDER BY会出现，需要优化，一般用添加索引来优化）</td>
+</tr>
+<tr>
+<td align="center">Using filesort</td>
+<td align="left">对结果使用一个外部索引排序，而不是按索引次序从表里读取行（需要优化，一般用索引来优化）</td>
+</tr>
+</tbody></table>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/kw/673307.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/kw/7197358.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/kw/987692.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
