@@ -9,8 +9,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate">
-    <meta name="keywords" content="xuchunlei,"> 
-    <meta name="description" content="Docker学习笔记（二）-使用因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单
+    <meta name="keywords" content="xuchunlei,博客,Docker,Linux"> 
+    <meta name="description" content="一个战五渣的个人博客,Docker学习笔记（二）-使用因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单
 5 Docker数据卷数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和,"> 
     <meta name="author" content="xuchl"> 
     <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
@@ -158,7 +158,7 @@
 <h3 id="5-Docker数据卷"><a href="#5-Docker数据卷" class="headerlink" title="5 Docker数据卷"></a>5 Docker数据卷</h3><p>数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和文件和文件夹，为了持久化和共享数据。当数据卷目录挂载到容器目录后，修改会立即同步。容器和数据卷都可以一对多。<br><img src="/img/20200318/1.png" alt><br>配置数据卷<br>创建容器时使用<code>-v</code>参数来挂载数据卷，主机目录不写会默认分配一个目录<br>目录必须是绝对路径，目录不存在会自动创建，可以挂载多个数据卷（多个<code>-v</code>）<br><code>docker run ... -v 主机目录（文件）:容器内目录（文件） ...</code></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name=c3 \</span><br><span class="line">    -v /root/data:/root/data \</span><br><span class="line">    -v /root/data2:/root/data2 \</span><br><span class="line">    centos:8</span><br></pre></td></tr></table></figure>
 
-<p>以上数据卷，容器c3，容器c4的目录操做都会同步（共享数据）。删除容器，数据卷的数据还存在（持久化）。<br>通过<code>docker inspect</code>命令查看容器信息，在HostConfig下的Binds（Mounts里也能）查看绑定数据卷信息。</p>
+<p>以上数据卷，容器c3，容器c4的目录操作都会同步（共享数据）。删除容器，数据卷的数据还存在（持久化）。<br>通过<code>docker inspect</code>命令查看容器信息，在HostConfig下的Binds（Mounts里也能）查看绑定数据卷信息。</p>
 <p>配置数据卷容器<br>通过<code>--volume-from</code>参数配置，可以简化数据配置。容器会直接和数据卷关联，删除数据卷容器不影响下面的容器和数据卷的交互。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name=cd1 --volumes-from c3 centos:8</span><br></pre></td></tr></table></figure>
 

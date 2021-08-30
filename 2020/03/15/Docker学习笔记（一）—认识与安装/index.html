@@ -9,8 +9,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate">
-    <meta name="keywords" content="xuchunlei,"> 
-    <meta name="description" content="Docker学习笔记（一）认识与安装（Deepin15.11）老早就知道Docker了，但是没有静下心来去看。终于简单的学习了一下，记一下笔记。但是篇幅有点多，分开写吧。
+    <meta name="keywords" content="xuchunlei,博客,Docker,Linux"> 
+    <meta name="description" content="一个战五渣的个人博客,Docker学习笔记（一）认识与安装（Deepin15.11）老早就知道Docker了，但是没有静下心来去看。终于简单的学习了一下，记一下笔记。但是篇幅有点多，分开写吧。
 1.Docker介绍Doc,"> 
     <meta name="author" content="xuchl"> 
     <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
@@ -156,9 +156,9 @@
         <div class="content markdown">
             <h2 id="Docker学习笔记（一）"><a href="#Docker学习笔记（一）" class="headerlink" title="Docker学习笔记（一）"></a>Docker学习笔记（一）</h2><h2 id="认识与安装（Deepin15-11）"><a href="#认识与安装（Deepin15-11）" class="headerlink" title="认识与安装（Deepin15.11）"></a>认识与安装（Deepin15.11）</h2><p><em>老早就知道Docker了，但是没有静下心来去看。终于简单的学习了一下，记一下笔记。但是篇幅有点多，分开写吧。</em></p>
 <h3 id="1-Docker介绍"><a href="#1-Docker介绍" class="headerlink" title="1.Docker介绍"></a>1.Docker介绍</h3><p>Docker 是一个基于 Go 语言，开源的应用容器引擎。<br>Docker 可以让开发者打包他们的应用以及依赖包到一个轻量级、可移植的容器中，然后发布到任何流行的 Linux 机器上，也可以实现虚拟化。<br>容器是完全使用沙箱机制，相互隔离,容器性能开销极低。<br>Docker 从 17.03 版本之后分为 CE（Community Edition: 社区版免费） 和 EE（Enterprise Edition: 企业版收费）。<br>Docker 可以运行在Windows、Mac、Linux(CentOS,Ubuntu等)。<br><a href="https://docs.docker.com/" target="_blank" rel="noopener">官方教程</a></p>
-<h3 id="2-Docker架构"><a href="#2-Docker架构" class="headerlink" title="2.Docker架构"></a>2.Docker架构</h3><p><img src="/img/20200315/0.png" alt><br>镜像（Image）：Docker 镜像，就相当于是一个 root 文件系统。比如官方镜像 ubuntu:16.04 就包含了完整的一套 Ubuntu16.04 最小系统的 root 文件系统。<br>容器（Container）：镜像和容器的关系，就像是面向对象程序设计中的类和实例一样，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。<br>仓库（Repository）：仓库可看着一个代码控制中心，用来保存镜像。</p>
+<h3 id="2-Docker架构"><a href="#2-Docker架构" class="headerlink" title="2.Docker架构"></a>2.Docker架构</h3><p><img src="/img/20200315/0.png" alt><br>镜像（Image）：Docker 镜像，就相当于是一个 root 文件系统。比如官方镜像 ubuntu:16.04 就包含了完整的一套 Ubuntu16.04 最小系统的 root 文件系统。<br>容器（Container）：镜像和容器的关系，就像是面向对象程序设计中的类和实例一样，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。<br>仓库（Repository）：仓库可看作为一个代码控制中心，用来保存镜像。</p>
 <p>客户端（client）通过Docker命令与主机（host）的守护进程（daemon）进行通信交互，来创建和管理镜像（images），容器（containers），网络（networks），卷（volumes），插件（plugins）等Docker对象。</p>
-<h3 id="3-安装Docker"><a href="#3-安装Docker" class="headerlink" title="3 安装Docker"></a>3 安装Docker</h3><p>不同操做系统方式略有不同，可以参考官方的安装教程。这里基于Deepin15.11（基于官网<a href="https://docs.docker.com/install/linux/docker-ce/debian/" target="_blank" rel="noopener">Debian安装</a>）。<br>卸载旧版本 如果安装旧版本Docker先删除，未安装的话执行下面的命令会提示未安装。</p>
+<h3 id="3-安装Docker"><a href="#3-安装Docker" class="headerlink" title="3 安装Docker"></a>3 安装Docker</h3><p>不同操作系统方式略有不同，可以参考官方的安装教程。这里基于Deepin15.11（基于官网<a href="https://docs.docker.com/install/linux/docker-ce/debian/" target="_blank" rel="noopener">Debian安装</a>）。<br>卸载旧版本 如果安装旧版本Docker先删除，未安装的话执行下面的命令会提示未安装。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get remove docker docker-engine docker.io containerd runc</span><br></pre></td></tr></table></figure>
 
 <p>这里使用推荐的仓库安装，更新apt包索引</p>
@@ -187,7 +187,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository &quot;deb [arch=amd64] https://download.docker.com/linux/debian wheezy stable&quot;</span><br></pre></td></tr></table></figure>
 
 <s>
-要把之前的添加的删除，不然会一直存在在/etc/apt/sources.list里，跟新的时候会继续报错
+要把之前的添加的删除，不然会一直存在在/etc/apt/sources.list里，更新的时候会继续报错
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository -r \</span><br><span class="line">   &quot;deb [arch=amd64] https://download.docker.com/linux/debian \</span><br><span class="line">   $(lsb_release -cs) \</span><br><span class="line">   stable&quot;</span><br></pre></td></tr></table></figure>
 
 </s>
@@ -202,7 +202,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run hello-world</span><br></pre></td></tr></table></figure>
 
 <p>打印出以下信息则安装成功<br><img src="/img/20200315/4.png" alt></p>
-<p>配置Docker镜像加速器<br>Docker默认从<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker Hub</a>上下载Docker镜像，拉取有时会有问题，一般都会配置镜像加速器。各大云都有提供加速器，其他像中科大镜像加速器<code>https://docker.mirrors.ustc.edu.cn/</code>也是可以的。这里使用阿里云的镜像加速器，一般地址为<code>[系统分配前缀].mirror.aliyuncs.com</code>，每个阿里账号对应不同的镜像加速器。首先登陆阿里云，进入容器镜像服务。然后进入镜像加速器菜单，里面有账号对应的加速器地址，并附有各个系统的操做文档，直接复制粘贴过来并回车就行，比如Deepin的参考Ubuntu（基于Debian）的。<br><img src="/img/20200315/5.png" alt></p>
+<p>配置Docker镜像加速器<br>Docker默认从<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker Hub</a>上下载Docker镜像，拉取有时会有问题，一般都会配置镜像加速器。各大云都有提供加速器，其他像中科大镜像加速器<code>https://docker.mirrors.ustc.edu.cn/</code>也是可以的。这里使用阿里云的镜像加速器，一般地址为<code>[系统分配前缀].mirror.aliyuncs.com</code>，每个阿里账号对应不同的镜像加速器。首先登陆阿里云，进入容器镜像服务。然后进入镜像加速器菜单，里面有账号对应的加速器地址，并附有各个系统的操作文档，直接复制粘贴过来并回车就行，比如Deepin的参考Ubuntu（基于Debian）的。<br><img src="/img/20200315/5.png" alt></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir -p /etc/docker</span><br><span class="line">sudo tee /etc/docker/daemon.json &lt;&lt;-&apos;EOF&apos;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://whjf6e0c.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
 
 <p>可以通过<code>cat /etc/docker/daemon.json</code>来查看文件是否写入成功。</p>

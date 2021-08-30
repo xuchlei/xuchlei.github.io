@@ -9,8 +9,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate">
-    <meta name="keywords" content="xuchunlei,"> 
-    <meta name="description" content="帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_s,"> 
+    <meta name="keywords" content="xuchunlei,博客,MySQL,优化,EXPLAIN"> 
+    <meta name="description" content="一个战五渣的个人博客,帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_s,"> 
     <meta name="author" content="xuchl"> 
     <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -153,7 +153,7 @@
 
         </div>
         <div class="content markdown">
-            <p><em>帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_size的大小，然并卵；用SQL_BIG_RESULT强制跑，结果把C盘100多G的空间干满了，No space left on device；最后用了EXPLAIN分析SQL语句的执行计划信息，来去除临时表，然后问题解决。了解到了以前不了解的知识，比如最左(前缀)匹配原则。为了以后不在踩坑，这里简单写以下EXPLAIN的信息以备后用。</em></p>
+            <p><em>帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_size的大小，然并卵；用SQL_BIG_RESULT强制跑，结果把C盘100多G的空间干满了，No space left on device；最后用了EXPLAIN分析SQL语句的执行计划信息，来去除临时表，然后问题解决。了解到了以前不了解的知识，比如最左(前缀)匹配原则。为了以后不在踩坑，这里简单写一以下EXPLAIN的信息以备后用。</em></p>
 <h3 id="EXPLAIN简介"><a href="#EXPLAIN简介" class="headerlink" title="EXPLAIN简介"></a>EXPLAIN简介</h3><p><code>EXPLAIN</code>可以获取SQL语句的执行计划信息，可用于<code>SELECT</code>，<code>DELETE</code>，<code>INSERT</code>，<code>REPLACE</code>，和<code>UPDATE</code>语句，用来分析优化SQL以及表结构。执行（<code>EXPLAIN</code> + SQL语句）效果如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select 1 from dual;</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra          |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">|  1 | SIMPLE      | NULL  | NULL       | NULL | NULL          | NULL | NULL    | NULL | NULL |     NULL | No tables used |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
 
