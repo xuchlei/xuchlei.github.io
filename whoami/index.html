@@ -99,7 +99,6 @@
     </iframe>
 </div>
 
-<h4 id="我的公众号"><a href="#我的公众号" class="headerlink" title="我的公众号"></a>我的公众号</h4><div align="center"><img src="/img/me.png"></div>
 
 <h4 id="我的主力设备"><a href="#我的主力设备" class="headerlink" title="我的主力设备"></a>我的主力设备</h4><table>
 <thead>
@@ -161,8 +160,16 @@
 <td align="center">SSD 512G</td>
 </tr>
 </tbody></table>
-<h4 id="我的邮箱"><a href="#我的邮箱" class="headerlink" title="我的邮箱"></a>我的邮箱</h4><p><a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
-
+<script>
+    function mouseOver() {
+        document.getElementById("wechat").style.display = "block";
+    }
+    function mouseOut() {
+        document.getElementById("wechat").style.display = "none";
+    }
+</script>
+<div align="center" style="min-height:258px;"><img id="wechat" style="display:none;" src="/img/me.png"></div>
+<div align="center"><a class="iconfont icon-github" style="font-size:30px;" href="https://github.com/xuchlei" target="_blank" rel="noopener"></a>&nbsp;&nbsp;<a class="iconfont icon-wechat" title="微信公众号" onmouseover="mouseOver()" onmouseout="mouseOut()" style="font-size:30px;"></a>&nbsp;&nbsp;<a class="iconfont icon-email" style="font-size:30px;" href="mailto:xuchl@xuchunlei.top"></a><div></div></div>
                 
                 </div>
             </div>

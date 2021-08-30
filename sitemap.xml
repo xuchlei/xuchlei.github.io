@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://xuchunlei.top/whoami/index.html</loc>
+    
+    <lastmod>2021-08-30</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://xuchunlei.top/music/index.html</loc>
     
     <lastmod>2021-08-30</lastmod>
@@ -19,13 +26,6 @@
     <loc>https://xuchunlei.top/2021/08/13/MySQL%20EXPLAIN%20%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/</loc>
     
     <lastmod>2021-08-13</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://xuchunlei.top/whoami/index.html</loc>
-    
-    <lastmod>2021-08-11</lastmod>
     
   </url>
   
