@@ -155,32 +155,20 @@
       </tags>
   </entry>
   <entry>
-    <title>GitHub Pages绑定域名</title>
-    <url>/2019/11/08/GitHub-Pages%E7%BB%91%E5%AE%9A%E5%9F%9F%E5%90%8D/</url>
-    <content><![CDATA[<h1 id="GitHub-Pages绑定域名"><a href="#GitHub-Pages绑定域名" class="headerlink" title="GitHub Pages绑定域名"></a>GitHub Pages绑定域名</h1><blockquote>
-<h4 id="准备-申请域名"><a href="#准备-申请域名" class="headerlink" title="准备 申请域名"></a>准备 申请域名</h4></blockquote>
-<p>老早就想申请一个域名了，和GitHub的用户名一样，可选的也不是很多。个人用的话推荐.top顶级域名，便宜（万网相对便宜吧，续费每年26￥）。<br>然后我是新用户，首年1元就可以（有的首次开通便宜，可以多买几年）。<br>大部分顶级域名国内都需要实名认证，一般2到3个工作日审核。我早上申请的，过了一会域名就实名通过了，可以进行解析了。</p>
-<blockquote>
-<h4 id="GitHub仓库配置"><a href="#GitHub仓库配置" class="headerlink" title="GitHub仓库配置"></a>GitHub仓库配置</h4></blockquote>
-<p>xxx.github.io仓库 &gt; Settings &gt; Custom domain中写入申请的域名 &gt; Save<br><a href="https://help.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site" target="_blank" rel="noopener">官方文档</a></p>
-<blockquote>
-<h4 id="添加域名解析"><a href="#添加域名解析" class="headerlink" title="添加域名解析"></a>添加域名解析</h4></blockquote>
-<ul>
-<li><p>获取GitHub Pages域名：ping自己的地址xxx.github.io，获取到ip</p>
-</li>
-<li><p>添加域名解析：可以加两条A类型的，一条www，一条@。</p>
-</li>
-</ul>
-<p>过一段时间就能访问了</p>
-<blockquote>
-<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4></blockquote>
-<p>以下主题限定<br>从 xxx.github.io 到新域名，需要更改Hexo的url配置，这样对应的主页地址才能更改。<br>Gitalk的Homepage URL和Authorization callback URL也要修改。<br>顺便删掉了部分代码，去掉谷歌403错误（疑似广告）<br>音乐本地话，去除”A cookie associated with a cross-site resourced……”警告</p>
-<p>p.s：新建这篇文章发现，名字中如果有空格需要加引号，不然空格前面的就会忽略掉（即《Pages绑定域名》）。加上引号，生成的文件名空格会被-替代。</p>
+    <title>IP地址分布分析(国内)</title>
+    <url>/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/</url>
+    <content><![CDATA[<h2 id="IP地址分布分析-国内"><a href="#IP地址分布分析-国内" class="headerlink" title="IP地址分布分析(国内)"></a>IP地址分布分析(国内)</h2><p><em>因为工作的原因，简单整理了一下，效率极低，娱乐用</em></p>
+<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为第一次做这个，没弄数据库和根据ip段来判断，直接请求<a href="https://ip.cn/" target="_blank" rel="noopener">ip.cn</a>，通过jsoup来获取页面数据。发现GeoIP数据不是很准确，基本以页面<code>所在地理位置</code>的数据为准，在获取不到准确数据的情况下参考页面<code>GeoIP</code>数据。<br>请求是最影响效率的地方，基本每秒请求一次，偶尔会报错（超时，520之类），毕竟是免费的。实际上分析的时候用的多线程（500条为一组），把没获取全的数据单独执行获取，然后在Excel表格里手动修改错误数据，然后整理计算。<br><img src="/img/20200402/1.png" alt></p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>后来（工作完成后）根据获取数据的规律，简单写了下（渣）代码，基本就是读取ip，获取ip所在省份，ip所在省份加一。执行错误，或者有无法识别的IP（国外，本地，特殊IP等）需要手动判断。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.net.SocketException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import org.apache.commons.lang3.StringUtils;</span><br><span class="line">import org.jsoup.Connection;</span><br><span class="line">import org.jsoup.Jsoup;</span><br><span class="line">import org.jsoup.nodes.Document;</span><br><span class="line">import org.jsoup.select.Elements;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreater &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line">	</span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		Map&lt;String, Integer&gt; provinceGeoIpMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceGeoIpMap.put(&quot;Beijing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tianjin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Chongqing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hebei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Yunnan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Liaoning&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Heilongjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hunan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Anhui&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shandong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Xinjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangsu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Zhejiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hubei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Gansu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanxi&quot;, 0); // 山西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Inner Mongolia Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shaanxi&quot;, 0); // 陕西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jilin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Fujian&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guizhou&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangdong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Qinghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tibet&quot;, 0); // 西藏</span><br><span class="line">		provinceGeoIpMap.put(&quot;Sichuan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Ningxia Hui Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// 获取ip.cn的页面内容</span><br><span class="line">				Document html = httpGet(&quot;https://ip.cn/?ip=&quot; + ips[i], null);</span><br><span class="line">				Elements pelements = html.getElementsByClass(&quot;well&quot;).get(0).getElementsByTag(&quot;p&quot;);</span><br><span class="line">				// 所在地理位置</span><br><span class="line">				String addresStr = pelements.get(1).getElementsByTag(&quot;code&quot;).text();</span><br><span class="line">				String provinceAddresStr = addresStr.substring(0, 2);</span><br><span class="line">				// GeoIP(局域网以及特殊ip没有)</span><br><span class="line">				String geoIpStr = pelements.size() == 3 ? pelements.get(2).getElementsByTag(&quot;code&quot;).text() : &quot;&quot;;</span><br><span class="line">				String[] geoIpAry = geoIpStr.split(&quot;, &quot;);</span><br><span class="line">				String provinceGeoIpStr = 1 &lt; geoIpAry.length ? geoIpAry[geoIpAry.length - 2]</span><br><span class="line">						: 0 &lt; geoIpAry.length ? geoIpAry[0] : &quot;&quot;;</span><br><span class="line"></span><br><span class="line">				System.out.println(i + &quot;\t&quot; + provinceAddresStr + &quot;\t&quot; + provinceGeoIpStr);</span><br><span class="line">				// 根据所在地理位置判断</span><br><span class="line">				if (provinceMap.get(provinceAddresStr) == null) &#123;</span><br><span class="line">					// 根据GeoIP判断</span><br><span class="line">					if (provinceGeoIpMap.get(provinceGeoIpStr) == null) &#123;</span><br><span class="line">						// 其他</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\t&quot; + addresStr + &quot;\t&quot; + geoIpStr + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceGeoIpMap.put(provinceGeoIpStr, provinceGeoIpMap.get(provinceGeoIpStr) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					provinceMap.put(provinceAddresStr, provinceMap.get(provinceAddresStr) + 1);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (SocketException se) &#123;</span><br><span class="line">			System.out.println(&quot;连接超时，请从最后的下标继续执行，然后手动合并数据。&quot;);</span><br><span class="line">			se.printStackTrace();</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				margeCount(provinceMap, provinceGeoIpMap);</span><br><span class="line">				StringBuffer result = new StringBuffer();</span><br><span class="line">				provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">					result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">				&#125;);</span><br><span class="line">				System.out.println(result.toString());</span><br><span class="line">				System.out.println(other);</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * httGet请求</span><br><span class="line">	 */</span><br><span class="line">	private static Document httpGet(String url, String cookie) throws IOException &#123;</span><br><span class="line">		Connection con = Jsoup.connect(url);</span><br><span class="line">		// 请求头设置</span><br><span class="line">		con.header(&quot;Accept&quot;, &quot;*/*&quot;);</span><br><span class="line">		con.header(&quot;User-Agent&quot;,</span><br><span class="line">				&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&quot;);</span><br><span class="line">		if (StringUtils.isNotEmpty(cookie)) &#123;</span><br><span class="line">			// cookie设置</span><br><span class="line">			con.header(&quot;Cookie&quot;, cookie);</span><br><span class="line">		&#125;</span><br><span class="line">		return con.get();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 数据合并</span><br><span class="line">	 */</span><br><span class="line">	private static void margeCount(Map&lt;String, Integer&gt; targetMap, Map&lt;String, Integer&gt; addMap) &#123;</span><br><span class="line">		targetMap.put(&quot;北京&quot;, targetMap.get(&quot;北京&quot;) + addMap.get(&quot;Beijing&quot;));</span><br><span class="line">		targetMap.put(&quot;天津&quot;, targetMap.get(&quot;天津&quot;) + addMap.get(&quot;Tianjin&quot;));</span><br><span class="line">		targetMap.put(&quot;上海&quot;, targetMap.get(&quot;上海&quot;) + addMap.get(&quot;Shanghai&quot;));</span><br><span class="line">		targetMap.put(&quot;重庆&quot;, targetMap.get(&quot;重庆&quot;) + addMap.get(&quot;Chongqing&quot;));</span><br><span class="line">		targetMap.put(&quot;河北&quot;, targetMap.get(&quot;河北&quot;) + addMap.get(&quot;Hebei&quot;));</span><br><span class="line">		targetMap.put(&quot;河南&quot;, targetMap.get(&quot;河南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">		targetMap.put(&quot;云南&quot;, targetMap.get(&quot;云南&quot;) + addMap.get(&quot;Yunnan&quot;));</span><br><span class="line">		targetMap.put(&quot;辽宁&quot;, targetMap.get(&quot;辽宁&quot;) + addMap.get(&quot;Liaoning&quot;));</span><br><span class="line">		targetMap.put(&quot;黑龙江&quot;, targetMap.get(&quot;黑龙&quot;) + addMap.get(&quot;Heilongjiang&quot;));</span><br><span class="line">		targetMap.remove(&quot;黑龙&quot;);</span><br><span class="line">		targetMap.put(&quot;湖南&quot;, targetMap.get(&quot;湖南&quot;) + addMap.get(&quot;Hunan&quot;));</span><br><span class="line">		targetMap.put(&quot;安徽&quot;, targetMap.get(&quot;安徽&quot;) + addMap.get(&quot;Anhui&quot;));</span><br><span class="line">		targetMap.put(&quot;山东&quot;, targetMap.get(&quot;山东&quot;) + addMap.get(&quot;Shandong&quot;));</span><br><span class="line">		targetMap.put(&quot;新疆&quot;, targetMap.get(&quot;新疆&quot;) + addMap.get(&quot;Xinjiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江苏&quot;, targetMap.get(&quot;江苏&quot;) + addMap.get(&quot;Jiangsu&quot;));</span><br><span class="line">		targetMap.put(&quot;浙江&quot;, targetMap.get(&quot;浙江&quot;) + addMap.get(&quot;Zhejiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江西&quot;, targetMap.get(&quot;江西&quot;) + addMap.get(&quot;Jiangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;湖北&quot;, targetMap.get(&quot;湖北&quot;) + addMap.get(&quot;Hubei&quot;));</span><br><span class="line">		targetMap.put(&quot;广西&quot;, targetMap.get(&quot;广西&quot;) + addMap.get(&quot;Guangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;甘肃&quot;, targetMap.get(&quot;甘肃&quot;) + addMap.get(&quot;Gansu&quot;));</span><br><span class="line">		targetMap.put(&quot;山西&quot;, targetMap.get(&quot;山西&quot;) + addMap.get(&quot;Shanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;内蒙古&quot;, targetMap.get(&quot;内蒙&quot;) + addMap.get(&quot;Inner Mongolia Autonomous Region&quot;));</span><br><span class="line">		targetMap.remove(&quot;内蒙&quot;);</span><br><span class="line">		targetMap.put(&quot;陕西&quot;, targetMap.get(&quot;陕西&quot;) + addMap.get(&quot;Shaanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;吉林&quot;, targetMap.get(&quot;吉林&quot;) + addMap.get(&quot;Jilin&quot;));</span><br><span class="line">		targetMap.put(&quot;福建&quot;, targetMap.get(&quot;福建&quot;) + addMap.get(&quot;Fujian&quot;));</span><br><span class="line">		targetMap.put(&quot;贵州&quot;, targetMap.get(&quot;贵州&quot;) + addMap.get(&quot;Guizhou&quot;));</span><br><span class="line">		targetMap.put(&quot;广东&quot;, targetMap.get(&quot;广东&quot;) + addMap.get(&quot;Guangdong&quot;));</span><br><span class="line">		targetMap.put(&quot;青海&quot;, targetMap.get(&quot;青海&quot;) + addMap.get(&quot;Qinghai&quot;));</span><br><span class="line">		targetMap.put(&quot;西藏&quot;, targetMap.get(&quot;西藏&quot;) + addMap.get(&quot;Tibet&quot;));</span><br><span class="line">		targetMap.put(&quot;四川&quot;, targetMap.get(&quot;四川&quot;) + addMap.get(&quot;Sichuan&quot;));</span><br><span class="line">		targetMap.put(&quot;宁夏&quot;, targetMap.get(&quot;宁夏&quot;) + addMap.get(&quot;Ningxia Hui Autonomous Region&quot;));</span><br><span class="line">		targetMap.put(&quot;海南&quot;, targetMap.get(&quot;海南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据生成的文本替换Echart的数据，展示效果如下。<br><img src="/img/20200402/2.png" alt><br><a href="https://xuchunlei.top/ipDistributionMap" target="_blank">IP地址分布地图Echarts代码页面</a></p>
+<p><img src="/img/20200402/3.png" alt><br><a href="https://xuchunlei.top/ipDistributionPie" target="_blank">IP地址分布饼状图Echarts代码页面</a></p>
 ]]></content>
       <tags>
-        <tag>博客</tag>
-        <tag>GitHub Pages</tag>
-        <tag>域名</tag>
+        <tag>Java</tag>
+        <tag>IP</tag>
+        <tag>Echarts</tag>
       </tags>
   </entry>
   <entry>
@@ -214,6 +202,35 @@
         <tag>Java</tag>
         <tag>IP</tag>
         <tag>Echarts</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GitHub Pages绑定域名</title>
+    <url>/2019/11/08/GitHub-Pages%E7%BB%91%E5%AE%9A%E5%9F%9F%E5%90%8D/</url>
+    <content><![CDATA[<h1 id="GitHub-Pages绑定域名"><a href="#GitHub-Pages绑定域名" class="headerlink" title="GitHub Pages绑定域名"></a>GitHub Pages绑定域名</h1><blockquote>
+<h4 id="准备-申请域名"><a href="#准备-申请域名" class="headerlink" title="准备 申请域名"></a>准备 申请域名</h4></blockquote>
+<p>老早就想申请一个域名了，和GitHub的用户名一样，可选的也不是很多。个人用的话推荐.top顶级域名，便宜（万网相对便宜吧，续费每年26￥）。<br>然后我是新用户，首年1元就可以（有的首次开通便宜，可以多买几年）。<br>大部分顶级域名国内都需要实名认证，一般2到3个工作日审核。我早上申请的，过了一会域名就实名通过了，可以进行解析了。</p>
+<blockquote>
+<h4 id="GitHub仓库配置"><a href="#GitHub仓库配置" class="headerlink" title="GitHub仓库配置"></a>GitHub仓库配置</h4></blockquote>
+<p>xxx.github.io仓库 &gt; Settings &gt; Custom domain中写入申请的域名 &gt; Save<br><a href="https://help.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site" target="_blank" rel="noopener">官方文档</a></p>
+<blockquote>
+<h4 id="添加域名解析"><a href="#添加域名解析" class="headerlink" title="添加域名解析"></a>添加域名解析</h4></blockquote>
+<ul>
+<li><p>获取GitHub Pages域名：ping自己的地址xxx.github.io，获取到ip</p>
+</li>
+<li><p>添加域名解析：可以加两条A类型的，一条www，一条@。</p>
+</li>
+</ul>
+<p>过一段时间就能访问了</p>
+<blockquote>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4></blockquote>
+<p>以下主题限定<br>从 xxx.github.io 到新域名，需要更改Hexo的url配置，这样对应的主页地址才能更改。<br>Gitalk的Homepage URL和Authorization callback URL也要修改。<br>顺便删掉了部分代码，去掉谷歌403错误（疑似广告）<br>音乐本地话，去除”A cookie associated with a cross-site resourced……”警告</p>
+<p>p.s：新建这篇文章发现，名字中如果有空格需要加引号，不然空格前面的就会忽略掉（即《Pages绑定域名》）。加上引号，生成的文件名空格会被-替代。</p>
+]]></content>
+      <tags>
+        <tag>博客</tag>
+        <tag>GitHub Pages</tag>
+        <tag>域名</tag>
       </tags>
   </entry>
   <entry>
@@ -314,102 +331,6 @@
         <tag>Linux</tag>
         <tag>Redis</tag>
         <tag>FastDFS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IP地址分布分析(国内)</title>
-    <url>/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/</url>
-    <content><![CDATA[<h2 id="IP地址分布分析-国内"><a href="#IP地址分布分析-国内" class="headerlink" title="IP地址分布分析(国内)"></a>IP地址分布分析(国内)</h2><p><em>因为工作的原因，简单整理了一下，效率极低，娱乐用</em></p>
-<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为第一次做这个，没弄数据库和根据ip段来判断，直接请求<a href="https://ip.cn/" target="_blank" rel="noopener">ip.cn</a>，通过jsoup来获取页面数据。发现GeoIP数据不是很准确，基本以页面<code>所在地理位置</code>的数据为准，在获取不到准确数据的情况下参考页面<code>GeoIP</code>数据。<br>请求是最影响效率的地方，基本每秒请求一次，偶尔会报错（超时，520之类），毕竟是免费的。实际上分析的时候用的多线程（500条为一组），把没获取全的数据单独执行获取，然后在Excel表格里手动修改错误数据，然后整理计算。<br><img src="/img/20200402/1.png" alt></p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>后来（工作完成后）根据获取数据的规律，简单写了下（渣）代码，基本就是读取ip，获取ip所在省份，ip所在省份加一。执行错误，或者有无法识别的IP（国外，本地，特殊IP等）需要手动判断。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.net.SocketException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import org.apache.commons.lang3.StringUtils;</span><br><span class="line">import org.jsoup.Connection;</span><br><span class="line">import org.jsoup.Jsoup;</span><br><span class="line">import org.jsoup.nodes.Document;</span><br><span class="line">import org.jsoup.select.Elements;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreater &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line">	</span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		Map&lt;String, Integer&gt; provinceGeoIpMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceGeoIpMap.put(&quot;Beijing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tianjin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Chongqing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hebei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Yunnan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Liaoning&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Heilongjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hunan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Anhui&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shandong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Xinjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangsu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Zhejiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hubei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Gansu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanxi&quot;, 0); // 山西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Inner Mongolia Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shaanxi&quot;, 0); // 陕西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jilin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Fujian&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guizhou&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangdong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Qinghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tibet&quot;, 0); // 西藏</span><br><span class="line">		provinceGeoIpMap.put(&quot;Sichuan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Ningxia Hui Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// 获取ip.cn的页面内容</span><br><span class="line">				Document html = httpGet(&quot;https://ip.cn/?ip=&quot; + ips[i], null);</span><br><span class="line">				Elements pelements = html.getElementsByClass(&quot;well&quot;).get(0).getElementsByTag(&quot;p&quot;);</span><br><span class="line">				// 所在地理位置</span><br><span class="line">				String addresStr = pelements.get(1).getElementsByTag(&quot;code&quot;).text();</span><br><span class="line">				String provinceAddresStr = addresStr.substring(0, 2);</span><br><span class="line">				// GeoIP(局域网以及特殊ip没有)</span><br><span class="line">				String geoIpStr = pelements.size() == 3 ? pelements.get(2).getElementsByTag(&quot;code&quot;).text() : &quot;&quot;;</span><br><span class="line">				String[] geoIpAry = geoIpStr.split(&quot;, &quot;);</span><br><span class="line">				String provinceGeoIpStr = 1 &lt; geoIpAry.length ? geoIpAry[geoIpAry.length - 2]</span><br><span class="line">						: 0 &lt; geoIpAry.length ? geoIpAry[0] : &quot;&quot;;</span><br><span class="line"></span><br><span class="line">				System.out.println(i + &quot;\t&quot; + provinceAddresStr + &quot;\t&quot; + provinceGeoIpStr);</span><br><span class="line">				// 根据所在地理位置判断</span><br><span class="line">				if (provinceMap.get(provinceAddresStr) == null) &#123;</span><br><span class="line">					// 根据GeoIP判断</span><br><span class="line">					if (provinceGeoIpMap.get(provinceGeoIpStr) == null) &#123;</span><br><span class="line">						// 其他</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\t&quot; + addresStr + &quot;\t&quot; + geoIpStr + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceGeoIpMap.put(provinceGeoIpStr, provinceGeoIpMap.get(provinceGeoIpStr) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					provinceMap.put(provinceAddresStr, provinceMap.get(provinceAddresStr) + 1);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (SocketException se) &#123;</span><br><span class="line">			System.out.println(&quot;连接超时，请从最后的下标继续执行，然后手动合并数据。&quot;);</span><br><span class="line">			se.printStackTrace();</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				margeCount(provinceMap, provinceGeoIpMap);</span><br><span class="line">				StringBuffer result = new StringBuffer();</span><br><span class="line">				provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">					result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">				&#125;);</span><br><span class="line">				System.out.println(result.toString());</span><br><span class="line">				System.out.println(other);</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * httGet请求</span><br><span class="line">	 */</span><br><span class="line">	private static Document httpGet(String url, String cookie) throws IOException &#123;</span><br><span class="line">		Connection con = Jsoup.connect(url);</span><br><span class="line">		// 请求头设置</span><br><span class="line">		con.header(&quot;Accept&quot;, &quot;*/*&quot;);</span><br><span class="line">		con.header(&quot;User-Agent&quot;,</span><br><span class="line">				&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&quot;);</span><br><span class="line">		if (StringUtils.isNotEmpty(cookie)) &#123;</span><br><span class="line">			// cookie设置</span><br><span class="line">			con.header(&quot;Cookie&quot;, cookie);</span><br><span class="line">		&#125;</span><br><span class="line">		return con.get();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 数据合并</span><br><span class="line">	 */</span><br><span class="line">	private static void margeCount(Map&lt;String, Integer&gt; targetMap, Map&lt;String, Integer&gt; addMap) &#123;</span><br><span class="line">		targetMap.put(&quot;北京&quot;, targetMap.get(&quot;北京&quot;) + addMap.get(&quot;Beijing&quot;));</span><br><span class="line">		targetMap.put(&quot;天津&quot;, targetMap.get(&quot;天津&quot;) + addMap.get(&quot;Tianjin&quot;));</span><br><span class="line">		targetMap.put(&quot;上海&quot;, targetMap.get(&quot;上海&quot;) + addMap.get(&quot;Shanghai&quot;));</span><br><span class="line">		targetMap.put(&quot;重庆&quot;, targetMap.get(&quot;重庆&quot;) + addMap.get(&quot;Chongqing&quot;));</span><br><span class="line">		targetMap.put(&quot;河北&quot;, targetMap.get(&quot;河北&quot;) + addMap.get(&quot;Hebei&quot;));</span><br><span class="line">		targetMap.put(&quot;河南&quot;, targetMap.get(&quot;河南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">		targetMap.put(&quot;云南&quot;, targetMap.get(&quot;云南&quot;) + addMap.get(&quot;Yunnan&quot;));</span><br><span class="line">		targetMap.put(&quot;辽宁&quot;, targetMap.get(&quot;辽宁&quot;) + addMap.get(&quot;Liaoning&quot;));</span><br><span class="line">		targetMap.put(&quot;黑龙江&quot;, targetMap.get(&quot;黑龙&quot;) + addMap.get(&quot;Heilongjiang&quot;));</span><br><span class="line">		targetMap.remove(&quot;黑龙&quot;);</span><br><span class="line">		targetMap.put(&quot;湖南&quot;, targetMap.get(&quot;湖南&quot;) + addMap.get(&quot;Hunan&quot;));</span><br><span class="line">		targetMap.put(&quot;安徽&quot;, targetMap.get(&quot;安徽&quot;) + addMap.get(&quot;Anhui&quot;));</span><br><span class="line">		targetMap.put(&quot;山东&quot;, targetMap.get(&quot;山东&quot;) + addMap.get(&quot;Shandong&quot;));</span><br><span class="line">		targetMap.put(&quot;新疆&quot;, targetMap.get(&quot;新疆&quot;) + addMap.get(&quot;Xinjiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江苏&quot;, targetMap.get(&quot;江苏&quot;) + addMap.get(&quot;Jiangsu&quot;));</span><br><span class="line">		targetMap.put(&quot;浙江&quot;, targetMap.get(&quot;浙江&quot;) + addMap.get(&quot;Zhejiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江西&quot;, targetMap.get(&quot;江西&quot;) + addMap.get(&quot;Jiangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;湖北&quot;, targetMap.get(&quot;湖北&quot;) + addMap.get(&quot;Hubei&quot;));</span><br><span class="line">		targetMap.put(&quot;广西&quot;, targetMap.get(&quot;广西&quot;) + addMap.get(&quot;Guangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;甘肃&quot;, targetMap.get(&quot;甘肃&quot;) + addMap.get(&quot;Gansu&quot;));</span><br><span class="line">		targetMap.put(&quot;山西&quot;, targetMap.get(&quot;山西&quot;) + addMap.get(&quot;Shanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;内蒙古&quot;, targetMap.get(&quot;内蒙&quot;) + addMap.get(&quot;Inner Mongolia Autonomous Region&quot;));</span><br><span class="line">		targetMap.remove(&quot;内蒙&quot;);</span><br><span class="line">		targetMap.put(&quot;陕西&quot;, targetMap.get(&quot;陕西&quot;) + addMap.get(&quot;Shaanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;吉林&quot;, targetMap.get(&quot;吉林&quot;) + addMap.get(&quot;Jilin&quot;));</span><br><span class="line">		targetMap.put(&quot;福建&quot;, targetMap.get(&quot;福建&quot;) + addMap.get(&quot;Fujian&quot;));</span><br><span class="line">		targetMap.put(&quot;贵州&quot;, targetMap.get(&quot;贵州&quot;) + addMap.get(&quot;Guizhou&quot;));</span><br><span class="line">		targetMap.put(&quot;广东&quot;, targetMap.get(&quot;广东&quot;) + addMap.get(&quot;Guangdong&quot;));</span><br><span class="line">		targetMap.put(&quot;青海&quot;, targetMap.get(&quot;青海&quot;) + addMap.get(&quot;Qinghai&quot;));</span><br><span class="line">		targetMap.put(&quot;西藏&quot;, targetMap.get(&quot;西藏&quot;) + addMap.get(&quot;Tibet&quot;));</span><br><span class="line">		targetMap.put(&quot;四川&quot;, targetMap.get(&quot;四川&quot;) + addMap.get(&quot;Sichuan&quot;));</span><br><span class="line">		targetMap.put(&quot;宁夏&quot;, targetMap.get(&quot;宁夏&quot;) + addMap.get(&quot;Ningxia Hui Autonomous Region&quot;));</span><br><span class="line">		targetMap.put(&quot;海南&quot;, targetMap.get(&quot;海南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据生成的文本替换Echart的数据，展示效果如下。<br><img src="/img/20200402/2.png" alt><br><a href="https://xuchunlei.top/ipDistributionMap" target="_blank">IP地址分布地图Echarts代码页面</a></p>
-<p><img src="/img/20200402/3.png" alt><br><a href="https://xuchunlei.top/ipDistributionPie" target="_blank">IP地址分布饼状图Echarts代码页面</a></p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-        <tag>IP</tag>
-        <tag>Echarts</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Markdown参考</title>
-    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
-    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-
-<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
-
-<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
-
-<hr>
-<hr>
-<hr>
-<hr>
-<hr>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
-<p>第一层嵌套</p>
-<blockquote>
-<ul>
-<li>第二层嵌套1（无序列表）</li>
-<li>第二层嵌套2（无序列表）</li>
-</ul>
-</blockquote>
-</blockquote>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>无序列表一</li>
-<li>无序列表二<ul>
-<li>无序嵌套列表二-1</li>
-<li>无序嵌套列表二-2</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li>有序列表一</li>
-<li>有序列表二</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
-
-<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>默认</th>
-<th align="left">左对齐</th>
-<th align="center">居中</th>
-<th align="right">右对齐</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>单元格</td>
-<td align="left">单元格</td>
-<td align="center"><code>单元格</code></td>
-<td align="right">单元格</td>
-</tr>
-</tbody></table>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
-
-<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
-<pre><code>console.log(&quot;Hello world 空格&quot;)
-console.log(&quot;Hello world 空格&quot;)
-
-console.log(&quot;Hello world Tab&quot;)
-console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>Markdown</tag>
       </tags>
   </entry>
   <entry>
@@ -605,6 +526,151 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 ]]></content>
       <tags>
         <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown参考</title>
+    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
+    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
+
+<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
+
+<hr>
+<hr>
+<hr>
+<hr>
+<hr>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
+<p>第一层嵌套</p>
+<blockquote>
+<ul>
+<li>第二层嵌套1（无序列表）</li>
+<li>第二层嵌套2（无序列表）</li>
+</ul>
+</blockquote>
+</blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>无序列表一</li>
+<li>无序列表二<ul>
+<li>无序嵌套列表二-1</li>
+<li>无序嵌套列表二-2</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>有序列表一</li>
+<li>有序列表二</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>默认</th>
+<th align="left">左对齐</th>
+<th align="center">居中</th>
+<th align="right">右对齐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单元格</td>
+<td align="left">单元格</td>
+<td align="center"><code>单元格</code></td>
+<td align="right">单元格</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
+<pre><code>console.log(&quot;Hello world 空格&quot;)
+console.log(&quot;Hello world 空格&quot;)
+
+console.log(&quot;Hello world Tab&quot;)
+console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>Markdown</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SSH远程登录</title>
+    <url>/2021/06/25/SSH%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="SSH远程登录"><a href="#SSH远程登录" class="headerlink" title="SSH远程登录"></a>SSH远程登录</h1><p><em>起因是服务器在儿童节那天数据库连不上了，原因是中了之前横行的勒索病毒的变种……然后就有了后来的各种加强：windos变更为linux,通过SSH连接等等，这里就简单梳理一下SSH的相关知识</em><br><img src="/img/20210625/1.jpg" alt></p>
+<h4 id="什么是SSH"><a href="#什么是SSH" class="headerlink" title="什么是SSH"></a>什么是SSH</h4><p>SSH (Secure Shell 安全外壳协议)是为远程登录会话和其他网络服务提供安全性的网络协议。利用SSH协议可以有效防止远程管理过程中的信息泄露问题，即使被中途截获，密码和数据也不会泄露。可以防止中间人(man-in-the-middle)攻击。</p>
+<h4 id="口令登录"><a href="#口令登录" class="headerlink" title="口令登录"></a>口令登录</h4><p>之前的deepin使用的是OpenSSH，默认使用口令的安全验证，就是只有账号和口令就可以登录远程主机。因为之前改过端口，需要同通过参数-p来指定端口。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+
+<p>第一次登录时，会提示你确认主机的真实性，yes后会提示你输入密码，如图<br><img src="/img/20210625/2.png" alt></p>
+<h4 id="私钥登录"><a href="#私钥登录" class="headerlink" title="私钥登录"></a>私钥登录</h4><p>现在改为基于密匙的安全验证，通过一对密钥进行安全认证。</p>
+<p>执行<code>ssh-keygen</code>生成公钥和私钥，公钥（通常做法是使用-t参数，指定密钥的加密算法，如dsa rsa），生成时会询问一些问题，一般默认回车就好，这里设置私钥密码。<br>第一个问题询问密钥保存的文件名。</p>
+<blockquote>
+<p>Enter file in which to save the key (/root/.ssh/id_rsa):</p>
+</blockquote>
+<p>第二个问题询问私钥是否设定密码保护,直接回车就默认为空。这里设置，然后再确认一遍密码。</p>
+<blockquote>
+<p>Enter passphrase (empty for no passphrase): </p>
+</blockquote>
+<p><img src="/img/20210625/3.png" alt></p>
+<blockquote>
+<p>id_rsa 生成的私钥文件<br>id_rsa.pub 生成的公钥文件</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p>修改如下</p>
+<blockquote>
+<p>#root用户登录<br>PermitRootLogin yes</p>
+<p>#密钥认证<br>PubkeyAuthentication yes</p>
+<p>#密码认证（可以关闭，关闭后只能通过密钥进入）<br>PasswordAuthentication yes</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#重启SSH</span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#私钥登录，把远程主机的私钥发放给客户端用户</span><br><span class="line">ssh root@192.168.112.128 -p 122 -i C:/Users/xuchl/.ssh/deepin_rsa</span><br></pre></td></tr></table></figure>
+
+<p>因为我有设置私钥密码，这里需要输入私钥密码。<br><img src="/img/20210625/4.png" alt></p>
+<h4 id="公钥登录"><a href="#公钥登录" class="headerlink" title="公钥登录"></a>公钥登录</h4><p>公钥登录，要客户端公钥写入远程主机authorized_keys文件中，这里直接复制粘贴的，试了几个linux命令都没有实现。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p>修改如下</p>
+<blockquote>
+<p>PubkeyAuthentication yes<br>AuthorizedKeysFile .ssh/authorized_keys</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改文件权限</span><br><span class="line">chmod 600 ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+
+<p>PS:这里的文件使用root用户建的，其他用户通过密钥登录的话还需要再输入一遍密码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#公钥登录</span><br><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20210625/5.png" alt></p>
+<h4 id="本地端口转发"><a href="#本地端口转发" class="headerlink" title="本地端口转发"></a>本地端口转发</h4><p>本地1和服务器2无法直接连接，但是中继3可以连接1和2，1通过3连上2。本地1到中继3形成数据传输的秘密隧道，即SSH隧道。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#本地1执行（本地1端口:服务器2:服务器2端口 中继3）</span><br><span class="line">ssh -L 1121:192.168.112.128:122 192.168.112.3</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过本地的1121端口就可以直接登录服务器</span><br><span class="line">ssh -p 1121 root@localhost</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20210625/6.png" alt></p>
+<h4 id="远程端口转发"><a href="#远程端口转发" class="headerlink" title="远程端口转发"></a>远程端口转发</h4><p>本地1和服务器2无法直接连接，并且本地1无法连接中继3，但是中继3可以连接1和2，1通过3连上2。<br>额，这个没成功，win10连不上，不保证正确。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#中继3执行（中继3端口:服务器2:服务器2端口 本地1）</span><br><span class="line">ssh -R 1122:192.168.112.128:122 192.168.88.27</span><br></pre></td></tr></table></figure>
+
+<h4 id="示例：通过SSH通道连接MariaDB"><a href="#示例：通过SSH通道连接MariaDB" class="headerlink" title="示例：通过SSH通道连接MariaDB"></a>示例：通过SSH通道连接MariaDB</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过Docker拉取最新MariaDB镜像</span><br><span class="line">docker pull mariadb</span><br><span class="line">#简单创建容器并启动</span><br><span class="line">docker run --name mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 mariadb:latest</span><br></pre></td></tr></table></figure>
+
+<p>通过SSH通道登录数据库<br><img src="/img/20210625/7.jpg" alt></p>
+]]></content>
+      <tags>
+        <tag>Linux</tag>
+        <tag>SSH</tag>
       </tags>
   </entry>
   <entry>
@@ -832,72 +898,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>SSH远程登录</title>
-    <url>/2021/06/25/SSH%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/</url>
-    <content><![CDATA[<h1 id="SSH远程登录"><a href="#SSH远程登录" class="headerlink" title="SSH远程登录"></a>SSH远程登录</h1><p><em>起因是服务器在儿童节那天数据库连不上了，原因是中了之前横行的勒索病毒的变种……然后就有了后来的各种加强：windos变更为linux,通过SSH连接等等，这里就简单梳理一下SSH的相关知识</em><br><img src="/img/20210625/1.jpg" alt></p>
-<h4 id="什么是SSH"><a href="#什么是SSH" class="headerlink" title="什么是SSH"></a>什么是SSH</h4><p>SSH (Secure Shell 安全外壳协议)是为远程登录会话和其他网络服务提供安全性的网络协议。利用SSH协议可以有效防止远程管理过程中的信息泄露问题，即使被中途截获，密码和数据也不会泄露。可以防止中间人(man-in-the-middle)攻击。</p>
-<h4 id="口令登录"><a href="#口令登录" class="headerlink" title="口令登录"></a>口令登录</h4><p>之前的deepin使用的是OpenSSH，默认使用口令的安全验证，就是只有账号和口令就可以登录远程主机。因为之前改过端口，需要同通过参数-p来指定端口。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
-
-<p>第一次登录时，会提示你确认主机的真实性，yes后会提示你输入密码，如图<br><img src="/img/20210625/2.png" alt></p>
-<h4 id="私钥登录"><a href="#私钥登录" class="headerlink" title="私钥登录"></a>私钥登录</h4><p>现在改为基于密匙的安全验证，通过一对密钥进行安全认证。</p>
-<p>执行<code>ssh-keygen</code>生成公钥和私钥，公钥（通常做法是使用-t参数，指定密钥的加密算法，如dsa rsa），生成时会询问一些问题，一般默认回车就好，这里设置私钥密码。<br>第一个问题询问密钥保存的文件名。</p>
-<blockquote>
-<p>Enter file in which to save the key (/root/.ssh/id_rsa):</p>
-</blockquote>
-<p>第二个问题询问私钥是否设定密码保护,直接回车就默认为空。这里设置，然后再确认一遍密码。</p>
-<blockquote>
-<p>Enter passphrase (empty for no passphrase): </p>
-</blockquote>
-<p><img src="/img/20210625/3.png" alt></p>
-<blockquote>
-<p>id_rsa 生成的私钥文件<br>id_rsa.pub 生成的公钥文件</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
-
-<p>修改如下</p>
-<blockquote>
-<p>#root用户登录<br>PermitRootLogin yes</p>
-<p>#密钥认证<br>PubkeyAuthentication yes</p>
-<p>#密码认证（可以关闭，关闭后只能通过密钥进入）<br>PasswordAuthentication yes</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#重启SSH</span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#私钥登录，把远程主机的私钥发放给客户端用户</span><br><span class="line">ssh root@192.168.112.128 -p 122 -i C:/Users/xuchl/.ssh/deepin_rsa</span><br></pre></td></tr></table></figure>
-
-<p>因为我有设置私钥密码，这里需要输入私钥密码。<br><img src="/img/20210625/4.png" alt></p>
-<h4 id="公钥登录"><a href="#公钥登录" class="headerlink" title="公钥登录"></a>公钥登录</h4><p>公钥登录，要客户端公钥写入远程主机authorized_keys文件中，这里直接复制粘贴的，试了几个linux命令都没有实现。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
-
-<p>修改如下</p>
-<blockquote>
-<p>PubkeyAuthentication yes<br>AuthorizedKeysFile .ssh/authorized_keys</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改文件权限</span><br><span class="line">chmod 600 ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
-
-<p>PS:这里的文件使用root用户建的，其他用户通过密钥登录的话还需要再输入一遍密码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#公钥登录</span><br><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20210625/5.png" alt></p>
-<h4 id="本地端口转发"><a href="#本地端口转发" class="headerlink" title="本地端口转发"></a>本地端口转发</h4><p>本地1和服务器2无法直接连接，但是中继3可以连接1和2，1通过3连上2。本地1到中继3形成数据传输的秘密隧道，即SSH隧道。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#本地1执行（本地1端口:服务器2:服务器2端口 中继3）</span><br><span class="line">ssh -L 1121:192.168.112.128:122 192.168.112.3</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过本地的1121端口就可以直接登录服务器</span><br><span class="line">ssh -p 1121 root@localhost</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20210625/6.png" alt></p>
-<h4 id="远程端口转发"><a href="#远程端口转发" class="headerlink" title="远程端口转发"></a>远程端口转发</h4><p>本地1和服务器2无法直接连接，并且本地1无法连接中继3，但是中继3可以连接1和2，1通过3连上2。<br>额，这个没成功，win10连不上，不保证正确。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#中继3执行（中继3端口:服务器2:服务器2端口 本地1）</span><br><span class="line">ssh -R 1122:192.168.112.128:122 192.168.88.27</span><br></pre></td></tr></table></figure>
-
-<h4 id="示例：通过SSH通道连接MariaDB"><a href="#示例：通过SSH通道连接MariaDB" class="headerlink" title="示例：通过SSH通道连接MariaDB"></a>示例：通过SSH通道连接MariaDB</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过Docker拉取最新MariaDB镜像</span><br><span class="line">docker pull mariadb</span><br><span class="line">#简单创建容器并启动</span><br><span class="line">docker run --name mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 mariadb:latest</span><br></pre></td></tr></table></figure>
-
-<p>通过SSH通道登录数据库<br><img src="/img/20210625/7.jpg" alt></p>
-]]></content>
-      <tags>
-        <tag>Linux</tag>
-        <tag>SSH</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Vue element-china-area-data 数据源修改</title>
     <url>/2020/06/19/Vue-element-china-area-data-%E6%95%B0%E6%8D%AE%E6%BA%90%E4%BF%AE%E6%94%B9/</url>
     <content><![CDATA[<p><em>Vue前台需要省市区三级联动，但是element-china-area-data的regionData数据太旧了，而且有部分数据不符合现有系统的逻辑。于是乎……</em></p>
@@ -973,37 +973,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>做成我的足迹续</title>
-    <url>/2021/03/25/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9%E7%BB%AD/</url>
-    <content><![CDATA[<h1 id="做成我的足迹续"><a href="#做成我的足迹续" class="headerlink" title="做成我的足迹续"></a>做成我的足迹续</h1><p><em>光阴荏苒，日月如梭，往事随风，飘散而过。</em><br>距离上次写的文章<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">做成我的足迹</a>已经过去490天，期间足迹增加了一点点。最近很忙加上确实没有啥能写的，就鸽了很久（106天）。这周开始才稍微有点时间，想着写点东西，因为手里有一些半成品拿不出手，就想到之前的足迹还有让我pass的地图，然后就开始了XX补全（橙汁）计划<sub>最近EVA新剧场版反响不小啊</sub>。</p>
-<h4 id="谷歌地图"><a href="#谷歌地图" class="headerlink" title="谷歌地图"></a>谷歌地图</h4><p>使用需要结算账号（绑定银行卡），账号劝退！国家地区里没有中国选项（也没有朝鲜），有港澳台地区。这里选的香港，因为要国际通用的银行卡，然而我并没有。<br><img src="/img/20210325/1.png" alt><br>后来发现国家地区选择日本可以使用PayPal，可以绑定银联卡，这里就没有再尝试了。补完失败……<br><img src="/img/20210325/2.png" alt></p>
-<h4 id="高德地图"><a href="#高德地图" class="headerlink" title="高德地图"></a>高德地图</h4><p>高德只能国内用，国外的点只能看看。经纬度数据使用了之前百度地图的，但是因为坐标系不一样，不能直接使用,需要把百度坐标BD-09转成火星坐标GCJ-02。</p>
-<blockquote>
-<p>WGS-84坐标系：地心坐标系，GPS原始坐标体系</p>
-<blockquote>
-<p>国内不允许使用</p>
-</blockquote>
-<p>GCJ-02 坐标系：火星坐标系</p>
-<blockquote>
-<p>国测局02年发布的坐标体系，它是一种对经纬度数据加入随机的偏差的加密算法<br>互联网地图在国内必须至少使用GCJ-02进行首次加密</p>
-</blockquote>
-<p>BD-09坐标系</p>
-<blockquote>
-<p>百度中国地图所采用的坐标系，由GCJ-02进行进一步的偏移算法得到</p>
-</blockquote>
-</blockquote>
-<p>其他功能基本类似，稍微修改一下就能了，直接上<a href="https://xuchunlei.top/myTrailsAMap" target="_blank">展示页面（代码）</a>和效果图。<br><img src="/img/20210325/3.png" alt></p>
-<h4 id="必应地图"><a href="#必应地图" class="headerlink" title="必应地图"></a>必应地图</h4><p>国内国外都能用，经纬度依旧使用百度的，国内的经纬度<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>。重要的事情说三遍，这里坑了一下，以为国内的坐标也要转换成WGS-84GPS原始坐标。其他功能除了行政区划polygon，基本类似。行政区划polygon用的高德地图API获取行经纬度数据，然后用必应地图的polygon描绘。还有必应地图开发中心账号登录的时候需要科学上网一下，其他都不需要。这里列一下用到的网址，然后上<a href="https://xuchunlei.top/myTrailsBingMap" target="_blank">展示页面（代码）</a>和效果图。<br><a href="https://www.bingmapsportal.com/" target="_blank" rel="noopener">必应地图开发中心</a><br><a href="https://cn.bing.com/maps/sdkrelease/mapcontrol/isdk/loadmapasync" target="_blank" rel="noopener">必应地图Demo</a><br><a href="https://docs.microsoft.com/en-us/bingmaps/v8-web-control/map-control-api/" target="_blank" rel="noopener">必应地图API参考</a><br><img src="/img/20210325/4.png" alt></p>
-<h4 id="雅虎地图"><a href="#雅虎地图" class="headerlink" title="雅虎地图"></a>雅虎地图</h4><p>额，API终止服务……<br><img src="/img/20210325/5.png" alt></p>
-<p>只简单修改了一下，样式什么的懒得微调了，毕竟之前的百度地图的样式也不咋地。国内其他的还有腾讯地图，搜狗地图貌似都是自己的坐标系，估计以后也不会再搞了。</p>
-]]></content>
-      <tags>
-        <tag>高德地图</tag>
-        <tag>必应地图</tag>
-        <tag>足迹</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>不吐不快-记录一次千万级数据统计</title>
     <url>/2020/06/04/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1%E5%8D%83%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%9F%E8%AE%A1/</url>
     <content><![CDATA[<h2 id="不吐不快-记录一次千万级数据统计"><a href="#不吐不快-记录一次千万级数据统计" class="headerlink" title="不吐不快-记录一次千万级数据统计"></a>不吐不快-记录一次千万级数据统计</h2><p><em>吐槽专用，没啥干货</em></p>
@@ -1060,6 +1029,37 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 ]]></content>
       <tags>
         <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>做成我的足迹续</title>
+    <url>/2021/03/25/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9%E7%BB%AD/</url>
+    <content><![CDATA[<h1 id="做成我的足迹续"><a href="#做成我的足迹续" class="headerlink" title="做成我的足迹续"></a>做成我的足迹续</h1><p><em>光阴荏苒，日月如梭，往事随风，飘散而过。</em><br>距离上次写的文章<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">做成我的足迹</a>已经过去490天，期间足迹增加了一点点。最近很忙加上确实没有啥能写的，就鸽了很久（106天）。这周开始才稍微有点时间，想着写点东西，因为手里有一些半成品拿不出手，就想到之前的足迹还有让我pass的地图，然后就开始了XX补全（橙汁）计划<sub>最近EVA新剧场版反响不小啊</sub>。</p>
+<h4 id="谷歌地图"><a href="#谷歌地图" class="headerlink" title="谷歌地图"></a>谷歌地图</h4><p>使用需要结算账号（绑定银行卡），账号劝退！国家地区里没有中国选项（也没有朝鲜），有港澳台地区。这里选的香港，因为要国际通用的银行卡，然而我并没有。<br><img src="/img/20210325/1.png" alt><br>后来发现国家地区选择日本可以使用PayPal，可以绑定银联卡，这里就没有再尝试了。补完失败……<br><img src="/img/20210325/2.png" alt></p>
+<h4 id="高德地图"><a href="#高德地图" class="headerlink" title="高德地图"></a>高德地图</h4><p>高德只能国内用，国外的点只能看看。经纬度数据使用了之前百度地图的，但是因为坐标系不一样，不能直接使用,需要把百度坐标BD-09转成火星坐标GCJ-02。</p>
+<blockquote>
+<p>WGS-84坐标系：地心坐标系，GPS原始坐标体系</p>
+<blockquote>
+<p>国内不允许使用</p>
+</blockquote>
+<p>GCJ-02 坐标系：火星坐标系</p>
+<blockquote>
+<p>国测局02年发布的坐标体系，它是一种对经纬度数据加入随机的偏差的加密算法<br>互联网地图在国内必须至少使用GCJ-02进行首次加密</p>
+</blockquote>
+<p>BD-09坐标系</p>
+<blockquote>
+<p>百度中国地图所采用的坐标系，由GCJ-02进行进一步的偏移算法得到</p>
+</blockquote>
+</blockquote>
+<p>其他功能基本类似，稍微修改一下就能了，直接上<a href="https://xuchunlei.top/myTrailsAMap" target="_blank">展示页面（代码）</a>和效果图。<br><img src="/img/20210325/3.png" alt></p>
+<h4 id="必应地图"><a href="#必应地图" class="headerlink" title="必应地图"></a>必应地图</h4><p>国内国外都能用，经纬度依旧使用百度的，国内的经纬度<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>。重要的事情说三遍，这里坑了一下，以为国内的坐标也要转换成WGS-84GPS原始坐标。其他功能除了行政区划polygon，基本类似。行政区划polygon用的高德地图API获取行经纬度数据，然后用必应地图的polygon描绘。还有必应地图开发中心账号登录的时候需要科学上网一下，其他都不需要。这里列一下用到的网址，然后上<a href="https://xuchunlei.top/myTrailsBingMap" target="_blank">展示页面（代码）</a>和效果图。<br><a href="https://www.bingmapsportal.com/" target="_blank" rel="noopener">必应地图开发中心</a><br><a href="https://cn.bing.com/maps/sdkrelease/mapcontrol/isdk/loadmapasync" target="_blank" rel="noopener">必应地图Demo</a><br><a href="https://docs.microsoft.com/en-us/bingmaps/v8-web-control/map-control-api/" target="_blank" rel="noopener">必应地图API参考</a><br><img src="/img/20210325/4.png" alt></p>
+<h4 id="雅虎地图"><a href="#雅虎地图" class="headerlink" title="雅虎地图"></a>雅虎地图</h4><p>额，API终止服务……<br><img src="/img/20210325/5.png" alt></p>
+<p>只简单修改了一下，样式什么的懒得微调了，毕竟之前的百度地图的样式也不咋地。国内其他的还有腾讯地图，搜狗地图貌似都是自己的坐标系，估计以后也不会再搞了。</p>
+]]></content>
+      <tags>
+        <tag>足迹</tag>
+        <tag>高德地图</tag>
+        <tag>必应地图</tag>
       </tags>
   </entry>
   <entry>
