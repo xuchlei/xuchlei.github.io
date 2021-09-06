@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>改造日记-系统从机械硬盘迁移升级到固态硬盘 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,硬盘升级,系统迁移"> 
+    <meta name="description" content="一个战五渣的个人博客,家人嫌弃家里电脑太慢了，发现瓶颈来自硬盘，于是乎就开始改造计划
+硬盘选用老电脑是联想的品牌机（具体型号大概是天逸510S，没看机身标签。大概的生产时间为2019年到2020年，也不老啊）。CPU为i,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">改造日记-系统从机械硬盘迁移升级到固态硬盘</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">改造日记-系统从机械硬盘迁移升级到固态硬盘</h1>
+        <div class="stuff">
+            <span>九月 06, 2021</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/改造/">改造</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/硬盘/">硬盘</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>家人嫌弃家里电脑太慢了，发现瓶颈来自硬盘，于是乎就开始改造计划</em></p>
+<h3 id="硬盘选用"><a href="#硬盘选用" class="headerlink" title="硬盘选用"></a>硬盘选用</h3><p>老电脑是联想的品牌机（具体型号大概是天逸510S，没看机身标签。大概的生产时间为2019年到2020年，也不老啊）。CPU为i3-9100，内存4代8G，win10家庭版。硬盘为希捷ST1000DM003，1T容量，7200转，SATA3接口。电脑运行时，硬盘活动时间几乎一直在100%。考虑到成本，最有效的手段就是把机械硬盘替换为固态硬盘。预算200多，最后选用了SATA3的最多的SSD（某宝某东搜索固态硬盘出来一堆）——金士顿A400。本来打算选180￥左右的120G当系统盘的，后来考虑到230￥左右的240G比较划算点，再往上的容量因超预算不考虑。经过几天的等待，硬盘到货了，通过CrystalDiskInfo读取了硬盘信息如下：<br><img src="/img/20210906/1.jpg" alt><br>吐槽一下硬盘信息检测工具CrystalDiskInfo，官方老二次元了！下面是官网下载界面<br><img src="/img/20210906/2.jpg" alt></p>
+<h3 id="开始迁移"><a href="#开始迁移" class="headerlink" title="开始迁移"></a>开始迁移</h3><p>早上不到5点起床，开始往店里迁移……打开方式不对，重来一遍。拆开机箱，开始迁移升级工作。一上来就给我一个惊喜，品牌机就是品牌机，“物尽其用”，居然只有一根电源线……看来不能挂两块硬盘了，有点庆幸买了240G的了。看来不能直接接在主板上进行系统迁移了，还好带了硬盘盒子，接好电源和USB数据线，正式开始迁移升级。<br><img src="/img/20210906/3.jpg" alt></p>
+<ol>
+<li><p>准备DiskGenius数据恢复及分区管理软件<br>从DiskGenius官网下载对应系统位数的软件，这里是64位的，免费版功能足够。绿色版，可以直接运行。<br><img src="/img/20210906/4.jpg" alt></p>
+</li>
+<li><p>系统迁移<br>选择菜单：工具-系统迁移，打开系统迁移设置对话框<br><img src="/img/20210906/5.jpg" alt><br>选择目标磁盘（这里是新硬盘，目标硬盘大于原盘容量已用容量才行），然后确定<br><img src="/img/20210906/6.jpg" alt><br>DiskGenius会自动设置，包括隐藏分区，这里有4个分区。因为是USB挂载的硬盘，SATA连接的时候这里选项应该不同，比如设置电脑启动顺序啥的。点击开始<br><img src="/img/20210906/7.jpg" alt><br>选择迁移模式，这里选择热迁移，有数据的话在这之前还会警告你会覆盖数据<br><img src="/img/20210906/8.jpg" alt><br>开始迁移，时间为预估，不是很准确<br><img src="/img/20210906/9.jpg" alt><br>迁移完成提示，如果是SATA挂在的话，会提示让你进BIOS更改启动顺序。点击确定<br><img src="/img/20210906/10.jpg" alt><br>至此系统迁移完成，结构与原来一致。点击完成，关闭对话框<br><img src="/img/20210906/11.jpg" alt></p>
+</li>
+<li><p>非系统盘迁移<br>还好老电脑只有两个分区，并且使用容量并不是很多。系统分区迁移完，还有一个D盘，于是一块迁了。<br>把新硬盘剩下的空间建一个新的分区，新硬盘右键-建立新分区，打开调整分区容量对话框<br><img src="/img/20210906/12.jpg" alt><br>默认全部分配，点击开始<br><img src="/img/20210906/13.jpg" alt><br>警告提示，确认无误后选择是<br><img src="/img/20210906/14.jpg" alt><br>建立新分区完成，点击完成，关闭对话框<br><img src="/img/20210906/15.jpg" alt><br>选择要克隆的分区，右键-克隆分区，打开克隆分区(卷)和选择目标分区(卷)对话框<br><img src="/img/20210906/16.jpg" alt><br>选择新建好的分区，点击确定<br><img src="/img/20210906/17.jpg" alt><br>三种克隆方式，这里两个分区的大小不同，只能选择按文件复制。点击开始<br><img src="/img/20210906/18.jpg" alt><br>覆盖警告，确认无误后点击确定<br><img src="/img/20210906/19.jpg" alt><br>选择迁移模式，这里依旧选择热迁移<br><img src="/img/20210906/20.jpg" alt><br>克隆完成。点击完成，关闭对话框<br><img src="/img/20210906/21.jpg" alt></p>
+</li>
+<li><p>硬盘替换<br>因为没有多余的电源线，不能挂两个硬盘了。把原来的机械硬盘拆卸下来，换上固态硬盘（使用了硬盘支架，2.5寸直接固定太难了）<br><img src="/img/20210906/22.jpg" alt></p>
+</li>
+</ol>
+<h3 id="开机测试"><a href="#开机测试" class="headerlink" title="开机测试"></a>开机测试</h3><p>开机正常，开机时间从原来的30s左右提升到十几秒，最快到10s左右，开机速度提升2到3倍。硬盘活动时间明显改善，打开软件也比原来丝滑了。电脑除了硬盘容量外，其余都和原来一样。<br><img src="/img/20210906/23.jpg" alt><br>因为换固态了，所以停掉了碎片整理<br><img src="/img/20210906/24.jpg" alt><br>最后GET到了一块1T机械硬盘。<br><img src="/img/20210906/25.jpg" alt><br>发现现在联想还在卖这个系列的电脑，好像除了CPU升级为10代外，其他没有太大变化，呵呵……</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/724495.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='http://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/163/32046426.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/163/413961906.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://link.hhtjim.com/163/536622304.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
