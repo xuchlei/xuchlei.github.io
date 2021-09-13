@@ -9,7 +9,7 @@ html{height:100%}
 body{height:100%;margin:0px;padding:0px}
 #container{height:100%}
 </style>
-<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=QpETkN7q770mIkKy7LCTxuoQdt0nsIQ9">
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=AA4uqECjDYfZUk9vSVMNR5bPdFEtw6GU">
 </script>
 <script type="text/javascript" src="data.js"></script>
 </head>
@@ -23,20 +23,22 @@ map.centerAndZoom(point, 5);
 map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
 map.setMapType(BMAP_EARTH_MAP);      // 设置地图类型为地球模式
 
-function getBoundary(area, bdary){
-	bdary.get(area, function(rs){       //获取行政区域
+function getBoundary(){
+var bdary = new BMapGL.Boundary();
+for(var i = 0; i < areas.length; i++) {
+	bdary.get(areas[i], function(rs){       //获取行政区域
+		//map.clearOverlays();        //清除地图覆盖物
 		var count = rs.boundaries.length; //行政区域的点有多少个
+		//var pointArray = [];
 		for (var i = 0; i < count; i++) {
 			var ply = new BMapGL.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeColor: "#ff0000"}); //建立多边形覆盖物
 			map.addOverlay(ply);  //添加覆盖物
+			//pointArray = pointArray.concat(ply.getPath());
 		}
 	});
+  }
 }
-areas = ['烟台市', '北京市']
-var bdary = new BMapGL.Boundary();
-for(var i = 0; i < areas.length; i++) {
-	getBoundary(areas[i], bdary);
-}
+getBoundary();
 var iw = new BMapGL.InfoWindow("<span style='float:left;width:156px;font-size:13px;;line-height:normal;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 335, height: 150, title: "　"}); // 创建信息窗口对象
 map.openInfoWindow(iw, point); //开启信息窗口
 
