@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>初识Flutter-安装和环境配置 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,Flutter,Android"> 
+    <meta name="description" content="一个战五渣的个人博客,新项目需要用到Flutter，于是开始学习，先搞下环境，写个Hello World！
+Flutter介绍Flutter是Google开源的UI工具包，帮助开发者通过一套代码库高效构建多平台精美应用，,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">初识Flutter-安装和环境配置</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">初识Flutter-安装和环境配置</h1>
+        <div class="stuff">
+            <span>九月 13, 2021</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Android/">Android</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Flutter/">Flutter</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>新项目需要用到Flutter，于是开始学习，先搞下环境，写个Hello World！</em></p>
+<h3 id="Flutter介绍"><a href="#Flutter介绍" class="headerlink" title="Flutter介绍"></a>Flutter介绍</h3><p>Flutter是Google开源的UI工具包，帮助开发者通过一套代码库高效构建多平台精美应用，支持移动、Web、桌面和嵌入式平台。以上摘自<a href="https://flutter.cn/" target="_blank" rel="noopener">Flutter官方</a>。刚开始学习可以参考<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>。</p>
+<h3 id="安装和环境配置-Win10-64位"><a href="#安装和环境配置-Win10-64位" class="headerlink" title="安装和环境配置(Win10 64位)"></a>安装和环境配置(Win10 64位)</h3><p>获取最新的Flutter SDK压缩包，这里版本是2.5.0，要查看其他发行通道和以往的版本，请参阅<a href="https://flutter.cn/docs/development/tools/sdk/releases" target="_blank" rel="noopener">SDK版本列表</a>页面。这里解压到D盘根目录，并配置环境变量path，添加flutter\bin目录。命令提示符窗口运行<code>flutter doctor</code>检测运行环境（这里出错了一次，不过不影响结果，两次都是）提示缺少Android SDK。<img src="/img/20210913/1.png" alt></p>
+<h4 id="配置Android开发环境"><a href="#配置Android开发环境" class="headerlink" title="配置Android开发环境"></a>配置Android开发环境</h4><p>现在<a href="https://developer.android.google.cn" target="_blank" rel="noopener">Android开发官网</a>里Android SDK集成到Android Studio，直接下载Android Studio即可。之前想单独装Android SDK的，15年开始就没有更新了，结果各种错误，最后放弃。</p>
+<blockquote>
+<p><del>单独装Android SDK失败过程，请忽略<br>这里直接从<a href="https://www.androiddevtools.cn/" target="_blank" rel="noopener">AndroidDevTools</a>单独下载Android SDK压缩包。依旧解压到D盘根目录，文件夹改名为android-sdk。启动SDK Manager.exe，默认选项，直接单击Install XX Packages按钮，弹出框中选中Accept License单选框（每个Packages大项都要点），然后单机Install按钮开始安装，下载需要一段时间。新建环境变量ANDROID_SDK_ROOT到android-sdk目录。配置环境变量path添加%ANDROID_SDK_ROOT%\tools和%ANDROID_SDK_ROOT%\platform-tools两条记录。命令提示符窗口执行<code>adb --version</code>出现版本号表示Android SDK环境安装成功。<br>这里有个问题，就是获取的版本不是最新的，只到29，在SDK Manager.exe貌似没法再提升版本了，开发要用API30和31的，也没有。在<code>sdkmanager --list</code>中是能找到新的版本的，通过<code>sdkmanager --update</code>能把Android SDK Platform-tools 升级到最新的31.0.3。通过<code>sdkmanager &quot;build-tools;30.0.3&quot; &quot;platforms;android-30&quot;</code>和<code>sdkmanager &quot;build-tools;31.0.0&quot; &quot;platforms;android-31&quot;</code>更新编译和开发调试工具。<br>命令提示符窗口运行<code>flutter doctor</code>检测运行环境，新错误cmdline-tools component is missing。命令提示符窗口连接到android-sdk\tools\bin目录，执行<code>sdkmanager &quot;cmdline-tools;latest&quot;</code>安装（Flutter提示多一个–install参数），Accept? (y/N):输入y回车。<br>然后还有一个同意 Android 协议，执行<code>flutter doctor --android-licenses</code>，一路y回车。最后只剩一个[!] Android Studio (not installed)，因为没用Android Studio，忽略。<br>执行AVD Manager.exe创建虚拟设备启动，提示图片没用，明明路径都存在……最后尝试无果，最后放弃，重新去下载了Android Studio</del></p>
+</blockquote>
+<p>安装Android Studio，这里把SDK安装路径改为了D盘<br><img src="/img/20210913/2.png" alt><br>安装完成后通过More Actions-SDK Manager来管理Android SDK。模拟器AVD Manager在下面<br><img src="/img/20210913/3.png" alt><br>新建环境变量ANDROID_SDK_ROOT到android-sdk目录。命令提示符窗口执行<code>flutter doctor</code>检测运行环境，提示cmdline-tools component is missing，安装cmdline-tools<br><img src="/img/20210913/4.png" alt><br>同意Android协议：执行<code>flutter doctor --android-licenses</code>，一路y回车，此时执行<code>flutter doctor</code>检测运行环境，全部通过<br><img src="/img/20210913/5.png" alt><br>配置Android模拟器的时候需要自己按需求下载用到的照片（模拟器是真的大，默认用户文件夹，对应C盘吃紧的我雪上加霜。改路径需要新建环境变量ANDROID_ADV_HOME以及删除默认路径.android后新建）<br><img src="/img/20210913/6.png" alt></p>
+<h4 id="编辑工具设定"><a href="#编辑工具设定" class="headerlink" title="编辑工具设定"></a>编辑工具设定</h4><p>Flutter支持Android Studio、IntelliJ、VS Code以及传说中的编辑器Emacs，这里我用的Visual Studio Code（yyds）<br>打开VS Code，Ctrl+Shift+p打开命令面板，输入install选择Install Extensions，扩展搜索输入框中输入flutter选择Flutter并单击Install按钮（会安装Dart插件）。Enabled&gt;Reload Required重新启动 VS Code。命令面板中输入doctor选择 Flutter: Run Flutter Doctor，输出 (OUTPUT) 面板不报错表示安装完成（就是<code>flutter doctor</code>，只不过多个了参数<code>-v</code>）</p>
+<h3 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h3><p>Ctrl+Shift+p打开命令面板，输入flutter，选择Flutter: New Application Project创建项目文件夹。输入项目名称，确定后在项目目录中就会生成main.dart文件。选择要启动的设备，启动（按F5），就能看到自带的示例程序<br><img src="/img/20210913/7.png" alt><br>这里改为“祖传代码”，用chorme启动，效果如下<br><img src="/img/20210913/8.png" alt><br>开发环境搞完就要开始正式学习了，至此文章就水完了，感觉官方<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>的文档更好，要想入坑可以去看看。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/724495.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='http://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/163/32046426.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/163/413961906.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://link.hhtjim.com/163/536622304.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
