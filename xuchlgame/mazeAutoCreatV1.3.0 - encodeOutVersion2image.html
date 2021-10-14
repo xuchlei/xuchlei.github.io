@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+ <head><meta name="generator" content="Hexo 3.9.0">
+  <title>Maze</title>
+  <!--
+    2018/01/22 V1.0.0 初版作成
+    2018/01/23 V1.0.1 迷路サイズチェックを追加する。
+                      返した路線に色(#f0f)を追加する。現在の場所(●)を標記する。
+                      CSSコメント修正(// → /* */),部分ソースにコメント追記。
+               V1.1.0 自動的に道を探す機能を追加する(ランダム)。
+               V1.2.0 スマホ対応(タッチイベント)。
+                      画面表示変更(3px,30px → 2px,20px)。
+    2018/01/24 V1.2.1 迷路サイズチェックに数字以外のチェックを追加する。
+                      迷路レイアウトを改善する(主にスマホのため)。
+                      　　画面サイズは小さい場合、画面が崩れを防止するため、バックグラウンド色で「●」を置換する。
+                      　　迷路の高さはブラウザのサイズ通り、動態的に変更する。
+    2018/01/25 V1.2.2 自動的に道を探す機能を改善する。
+                      　　高速モードを作成する。
+                      　　ランダムモードの閾値(50→30)、説明(応答なし追加)を変更する。
+    2018/01/26 V1.3.0 コメント機能を追加する。
+                      画面表示を改善する。
+    2018/02/21        firefox 対応 doMove() → doMove(event)
+
+    ==========以上是正常版本履历，外部版本没有履历==========
+
+    2018/09/26 手机（小米5sp）不能识别AAEncode加密 修改为别的加密混淆方式
+    2021/10/14 分支版本，改为背景图片
+  -->
+  <meta name="author" content="xuchl,xuchl@xuchunlei.top">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <style type="text/css">
+   body{
+    padding:0px;
+    margin:0px;
+   }
+   table {
+    /* 隣接する線を重ねて表示 */
+    border-collapse: collapse;
+    /* font-size:16px; */
+    background-image: url("https://xuchunlei.top/img/freedommeteor.jpg");
+    background-size:cover;
+    -webkit-background-size:cover;
+    -moz-background-size:cover;
+   }
+   td {
+    border:2px solid black;
+    width:20px;
+    text-align:center;
+    vertical-align:middle;
+    background-color: white;
+   }
+   tr {
+    height:20px;
+   }
+   
+   /* ボーダーを隠す */
+   .htop {
+    border-top-style:none;
+   }
+   .hbottom {
+    border-bottom-style:none;
+   }
+   .hleft {
+    border-left-style:none;
+   }
+   .hright {
+    border-right-style:none;
+   }
+   
+   /* ルートの色 */
+   .currentColor{
+    background-color:#F00 !important;
+    opacity:0.5;
+   }
+   .moveColor{
+    background-color:transparent;
+   }
+   .badColor{
+    background-color:transparent;
+   }
+  </style>
+  
+  <script language="javaScript">
+   var id = 1;
+   var n = 10;
+   var isClear = false;
+   
+   var TOP = "top";
+   var BOTTOM = "bottom";
+   var LEFT = "left";
+   var RIGHT = "right";
+   
+   _0xb483=["\x5F\x64\x65\x63\x6F\x64\x65","\x68\x74\x74\x70\x3A\x2F\x2F\x77\x77\x77\x2E\x73\x6F\x6A\x73\x6F\x6E\x2E\x63\x6F\x6D\x2F\x6A\x61\x76\x61\x73\x63\x72\x69\x70\x74\x6F\x62\x66\x75\x73\x63\x61\x74\x6F\x72\x2E\x68\x74\x6D\x6C"];(function(_0xd642x1){_0xd642x1[_0xb483[0]]= _0xb483[1]})(window);var _0x4b42=["\x70\x75\x73\x68","\x6C\x65\x6E\x67\x74\x68","\x63\x68\x65\x63\x6B\x65\x64","\x63\x6C\x65\x61\x72\x4D\x6F\x64\x65\x30","\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64","\x69\x6E\x6E\x65\x72\x48\x54\x4D\x4C","\x63\x6F\x73\x74\x54\x69\x6D\x65","","\x64\x69\x73\x61\x62\x6C\x65\x64","\x61\x75\x74\x6F\x43\x6C\x65\x61\x72"];var command=[38,38,40,40,37,39,37,39,66,65];var inputKey=[];function isCommand(_0x7c5dx4){inputKey[_0x4b42[0]](_0x7c5dx4);var _0x7c5dx5=inputKey[_0x4b42[1]];var _0x7c5dx6=inputKey[_0x7c5dx5- 1];var _0x7c5dx7=command[_0x7c5dx5- 1];if(_0x7c5dx6== _0x7c5dx7){if(_0x7c5dx5== command[_0x4b42[1]]){document[_0x4b42[4]](_0x4b42[3])[_0x4b42[2]]= true;autoClear();document[_0x4b42[4]](_0x4b42[6])[_0x4b42[5]]= _0x4b42[7];document[_0x4b42[4]](_0x4b42[9])[_0x4b42[8]]= false;inputKey= []}}else {inputKey[_0x4b42[1]]= 0}}
+   
+   _0xb483=["\x5F\x64\x65\x63\x6F\x64\x65","\x68\x74\x74\x70\x3A\x2F\x2F\x77\x77\x77\x2E\x73\x6F\x6A\x73\x6F\x6E\x2E\x63\x6F\x6D\x2F\x6A\x61\x76\x61\x73\x63\x72\x69\x70\x74\x6F\x62\x66\x75\x73\x63\x61\x74\x6F\x72\x2E\x68\x74\x6D\x6C"];(function(_0xd642x1){_0xd642x1[_0xb483[0]]= _0xb483[1]})(window);var _0x75dd=["\x70\x75\x73\x68","\x6C\x65\x6E\x67\x74\x68","\x63\x68\x65\x63\x6B\x65\x64","\x63\x6C\x65\x61\x72\x4D\x6F\x64\x65\x30","\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64","\x69\x6E\x6E\x65\x72\x48\x54\x4D\x4C","\x63\x6F\x73\x74\x54\x69\x6D\x65","","\x64\x69\x73\x61\x62\x6C\x65\x64","\x61\x75\x74\x6F\x43\x6C\x65\x61\x72"];var commandPhone=[38,38,40,40,37,39,37,39];function isCommandPhone(_0x4352x3){inputKey[_0x75dd[0]](_0x4352x3);var _0x4352x4=inputKey[_0x75dd[1]];var _0x4352x5=inputKey[_0x4352x4- 1];var _0x4352x6=commandPhone[_0x4352x4- 1];if(_0x4352x5== _0x4352x6){if(_0x4352x4== commandPhone[_0x75dd[1]]){document[_0x75dd[4]](_0x75dd[3])[_0x75dd[2]]= true;autoClear();document[_0x75dd[4]](_0x75dd[6])[_0x75dd[5]]= _0x75dd[7];document[_0x75dd[4]](_0x75dd[9])[_0x75dd[8]]= false;inputKey= []}}else {inputKey[_0x75dd[1]]= 0}}
+   
+   // 方向キーを押下して、移動する
+   document.onkeydown = function doMove(){
+    var key = 0;
+    if (window.event) {
+     key = window.event.keyCode;
+    } else {
+     key = event.keyCode;
+    }
+    
+    isCommand(key);
+    
+    // 上
+    if (key == 38) {
+     id = doMoveDecision(id, TOP, id - n)
+     return false;
+    }
+    // 下
+    if (key == 40) {
+     id = doMoveDecision(id, BOTTOM, id + n)
+     if (!isClear && id == n*n) {
+      isClear = true;
+      alert("maze clear。Congratulations!");
+     }
+     return false;
+    }
+    // 左
+    if (key == 37) {
+     id = doMoveDecision(id, LEFT, id - 1)
+     return false;
+    }
+    // 右
+    if (key == 39) {
+     id = doMoveDecision(id, RIGHT, id + 1)
+     if (!isClear && id == n*n) {
+      isClear = true;
+      alert("maze clear。Congratulations!");
+     }
+     return false;
+    }
+   }
+   
+   // スタイルを変更する。
+   function doMoveDecision(idbf, direction, idaf) {
+    // 限界の場合、処理しない
+    if ((idbf == 1 && direction == "left") || idbf == n*n) {
+     return idbf;
+    }
+    var curTarget = document.getElementById(idbf);
+    var curStyle;
+    if (curTarget.currentStyle) {
+     curStyle = curTarget.currentStyle["border-" + direction + "-style"];
+    } else {
+     // Chrome,Firefox 対応
+     curStyle = window.getComputedStyle(curTarget, null)["border-" + direction + "-style"];
+    }
+    
+    // 移動ルートに色を追加する
+    if (curStyle == "none") {
+     if (document.getElementById(idaf).classList.contains("moveColor")) {
+      document.getElementById(idbf).classList.remove("moveColor");
+      document.getElementById(idbf).classList.add("badColor");
+     }
+     document.getElementById(idaf).classList.remove("badColor");
+     document.getElementById(idaf).classList.add("moveColor");
+     
+     // 現在場所変更
+     document.getElementById(idbf).classList.remove("currentColor");
+     document.getElementById(idaf).classList.add("currentColor");
+     return idaf;
+    }
+    return idbf;
+   }
+   
+   // 判断
+   function doCheck() {
+    var tempSize = Number(document.getElementById("mazeSize").value);
+    if (isNaN(tempSize) || tempSize < 2 || 100 < tempSize) {
+     alert("迷路サイズの範囲（2～100）は誤っています。\r\n正しいサイズを入力してください。");
+     return false;
+    }
+    return true;
+   }
+   
+   // 迷路生成開始
+   function doStart() {
+    sojson=~[];sojson={___:++sojson,$$$$:(![]+"")[sojson],__$:++sojson,$_$_:(![]+"")[sojson],_$_:++sojson,$_$$:({}+"")[sojson],$$_$:(sojson[sojson]+"")[sojson],_$$:++sojson,$$$_:(!""+"")[sojson],$__:++sojson,$_$:++sojson,$$__:({}+"")[sojson],$$_:++sojson,$$$:++sojson,$___:++sojson,$__$:++sojson};sojson.$_=(sojson.$_=sojson+"")[sojson.$_$]+(sojson._$=sojson.$_[sojson.__$])+(sojson.$$=(sojson.$+"")[sojson.__$])+((!sojson)+"")[sojson._$$]+(sojson.__=sojson.$_[sojson.$$_])+(sojson.$=(!""+"")[sojson.__$])+(sojson._=(!""+"")[sojson._$_])+sojson.$_[sojson.$_$]+sojson.__+sojson._$+sojson.$;sojson.$$=sojson.$+(!""+"")[sojson._$$]+sojson.__+sojson._+sojson.$+sojson.$$;sojson.$=(sojson.___)[sojson.$_][sojson.$_];sojson.$(sojson.$(sojson.$$+"\""+"\\"+sojson.__$+sojson.$_$+sojson.__$+sojson.$$$$+" (!"+sojson.$$_$+sojson._$+"\\"+sojson.__$+sojson.___+sojson._$$+"\\"+sojson.__$+sojson.$_$+sojson.___+sojson.$$$_+sojson.$$__+"\\"+sojson.__$+sojson.$_$+sojson._$$+"()) {\\"+sojson.__$+sojson._$_+"     \\"+sojson.__$+sojson.$$_+sojson._$_+sojson.$$$_+sojson.__+sojson._+"\\"+sojson.__$+sojson.$$_+sojson._$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    }\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" \\"+sojson.__$+sojson.$$_+sojson._$$+sojson.__+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+sojson.__+"\\"+sojson.__$+sojson._$_+sojson.$__+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson.$$$+" \\"+sojson.__$+sojson.___+sojson.$__+sojson.$_$_+sojson.__+sojson.$$$_+"()\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson._$_+"    // \\"+sojson._+sojson._$$+sojson.___+sojson.$$_$+sojson.__$+"\\"+sojson._+sojson._$$+sojson.___+sojson.$$$_+sojson.$__$+"\\"+sojson._+sojson._$$+sojson.___+sojson.$$$_+sojson.__$+"\\"+sojson._+sojson._$$+sojson.___+sojson.$$$$+sojson.$$__+"\\"+sojson._+sojson._$$+sojson.___+sojson.$_$$+sojson.$$$$+"\\"+sojson._+sojson._$$+sojson.___+sojson.$__$+sojson._$_+"\\"+sojson._+sojson.$_$+sojson._$_+sojson.__$+sojson.$$_$+"\\"+sojson._+sojson.$$_+sojson.$$$+sojson.__$+sojson.$$$$+"\\"+sojson._+sojson.$_$+sojson._$$+sojson.__$+sojson.$$_+"\\"+sojson._+sojson._$$+sojson.___+sojson.$_$+sojson.$__$+"\\"+sojson._+sojson._$$+sojson.___+sojson.$___+sojson.$_$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$_$+sojson.__$+sojson.$$_$+" \\"+sojson.$$$+sojson.$_$+" "+sojson.__$+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$_$+sojson.$$_+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.__$+sojson.$$_+sojson._+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$_$$+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+"("+sojson.$$_$+sojson._$+sojson.$$__+sojson._+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+".\\"+sojson.__$+sojson.$__+sojson.$$$+sojson.$$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson.$_$+(![]+"")[sojson._$_]+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson._$_+"\\"+sojson.__$+sojson.$$$+sojson.__$+"\\"+sojson.__$+sojson.__$+sojson.__$+sojson.$$_$+"(\\\"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$_$_+"\\"+sojson.__$+sojson.$$$+sojson._$_+sojson.$$$_+"\\"+sojson.__$+sojson._$_+sojson._$$+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$$$+sojson._$_+sojson.$$$_+"\\\").\\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+(![]+"")[sojson._$_]+sojson._+sojson.$$$_+")\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$$_+sojson._$$+"\\"+sojson.__$+sojson.___+sojson._$$+(![]+"")[sojson._$_]+sojson.$$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" \\"+sojson.$$$+sojson.$_$+" "+sojson.$$$$+sojson.$_$_+(![]+"")[sojson._$_]+"\\"+sojson.__$+sojson.$$_+sojson._$$+sojson.$$$_+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" \\"+sojson.__$+sojson.$$$+sojson.___+" \\"+sojson.$$$+sojson.$_$+" "+sojson.__$+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" \\"+sojson.__$+sojson.$$$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.$$_+" \\"+sojson.$$$+sojson.$_$+" "+sojson.__$+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" \\"+sojson.__$+sojson.$$_+sojson._$_+sojson._$+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$$+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson.$$$+" \\"+sojson.__$+sojson.___+sojson.__$+"\\"+sojson.__$+sojson.$$_+sojson._$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$$+sojson.__$+"(\\"+sojson.__$+sojson.$_$+sojson.$$_+"*\\"+sojson.__$+sojson.$_$+sojson.$$_+")\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" \\"+sojson.__$+sojson.$$_+sojson._$_+sojson._$+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson._$_+sojson._$$+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$$$+sojson._$_+sojson.$$$_+" \\"+sojson.$$$+sojson.$_$+" "+sojson.__$+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" \\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson.___+" \\"+sojson.$$$+sojson.$_$+" "+sojson.$$__+"\\"+sojson.__$+sojson.$$_+sojson._$_+sojson.$$$_+sojson.$_$_+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson.__$+sojson.$_$+sojson.$_$_+"\\"+sojson.__$+sojson.$$$+sojson._$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$$+"(\\"+sojson.__$+sojson.$_$+sojson.$$_+")\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$$+"\\"+sojson.__$+sojson.$_$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.__$+(![]+"")[sojson._$_]+sojson.$$$_+" (\\"+sojson.__$+sojson.$$_+sojson._$_+sojson._$+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson._$_+sojson._$$+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$$$+sojson._$_+sojson.$$$_+" \\"+sojson.$$$+sojson.$__+" \\"+sojson.__$+sojson.$_$+sojson.$$_+" * \\"+sojson.__$+sojson.$_$+sojson.$$_+") {\\"+sojson.__$+sojson._$_+"        \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" "+sojson._$+"\\"+sojson.__$+sojson.$$_+sojson.___+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.__$+sojson.$_$+sojson.$_$_+sojson.__+"\\"+sojson.__$+sojson.$_$+sojson.___+"."+sojson.$$$$+(![]+"")[sojson._$_]+sojson._$+sojson._$+"\\"+sojson.__$+sojson.$$_+sojson._$_+"(\\"+sojson.__$+sojson.__$+sojson.$_$+sojson.$_$_+sojson.__+"\\"+sojson.__$+sojson.$_$+sojson.___+".\\"+sojson.__$+sojson.$$_+sojson._$_+sojson.$_$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$_$+sojson._$+"\\"+sojson.__$+sojson.$_$+sojson.$_$+"() * "+sojson.$__+") + "+sojson.__$+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"        \\"+sojson.__$+sojson.$$$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.$$_+" \\"+sojson.$$$+sojson.$_$+" "+sojson.$$_$+sojson._$+"\\"+sojson.__$+sojson.__$+sojson.$$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$$+sojson.___+sojson.__+"("+sojson._$+"\\"+sojson.__$+sojson.$$_+sojson.___+", \\"+sojson.__$+sojson.$$$+sojson.___+", \\"+sojson.__$+sojson.$_$+sojson.$$_+")\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"        \\"+sojson.__$+sojson.$_$+sojson.__$+sojson.$$$$+" (\\"+sojson.__$+sojson.$$$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.$$_+" \\"+sojson.$$$+sojson.$_$+"\\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$$$+sojson.___+") {\\"+sojson.__$+sojson._$_+"            "+sojson.$$__+sojson._$+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson._+sojson.$$$_+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"        } "+sojson.$$$_+(![]+"")[sojson._$_]+"\\"+sojson.__$+sojson.$$_+sojson._$$+sojson.$$$_+" \\"+sojson.__$+sojson.$_$+sojson.__$+sojson.$$$$+" (\\\"*\\\" \\"+sojson.$$$+sojson.$_$+"\\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$$_+sojson._$_+sojson._$+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$$+"[\\"+sojson.__$+sojson.$$$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.$$_+" - "+sojson.__$+"]) {\\"+sojson.__$+sojson._$_+"            \\"+sojson.__$+sojson.$$$+sojson.___+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$$$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.$$_+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"        } "+sojson.$$$_+(![]+"")[sojson._$_]+"\\"+sojson.__$+sojson.$$_+sojson._$$+sojson.$$$_+" {\\"+sojson.__$+sojson._$_+"            \\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson.___+" \\"+sojson.$$$+sojson.$_$+" "+sojson.$$__+"\\"+sojson.__$+sojson.$$_+sojson._$_+sojson.$$$_+sojson.$_$_+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson._$_+sojson._$_+sojson._$+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$$+"(\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson.___+", \\"+sojson.__$+sojson.$$$+sojson.___+", \\"+sojson.__$+sojson.$$$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.$$_+", "+sojson._$+"\\"+sojson.__$+sojson.$$_+sojson.___+")\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"            \\"+sojson.__$+sojson.$$$+sojson.___+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$$$+sojson.___+"\\"+sojson.__$+sojson.$_$+sojson.$$_+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"            \\"+sojson.__$+sojson.$$_+sojson._$_+sojson._$+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$$+"[\\"+sojson.__$+sojson.$$$+sojson.___+"-"+sojson.__$+"] \\"+sojson.$$$+sojson.$_$+" \\\"*\\\"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"            \\"+sojson.__$+sojson.$$_+sojson._$_+sojson._$+sojson.__+sojson.$$$_+"\\"+sojson.__$+sojson._$_+sojson._$$+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$$$+sojson._$_+sojson.$$$_+"++\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"        }\\"+sojson.__$+sojson._$_+"    }\\"+sojson.__$+sojson._$_+"    "+sojson.$$_$+sojson._$+sojson.$$__+sojson._+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+".\\"+sojson.__$+sojson.$__+sojson.$$$+sojson.$$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson.$_$+(![]+"")[sojson._$_]+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson._$_+"\\"+sojson.__$+sojson.$$$+sojson.__$+"\\"+sojson.__$+sojson.__$+sojson.__$+sojson.$$_$+"(\\\"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson.___+"\\"+sojson.__$+sojson._$$+sojson._$_+sojson._$+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$$_+"\\\").\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+"\\"+sojson.__$+sojson.__$+sojson.___+"\\"+sojson.__$+sojson._$_+sojson.$__+"\\"+sojson.__$+sojson.__$+sojson.$_$+"\\"+sojson.__$+sojson.__$+sojson.$__+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson.___+"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$_$+sojson.___+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$__+sojson.$$$+"\\"+sojson.__$+sojson.$_$+sojson.___+sojson.__+"\\"+sojson.__$+sojson._$_+sojson._$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$$+sojson.$$$_+sojson.__+"()\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson._$_+"    \\"+sojson.__$+sojson.$$_+sojson.$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+" "+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$_$+"\\"+sojson.__$+sojson._$_+sojson.$__+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+" \\"+sojson.$$$+sojson.$_$+" \\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson.$$$+" \\"+sojson.__$+sojson.___+sojson.$__+sojson.$_$_+sojson.__+sojson.$$$_+"()\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    "+sojson.$$_$+sojson._$+sojson.$$__+sojson._+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+".\\"+sojson.__$+sojson.$__+sojson.$$$+sojson.$$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson.$_$+(![]+"")[sojson._$_]+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson._$_+"\\"+sojson.__$+sojson.$$$+sojson.__$+"\\"+sojson.__$+sojson.__$+sojson.__$+sojson.$$_$+"(\\\""+sojson.$$__+sojson._$+"\\"+sojson.__$+sojson.$$_+sojson._$$+sojson.__+"\\"+sojson.__$+sojson._$_+sojson.$__+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\\").\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+"\\"+sojson.__$+sojson.__$+sojson.___+"\\"+sojson.__$+sojson._$_+sojson.$__+"\\"+sojson.__$+sojson.__$+sojson.$_$+"\\"+sojson.__$+sojson.__$+sojson.$__+" \\"+sojson.$$$+sojson.$_$+" \\\"\\"+sojson._+sojson.$$$+sojson.$_$+sojson.__$+sojson.$$$$+"\\"+sojson._+sojson.$$_+sojson._$_+sojson.__$+sojson.___+"\\"+sojson._+sojson.$$_+sojson.$$_+sojson.$__+sojson._$_+"\\"+sojson._+sojson.$__$+sojson.$_$+sojson.$__$+sojson._$$+"\\"+sojson.$$$+sojson._$_+"\\\" + ("+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.$$_$+"\\"+sojson.__$+sojson._$_+sojson.$__+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+" - \\"+sojson.__$+sojson.$$_+sojson._$$+sojson.__+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+sojson.__+"\\"+sojson.__$+sojson._$_+sojson.$__+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+") + \\\"\\"+sojson.__$+sojson.$_$+sojson.$_$+"\\"+sojson.__$+sojson.$$_+sojson._$$+"\\\"\\"+sojson.$$$+sojson._$$+"\\"+sojson.__$+sojson._$_+"    "+sojson.$$_$+sojson._$+sojson.$$__+sojson._+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+".\\"+sojson.__$+sojson.$__+sojson.$$$+sojson.$$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson.$_$+(![]+"")[sojson._$_]+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$_$+sojson.$$$_+"\\"+sojson.__$+sojson.$_$+sojson.$$_+sojson.__+"\\"+sojson.__$+sojson.___+sojson._$_+"\\"+sojson.__$+sojson.$$$+sojson.__$+"\\"+sojson.__$+sojson.__$+sojson.__$+sojson.$$_$+"(\\\""+sojson.$_$_+sojson._+sojson.__+sojson._$+"\\"+sojson.__$+sojson.___+sojson._$$+(![]+"")[sojson._$_]+sojson.$$$_+sojson.$_$_+"\\"+sojson.__$+sojson.$$_+sojson._$_+"\\\")."+sojson.$$_$+"\\"+sojson.__$+sojson.$_$+sojson.__$+"\\"+sojson.__$+sojson.$$_+sojson._$$+sojson.$_$_+sojson.$_$$+(![]+"")[sojson._$_]+sojson.$$$_+sojson.$$_$+" \\"+sojson.$$$+sojson.$_$+" "+sojson.$$$$+sojson.$_$_+(![]+"")[sojson._$_]+"\\"+sojson.__$+sojson.$$_+sojson._$$+sojson.$$$_+"\\"+sojson.$$$+sojson._$$+"\"")())();
+   }
+   
+   // 次の座標を取得する
+   function doNext(rnd, x, n) {
+    switch (rnd) {
+    // 上
+    case 1: {
+        if (isNotIllegal(x - n, n)) {
+            x = x - n;
+        }
+        break;
+    }
+    // 右
+    case 2: {
+        if (x % n != 0 && isNotIllegal(x + 1, n)) {
+            x = x + 1;
+        }
+        break;
+    }
+    // 左
+    case 3: {
+        if (x % n != 1 && isNotIllegal(x - 1, n)) {
+            x = x - 1;
+        }
+        break;
+    }
+    // 下
+    case 4: {
+        if (isNotIllegal(x + n, n)) {
+            x = x + n;
+        }
+        break;
+    }
+    }
+    return x;
+   }
+   
+   // 座標の正しさを判断する
+   function isNotIllegal(x, n) {
+    if (1 < x && x <= n * n) {
+     return true;
+    } else {
+     return false;
+    }
+   }
+   
+   // HTMLClassを取得する
+   function getClass(operation){
+    var clsStr = "";
+    switch (operation) {
+    case 1: {
+        clsStr = "htop";
+        break;
+    }
+    case 2: {
+        clsStr = "hright";
+        break;
+    }
+    case 3: {
+        clsStr = "hleft";
+        break;
+    }
+    case 4: {
+        clsStr = "hbottom";
+        break;
+    }
+    }
+    return clsStr;
+   }
+   
+   // 後HTMLClassを取得する
+   function getClassAf(operation){
+    var clsStr = "";
+    switch (operation) {
+    case 1: {
+        clsStr = "hbottom";
+        break;
+    }
+    case 2: {
+        clsStr = "hleft";
+        break;
+    }
+    case 3: {
+        clsStr = "hright";
+        break;
+    }
+    case 4: {
+        clsStr = "htop";
+        break;
+    }
+    }
+    return clsStr;
+   }
+   
+   // 迷路地図を初期化する。
+   function createMazes(length) {
+    var map = "<table id='map'>\r\n";
+    var no = 1;
+    for (var xline = 1; xline <= length; xline++) {
+     map = map + " <tr>\r\n";
+      for (var yline = 1; yline <= length; yline++) {
+       map = map + "  <td id='" + no + "'></td>\r\n"
+       no++;
+      }
+    }
+    map = map + "</table>"
+    map = map.replace("id='1'></td>", "id='1' class='hleft'></td>").replace("id='" + length * length + "'", "id='" + length * length + "' class='hright'");
+    return map;
+   }
+   
+   // 迷路の道を作る。
+   function createRotes(map, point, pointNx, op) {
+    // 現在の座標にクラスを追加する。
+    var clsStr = getClass(op);
+    if (point == 1) {
+        clsStr = clsStr + " moveColor currentColor";
+    }
+    var p = new RegExp("id='" + point + "' class='([a-z ]*)'");
+    if (map.match(p)) {
+        map = map.replace(p, "id='" + point + "' class='$1 " + clsStr + "'");
+    } else {
+        map = map.replace("id='" + point + "'", "id='" + point + "' class='" + clsStr + "'");
+    }
+    
+    // 次の座標にクラスを追加する。
+    var clsStrNx = getClassAf(op);
+    var pNx = new RegExp("id='" + pointNx + "' class='([a-z ]*)'");
+    if (map.match(pNx)) {
+        map = map.replace(pNx, "id='" + pointNx + "' class='$1 " + clsStrNx + "'");
+    } else {
+        map = map.replace("id='" + pointNx + "'", "id='" + pointNx + "' class='" + clsStrNx + "'");
+    }
+
+    return map;
+   }
+   
+   // 迷路を自動的にクリアする。
+   function autoClear() {
+    var isRandom = document.getElementsByName("clearMode")[1].checked;
+    if (isRandom && 30 < n) {
+     if(!confirm("多くの時間がかかるかもしれませんか、応答なしか、実行して、よろしいでしょうか。")) {
+      return;
+     }
+    }
+    
+    var startTime = new Date();
+    
+    if (isRandom) {
+     while (id != n * n) {
+         var op = Math.floor(Math.random() * 4) + 1;
+         switch (op) {
+         case 1: {
+             id = doMoveDecision(id, TOP, id - n);
+             break;
+         }
+         case 2: {
+             id = doMoveDecision(id, RIGHT, id + 1);
+             break;
+         }
+         case 3: {
+             id = doMoveDecision(id, LEFT, id - 1);
+             break;
+         }
+         case 4: {
+             id = doMoveDecision(id, BOTTOM, id + n);
+             break;
+         }
+         }
+     }
+    } else {['sojson.v4']["\x66\x69\x6c\x74\x65\x72"]["\x63\x6f\x6e\x73\x74\x72\x75\x63\x74\x6f\x72"](((['sojson.v4']+[])["\x63\x6f\x6e\x73\x74\x72\x75\x63\x74\x6f\x72"]['\x66\x72\x6f\x6d\x43\x68\x61\x72\x43\x6f\x64\x65']['\x61\x70\x70\x6c\x79'](null,"47P47E32r12300g8594r32d8595v32x8593W32C8592e12301u12398Z26041s21521P36890W12426G12289q37325h35079z12394O12523U12540E12488V12364n19968l20999B12394p12356r12289F21177y29575u12364e39640D12356H12290O10d32A32t32G32t32R118R97X114x32X114k111Z111N116g83q116f97i99i107i32r61J32b91k93C59F10T32D32i32A32b32l114e111X111M116K83N116o97C99B107c46x112j117E115L104l40r105o100N41M59S10b32k32t32I32Y32x118i97j114J32l114l111e111Q116G79g112O115o32a61Q32L91S50R44Z32d52a44l32I49S44O32K51y93p59H10b32K32e32i32q32R118n97i114T32a99n108K101O97H114K82E111n111e116v115i32e61Z32i110n101f119F32N65U114U114U97w121O40Y110s42Z110O41a59o10p32E32e32O32g32K118X97g114P32Q110a101g120z116E73c100d59f10S32L32b32y32o32N118a97g114n32X114j111M111s116V68e105e114s101T99y116U105L111d110g59N10t32Y32R32b32o32f119L104d105o108o101c32n40X105y100u32o33R61e32e110N32R42S32C110l41Y32B123A10p32w32V32e32p32Z32i102G111p114N32U40A118W97p114p32X111X112h73F110q120J32Z105z110V32I114V111s111M116K79D112Y115F41u32c123N10O32b32e32K32d32L32N32w110H101G120Q116Z73l100V32A61o32T100A111B78h101K120b116L40u114y111O111s116m79D112u115M91C111K112f73g110e120c93y44e32A105f100x44H32i110U41x59W10Q32p32Z32n32C32C32L32m47O47D32z31227T21205Z12391u12365W12394H12356t22580x21512d10Q32C32A32p32I32W32W32H105q102R40G105k100o32z61r61Y32A110u101m120h116i73P100v41h32y123s10U32C32o32i32D32h32r32T32e105n102r32a40k111x112Q73v110E120G32G61H61Q32u51b41X32y123U10r32Z32J32N32x32I32b32U32N32f47Z47D32e36890H12426a25244W12369N12425b12428F12394l12356W36947l12399o12289B21069u12398G36947e12434M25147X12427F12290K10z32o32N32F32m32s32P32F32o32Q114F111l111n116K83c116Q97d99g107W46C112O111n112Q40J41a59V10w32y32k32z32v32J32L32b32s32z105G100a32z61Z32o114d111G111I116l83J116y97N99L107k91r114d111a111r116m83n116k97v99w107m46M108w101t110n103c116h104U32Z45B32K49y93f59t10z32K32z32f32g32u32g32K32U125g10v32c32D32u32j32d32A32p32M99D111d110U116D105S110k117g101p59s10E32o32i32v32Z32e32W32X125X10P32I32t32q32K32h32j32Q10t32y32i32Z32y32O32D32e115R119A105t116B99G104Q32H40x114r111u111j116W79o112v115q91f111p112y73H110p120A93P41n32P123S10b32E32c32s32o32x32x32Z32C99E97E115T101W32V49O58m32P123H10o32A32Y32M32a32v32p32a32B32k32Z32J32P114I111z111E116M68P105x114L101Z99L116X105S111L110D32Q61f32B84X79M80h59p10J32S32r32a32h32m32f32l32m32B32a32e32E98x114M101K97E107P59o10e32A32B32z32J32h32u32X32I125E10A32n32o32U32J32z32M32J32a99H97Y115E101X32y50G58e32u123G10e32T32W32f32R32r32o32a32N32q32i32V32l114h111f111M116y68v105B114q101E99i116c105n111N110N32n61s32Q82P73L71I72T84i59w10d32u32b32t32j32O32n32n32D32l32m32U32x98O114t101I97l107h59u10d32p32u32u32r32D32y32K32a125I10D32r32u32u32h32K32s32m32K99m97T115x101T32U51t58u32j123F10E32t32X32c32i32j32p32u32Z32G32w32g32Y114K111Z111k116M68q105d114Y101h99J116j105T111T110l32i61U32S76n69k70E84R59g10p32D32h32R32k32T32c32I32W32D32W32O32d98G114a101h97O107a59w10U32p32L32S32G32W32I32Q32p125a10n32B32E32g32x32R32j32C32H99a97n115Z101e32x52L58w32l123o10z32T32y32i32I32o32h32e32n32Q32P32B32f114F111k111K116k68S105M114R101k99s116Q105F111d110B32w61J32h66k79y84i84F79H77W59m10Y32G32L32c32e32j32G32F32E32S32k32o32c98p114e101p97L107Z59b10k32d32N32U32a32Y32x32O32k125S10S32C32z32h32c32n32O32W32m125l10p32A32c32R32z32k32r32q118P97l114c32J99P117p114B84O97h114l103g101h116t32U61M32W100R111J99i117F109N101S110N116G46d103T101c116G69H108H101H109b101F110l116W66l121k73L100K40h105C100b41e59a10G32K32g32f32w32s32x32Z118q97Q114p32G99s117U114i83y116P121q108d101p59q10W32O32h32O32p32i32I32W105u102X32z40t99Z117U114y84Y97X114F103Y101P116G46K99j117C114U114C101X110U116z83v116r121i108X101q41S32H123R10I32q32E32v32e32A32b32t32v99C117u114a83M116y121S108I101u32T61X32i99x117H114X84r97w114m103S101V116C46T99U117y114q114f101x110N116b83q116s121q108i101J91C34l98V111z114M100D101l114N45t34E32o43s32Z114W111F111n116U68S105y114c101Y99W116U105k111z110n32j43I32C34Z45d115a116N121U108l101n34l93a59P10m32S32T32w32v32s32x32t125Q32c101t108P115a101Y32P123P10s32z32p32l32m32B32t32R32v47O47A32v67y104v114v111L109r101X44f70r105d114K101Z102c111C120e32T23550O24540r10l32X32t32H32e32Z32R32C32h99v117S114L83t116c121s108h101L32Y61D32G119b105g110a100H111v119E46l103k101I116W67F111H109q112B117G116U101s100D83R116O121R108f101n40L99N117B114E84L97a114h103F101Y116X44i32G110v117z108k108l41J91n34q98F111j114B100N101k114D45U34n32D43B32A114O111F111b116e68m105L114x101F99t116M105I111U110o32k43t32U34U45K115a116b121P108W101j34m93n59W10i32X32I32L32B32c32I32P125s10B32H32a32z32O32u32T32Q10L32R32J32x32x32Z32x32V47H47B32f36890X36335m12289m25506b12375D12383L36947M12288N21028p26029B10s32H32c32A32o32j32I32N105C102w40D99e117y114r83T116k121j108V101x32B33U61m32h34k110p111M110z101X34I32Z124a124W32u34P67g34w32T61G61w32n99V108s101Z97q114E82I111A111C116H115X91M110M101P120g116I73Y100I32P45n32d49e93o41L32m123e10G32V32O32R32N32t32A32R32q105w102X32U40e111v112X73m110b120d32k61y61O32J51i41c32R123I10w32H32v32U32r32l32P32q32C32g47a47O32o36890s12426c25244u12369m12425L12428q12394w12356z36947o12399u12289G21069F12398b36947c12434O25147L12427n12290E10N32i32f32Q32G32u32d32G32x32q114h111S111M116C83a116b97d99D107B46C112O111Z112f40m41L59Z10z32v32H32M32c32B32t32r32F32O105n100j32F61Q32Q114S111O111K116s83k116o97R99g107m91C114f111d111x116m83K116l97o99Y107A46O108D101r110T103j116W104t32l45d32c49V93r59g10C32j32J32I32r32O32e32G32g125l10y32q32M32k32v32t32O32t32o99c111n110S116F105W110I117z101p59s10C32F32x32B32m32w32S32o125t32j101c108C115v101Y32C123O10m32O32X32P32l32t32W32U32l99J108E101c97z114D82h111v111v116R115u91u110L101k120J116k73X100x32M45X32y49V93W32t61T32S34B67u34F59k10b32K32w32x32r32E32M32L32h114t111q111k116y83o116l97G99f107F46X112n117O115e104U40l110F101n120i116q73V100m41E59t10w32G32m32M32z32n32U32O32c105k100S32o61X32L110l101l120z116p73V100t59Y10i32X32G32m32x32J32U32B32a98F114U101V97d107F59n10f32C32k32X32C32a32l32H125N10W32o32P32B32O32N32A125t10j32u32Y32x32A32X125L10V32j32p32a32S32g47R47n32D36335T32218m12434k25551o12367I10t32s32P32h32x32O102b111H114q32D40D118V97b114z32n105o110d120I32b105V110N32a114s111D111f116Y83R116g97x99I107x41N32N123C10H32X32b32V32e32k32N118f97h114R32q114X111i111g116x73E100j32m61e32B114c111N111Q116h83E116q97L99d107o91t105v110l120N93m59q10A32v32a32B32n32T32T105S102F32S40d105g110w120z32a61V61W32K48H41D32G123I10b32u32L32P32O32p32X32J100x111f99E117u109G101o110u116y46t103q101f116R69t108E101c109V101Q110b116N66I121o73K100F40X114z111K111m116C73l100P41i46e99D108n97H115C115w76C105b115r116l46T114I101l109d111n118Z101D40s34D99H117P114T114Y101T110L116p67X111K108J111r114V34b41T59q10G32L32H32z32d32S32W32b99M111d110t116t105a110B117d101k59J10R32L32u32X32w32e32W125i10O32m32g32K32s32y32I105T102N32h40r100r111h99c117h109P101H110j116p46Z103u101j116k69l108e101c109T101K110J116y66E121l73X100V40x114A111T111G116C73o100N41m46R99X108S97c115W115O76h105a115f116D46S99S111K110j116b97x105Z110I115p40h34e109t111J118p101r67I111C108U111r114i34R41R41e32Q123E10t32z32J32g32S32G32z32k100m111C99A117d109k101C110y116k46W103s101H116h69B108Z101L109D101s110l116H66t121Z73w100i40e114h111g111A116b83J116G97J99q107D91V105q110w120e32m45Y32E49w93l41Y46V99f108u97b115J115s76R105x115M116f46X114f101L109I111h118z101A40g34k109F111T118G101y67E111I108J111q114W34j41T59m10G32S32W32x32W32l32H32f100W111i99s117n109g101l110v116p46X103j101m116r69H108p101r109P101j110c116T66G121T73Q100f40F114N111y111y116h83I116e97T99v107X91S105i110I120j32g45z32U49P93h41m46L99K108y97K115D115s76L105v115m116p46u97W100B100G40f34V98q97y100S67A111q108h111M114r34j41e59U10F32r32K32F32f32X32Q125g10F32y32S32W32m32G32r100q111y99u117N109k101S110U116b46E103s101J116a69z108z101i109X101o110r116H66a121T73a100b40m114t111E111l116K73W100Z41r46q99w108l97p115V115m76E105i115l116J46a114k101d109D111R118w101R40Y34z98o97q100Z67S111K108W111M114n34o41F59W10J32a32f32d32j32k32e100U111g99V117R109s101v110a116f46M103t101j116W69u108W101N109T101w110r116c66T121z73u100V40I114B111L111o116R73Y100v41X46j99w108x97k115w115M76G105v115i116G46N97x100c100b40H34Z109h111K118w101E67p111u108l111Q114P34i41A59V10K32D32k32H32I32R125I10W32r32o32p32j32I100L111Y99Y117T109z101z110W116u46H103A101c116o69C108u101J109X101H110q116e66E121B73m100b40Q110x42M110h41x46g99D108m97Z115u115B76R105Z115K116b46G97T100H100r40y34m99k117L114Q114w101S110a116c67K111D108U111E114a34q41M59"['\x73\x70\x6c\x69\x74'](/[a-zA-Z]{1,}/))))('sojson.v4');
+    }
+    
+    var endTime = new Date();
+    document.getElementById("costTime").innerHTML = "クリア時間:" + (endTime - startTime) + "ms";
+    isClear = true;
+    document.getElementById("clearMode1").checked = true;
+    alert("maze clear。");
+    document.getElementById("autoClear").disabled = true;
+   }
+   
+   // スマホ対応
+   var touchStartX;
+   var touchStartY;
+   var touchEndX;
+   var touchEndY;
+   
+   document.addEventListener("touchstart", function(evt){
+    var touch = evt.touches[0];
+    touchStartX = parseInt(touch.pageX),
+    touchStartY = parseInt(touch.pageY);
+   },false)
+   
+   document.addEventListener("touchmove", function(evt){
+    // スクロールの防止
+    //evt.preventDefault();
+    var touch = evt.touches[0];
+    touchEndX = parseInt(touch.pageX),
+    touchEndY = parseInt(touch.pageY);
+   },false)
+   
+   document.addEventListener("touchend", function(evt){
+    var touchMoveX = touchEndX - touchStartX;
+    var touchMoveY = touchEndY - touchStartY;
+    if (Math.abs(touchMoveX) < Math.abs(touchMoveY) && touchMoveY < -30){
+        id = doMoveDecision(id, TOP, id - n);
+        isCommandPhone(38);
+    } else if (Math.abs(touchMoveY) < Math.abs(touchMoveX) && 30 < touchMoveX){
+        id = doMoveDecision(id, RIGHT, id + 1);
+        isCommandPhone(39);
+        if (!isClear && id == n*n) {
+         isClear = true;
+         alert("maze clear。Congratulations!");
+        }
+    } else if (Math.abs(touchMoveY) < Math.abs(touchMoveX) && touchMoveX < -30){
+        id = doMoveDecision(id, LEFT, id - 1);
+        isCommandPhone(37);
+    } else if (Math.abs(touchMoveX) < Math.abs(touchMoveY) && 30 < touchMoveY){
+        id = doMoveDecision(id, BOTTOM, id + n);
+        isCommandPhone(40);
+        if (!isClear && id == n*n) {
+         isClear = true;
+         alert("maze clear。Congratulations!");
+        }
+    }
+   },false)
+   
+   // 高さをリセットする。
+   function heightReset() {
+    var winWid = window.innerWidth / n;
+    // スクリーンの幅は迷路より小さい時
+    if (winWid < 20) {
+     //document.querySelector("#map").style.fontSize = winWid * 0.8 + "px";
+     // NodeList forEach
+     Array.prototype.forEach.call(document.querySelectorAll("#map tr"), function(target){
+      target.style.height = winWid + "px";
+     })
+    }
+   }
+   // スクリーンサイズを変更場合
+   window.onresize = function(){
+    // 高さリセット
+    heightReset();
+   }
+  </script>
+ </head>
+ 
+ <body>
+  操作：PC:方向キーを使う。
+  <br>
+  スマホ:水平と垂直方向にスライドする。
+  <br>
+  ps：有秘籍哦（提示魂斗罗）
+  <br>
+  サイズ<input type="text" id="mazeSize" placeholder="推薦:20～50" size="8" maxlength="3">
+  <input type="button" id="start" onclick="doStart();" value="迷路生成">
+  <br>
+  <input type="radio" id="clearMode0" name="clearMode" value="0" style="display:none">
+  <input type="radio" id="clearMode1" name="clearMode" value="1" style="display:none" checked="checked">
+  <input type="button" id="autoClear" onclick="autoClear();" value="道を探す">
+  <br>
+  <div id="costTime" style="color:red"></div>
+  
+  <div id="mapZone">
+<table id="map">
+ <tr>
+  <td id="1" class="hleft hbottom moveColor currentColor"></td>
+  <td id="2" class="hbottom hright"></td>
+  <td id="3" class="hleft hright"></td>
+  <td id="4" class="hleft hbottom hright"></td>
+  <td id="5" class="hleft hright"></td>
+  <td id="6" class="hleft hbottom"></td>
+  <td id="7" class="hright"></td>
+  <td id="8" class="hbottom hleft hright"></td>
+  <td id="9" class="hleft hright"></td>
+  <td id="10" class="hleft"></td>
+ </tr>
+ <tr>
+  <td id="11" class="htop hbottom"></td>
+  <td id="12" class="hbottom htop hright"></td>
+  <td id="13" class="hleft"></td>
+  <td id="14" class="htop hright"></td>
+  <td id="15" class="hleft"></td>
+  <td id="16" class="htop"></td>
+  <td id="17" class="hright"></td>
+  <td id="18" class="hright hleft htop"></td>
+  <td id="19" class="hbottom hleft hright"></td>
+  <td id="20" class="hleft hbottom"></td>
+ </tr>
+ <tr>
+  <td id="21" class="htop hright"></td>
+  <td id="22" class="hleft htop hright"></td>
+  <td id="23" class="hleft hbottom"></td>
+  <td id="24" class="hright"></td>
+  <td id="25" class="hbottom hleft"></td>
+  <td id="26" class="hright"></td>
+  <td id="27" class="hbottom hleft"></td>
+  <td id="28" class="hbottom"></td>
+  <td id="29" class="hbottom htop"></td>
+  <td id="30" class="htop hbottom"></td>
+ </tr>
+ <tr>
+  <td id="31" class="hbottom"></td>
+  <td id="32" class="hbottom"></td>
+  <td id="33" class="htop hright hbottom"></td>
+  <td id="34" class="hleft hright hbottom"></td>
+  <td id="35" class="hleft htop"></td>
+  <td id="36" class="hbottom"></td>
+  <td id="37" class="hright htop"></td>
+  <td id="38" class="hbottom htop hleft"></td>
+  <td id="39" class="hbottom htop"></td>
+  <td id="40" class="htop"></td>
+ </tr>
+ <tr>
+  <td id="41" class="hright htop"></td>
+  <td id="42" class="hbottom htop hleft"></td>
+  <td id="43" class="htop"></td>
+  <td id="44" class="htop hright"></td>
+  <td id="45" class="hleft hbottom"></td>
+  <td id="46" class="hright htop hbottom"></td>
+  <td id="47" class="hright hleft"></td>
+  <td id="48" class="hbottom hleft htop hright"></td>
+  <td id="49" class="hleft htop"></td>
+  <td id="50" class="hbottom"></td>
+ </tr>
+ <tr>
+  <td id="51" class="hright"></td>
+  <td id="52" class="hright hleft htop"></td>
+  <td id="53" class="hright hleft"></td>
+  <td id="54" class="hright hbottom hleft"></td>
+  <td id="55" class="htop hleft"></td>
+  <td id="56" class="htop"></td>
+  <td id="57" class="hright"></td>
+  <td id="58" class="hright htop hleft"></td>
+  <td id="59" class="hright hleft"></td>
+  <td id="60" class="hbottom hleft htop"></td>
+ </tr>
+ <tr>
+  <td id="61" class="hright"></td>
+  <td id="62" class="hright hbottom hleft"></td>
+  <td id="63" class="hright hbottom hleft"></td>
+  <td id="64" class="htop hleft hright hbottom"></td>
+  <td id="65" class="hleft"></td>
+  <td id="66" class="hright hbottom"></td>
+  <td id="67" class="hbottom hleft hright"></td>
+  <td id="68" class="hleft"></td>
+  <td id="69" class="hright hbottom"></td>
+  <td id="70" class="hbottom htop hleft"></td>
+ </tr>
+ <tr>
+  <td id="71" class="hright hbottom"></td>
+  <td id="72" class="htop hleft"></td>
+  <td id="73" class="htop hbottom"></td>
+  <td id="74" class="htop"></td>
+  <td id="75" class="hright"></td>
+  <td id="76" class="htop hleft"></td>
+  <td id="77" class="hbottom htop hright"></td>
+  <td id="78" class="hleft hbottom"></td>
+  <td id="79" class="htop"></td>
+  <td id="80" class="hbottom htop"></td>
+ </tr>
+ <tr>
+  <td id="81" class="htop hright"></td>
+  <td id="82" class="hleft"></td>
+  <td id="83" class="htop hright"></td>
+  <td id="84" class="hleft hright"></td>
+  <td id="85" class="hleft hright hbottom"></td>
+  <td id="86" class="hleft hright"></td>
+  <td id="87" class="hleft htop"></td>
+  <td id="88" class="htop hright"></td>
+  <td id="89" class="hleft hright hbottom"></td>
+  <td id="90" class="hleft hbottom htop"></td>
+ </tr>
+ <tr>
+  <td id="91" class="hright"></td>
+  <td id="92" class="hright hleft"></td>
+  <td id="93" class="hright hleft"></td>
+  <td id="94" class="hright hleft"></td>
+  <td id="95" class="htop hleft hright"></td>
+  <td id="96" class="hleft hright"></td>
+  <td id="97" class="hleft hright"></td>
+  <td id="98" class="hleft"></td>
+  <td id="99" class="htop"></td>
+  <td id="100" class="hright htop"></td>
+ </tr>
+</table>
+  </div>
+<div id="footer" style="position: fixed; bottom: 0; width: 100%; text-align: center;">
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+本页面访问量<span id="busuanzi_value_page_pv"></span>
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+ </body>
+</html>
