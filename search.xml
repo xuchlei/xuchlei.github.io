@@ -184,6 +184,23 @@
       </tags>
   </entry>
   <entry>
+    <title>IP地址分布分析(国内)</title>
+    <url>/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/</url>
+    <content><![CDATA[<h2 id="IP地址分布分析-国内"><a href="#IP地址分布分析-国内" class="headerlink" title="IP地址分布分析(国内)"></a>IP地址分布分析(国内)</h2><p><em>因为工作的原因，简单整理了一下，效率极低，娱乐用</em></p>
+<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为第一次做这个，没弄数据库和根据ip段来判断，直接请求<a href="https://ip.cn/" target="_blank" rel="noopener">ip.cn</a>，通过jsoup来获取页面数据。发现GeoIP数据不是很准确，基本以页面<code>所在地理位置</code>的数据为准，在获取不到准确数据的情况下参考页面<code>GeoIP</code>数据。<br>请求是最影响效率的地方，基本每秒请求一次，偶尔会报错（超时，520之类），毕竟是免费的。实际上分析的时候用的多线程（500条为一组），把没获取全的数据单独执行获取，然后在Excel表格里手动修改错误数据，然后整理计算。<br><img src="/img/20200402/1.png" alt></p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>后来（工作完成后）根据获取数据的规律，简单写了下（渣）代码，基本就是读取ip，获取ip所在省份，ip所在省份加一。执行错误，或者有无法识别的IP（国外，本地，特殊IP等）需要手动判断。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.net.SocketException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import org.apache.commons.lang3.StringUtils;</span><br><span class="line">import org.jsoup.Connection;</span><br><span class="line">import org.jsoup.Jsoup;</span><br><span class="line">import org.jsoup.nodes.Document;</span><br><span class="line">import org.jsoup.select.Elements;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreater &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line">	</span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		Map&lt;String, Integer&gt; provinceGeoIpMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceGeoIpMap.put(&quot;Beijing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tianjin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Chongqing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hebei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Yunnan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Liaoning&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Heilongjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hunan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Anhui&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shandong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Xinjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangsu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Zhejiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hubei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Gansu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanxi&quot;, 0); // 山西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Inner Mongolia Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shaanxi&quot;, 0); // 陕西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jilin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Fujian&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guizhou&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangdong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Qinghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tibet&quot;, 0); // 西藏</span><br><span class="line">		provinceGeoIpMap.put(&quot;Sichuan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Ningxia Hui Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// 获取ip.cn的页面内容</span><br><span class="line">				Document html = httpGet(&quot;https://ip.cn/?ip=&quot; + ips[i], null);</span><br><span class="line">				Elements pelements = html.getElementsByClass(&quot;well&quot;).get(0).getElementsByTag(&quot;p&quot;);</span><br><span class="line">				// 所在地理位置</span><br><span class="line">				String addresStr = pelements.get(1).getElementsByTag(&quot;code&quot;).text();</span><br><span class="line">				String provinceAddresStr = addresStr.substring(0, 2);</span><br><span class="line">				// GeoIP(局域网以及特殊ip没有)</span><br><span class="line">				String geoIpStr = pelements.size() == 3 ? pelements.get(2).getElementsByTag(&quot;code&quot;).text() : &quot;&quot;;</span><br><span class="line">				String[] geoIpAry = geoIpStr.split(&quot;, &quot;);</span><br><span class="line">				String provinceGeoIpStr = 1 &lt; geoIpAry.length ? geoIpAry[geoIpAry.length - 2]</span><br><span class="line">						: 0 &lt; geoIpAry.length ? geoIpAry[0] : &quot;&quot;;</span><br><span class="line"></span><br><span class="line">				System.out.println(i + &quot;\t&quot; + provinceAddresStr + &quot;\t&quot; + provinceGeoIpStr);</span><br><span class="line">				// 根据所在地理位置判断</span><br><span class="line">				if (provinceMap.get(provinceAddresStr) == null) &#123;</span><br><span class="line">					// 根据GeoIP判断</span><br><span class="line">					if (provinceGeoIpMap.get(provinceGeoIpStr) == null) &#123;</span><br><span class="line">						// 其他</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\t&quot; + addresStr + &quot;\t&quot; + geoIpStr + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceGeoIpMap.put(provinceGeoIpStr, provinceGeoIpMap.get(provinceGeoIpStr) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					provinceMap.put(provinceAddresStr, provinceMap.get(provinceAddresStr) + 1);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (SocketException se) &#123;</span><br><span class="line">			System.out.println(&quot;连接超时，请从最后的下标继续执行，然后手动合并数据。&quot;);</span><br><span class="line">			se.printStackTrace();</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				margeCount(provinceMap, provinceGeoIpMap);</span><br><span class="line">				StringBuffer result = new StringBuffer();</span><br><span class="line">				provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">					result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">				&#125;);</span><br><span class="line">				System.out.println(result.toString());</span><br><span class="line">				System.out.println(other);</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * httGet请求</span><br><span class="line">	 */</span><br><span class="line">	private static Document httpGet(String url, String cookie) throws IOException &#123;</span><br><span class="line">		Connection con = Jsoup.connect(url);</span><br><span class="line">		// 请求头设置</span><br><span class="line">		con.header(&quot;Accept&quot;, &quot;*/*&quot;);</span><br><span class="line">		con.header(&quot;User-Agent&quot;,</span><br><span class="line">				&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&quot;);</span><br><span class="line">		if (StringUtils.isNotEmpty(cookie)) &#123;</span><br><span class="line">			// cookie设置</span><br><span class="line">			con.header(&quot;Cookie&quot;, cookie);</span><br><span class="line">		&#125;</span><br><span class="line">		return con.get();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 数据合并</span><br><span class="line">	 */</span><br><span class="line">	private static void margeCount(Map&lt;String, Integer&gt; targetMap, Map&lt;String, Integer&gt; addMap) &#123;</span><br><span class="line">		targetMap.put(&quot;北京&quot;, targetMap.get(&quot;北京&quot;) + addMap.get(&quot;Beijing&quot;));</span><br><span class="line">		targetMap.put(&quot;天津&quot;, targetMap.get(&quot;天津&quot;) + addMap.get(&quot;Tianjin&quot;));</span><br><span class="line">		targetMap.put(&quot;上海&quot;, targetMap.get(&quot;上海&quot;) + addMap.get(&quot;Shanghai&quot;));</span><br><span class="line">		targetMap.put(&quot;重庆&quot;, targetMap.get(&quot;重庆&quot;) + addMap.get(&quot;Chongqing&quot;));</span><br><span class="line">		targetMap.put(&quot;河北&quot;, targetMap.get(&quot;河北&quot;) + addMap.get(&quot;Hebei&quot;));</span><br><span class="line">		targetMap.put(&quot;河南&quot;, targetMap.get(&quot;河南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">		targetMap.put(&quot;云南&quot;, targetMap.get(&quot;云南&quot;) + addMap.get(&quot;Yunnan&quot;));</span><br><span class="line">		targetMap.put(&quot;辽宁&quot;, targetMap.get(&quot;辽宁&quot;) + addMap.get(&quot;Liaoning&quot;));</span><br><span class="line">		targetMap.put(&quot;黑龙江&quot;, targetMap.get(&quot;黑龙&quot;) + addMap.get(&quot;Heilongjiang&quot;));</span><br><span class="line">		targetMap.remove(&quot;黑龙&quot;);</span><br><span class="line">		targetMap.put(&quot;湖南&quot;, targetMap.get(&quot;湖南&quot;) + addMap.get(&quot;Hunan&quot;));</span><br><span class="line">		targetMap.put(&quot;安徽&quot;, targetMap.get(&quot;安徽&quot;) + addMap.get(&quot;Anhui&quot;));</span><br><span class="line">		targetMap.put(&quot;山东&quot;, targetMap.get(&quot;山东&quot;) + addMap.get(&quot;Shandong&quot;));</span><br><span class="line">		targetMap.put(&quot;新疆&quot;, targetMap.get(&quot;新疆&quot;) + addMap.get(&quot;Xinjiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江苏&quot;, targetMap.get(&quot;江苏&quot;) + addMap.get(&quot;Jiangsu&quot;));</span><br><span class="line">		targetMap.put(&quot;浙江&quot;, targetMap.get(&quot;浙江&quot;) + addMap.get(&quot;Zhejiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江西&quot;, targetMap.get(&quot;江西&quot;) + addMap.get(&quot;Jiangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;湖北&quot;, targetMap.get(&quot;湖北&quot;) + addMap.get(&quot;Hubei&quot;));</span><br><span class="line">		targetMap.put(&quot;广西&quot;, targetMap.get(&quot;广西&quot;) + addMap.get(&quot;Guangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;甘肃&quot;, targetMap.get(&quot;甘肃&quot;) + addMap.get(&quot;Gansu&quot;));</span><br><span class="line">		targetMap.put(&quot;山西&quot;, targetMap.get(&quot;山西&quot;) + addMap.get(&quot;Shanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;内蒙古&quot;, targetMap.get(&quot;内蒙&quot;) + addMap.get(&quot;Inner Mongolia Autonomous Region&quot;));</span><br><span class="line">		targetMap.remove(&quot;内蒙&quot;);</span><br><span class="line">		targetMap.put(&quot;陕西&quot;, targetMap.get(&quot;陕西&quot;) + addMap.get(&quot;Shaanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;吉林&quot;, targetMap.get(&quot;吉林&quot;) + addMap.get(&quot;Jilin&quot;));</span><br><span class="line">		targetMap.put(&quot;福建&quot;, targetMap.get(&quot;福建&quot;) + addMap.get(&quot;Fujian&quot;));</span><br><span class="line">		targetMap.put(&quot;贵州&quot;, targetMap.get(&quot;贵州&quot;) + addMap.get(&quot;Guizhou&quot;));</span><br><span class="line">		targetMap.put(&quot;广东&quot;, targetMap.get(&quot;广东&quot;) + addMap.get(&quot;Guangdong&quot;));</span><br><span class="line">		targetMap.put(&quot;青海&quot;, targetMap.get(&quot;青海&quot;) + addMap.get(&quot;Qinghai&quot;));</span><br><span class="line">		targetMap.put(&quot;西藏&quot;, targetMap.get(&quot;西藏&quot;) + addMap.get(&quot;Tibet&quot;));</span><br><span class="line">		targetMap.put(&quot;四川&quot;, targetMap.get(&quot;四川&quot;) + addMap.get(&quot;Sichuan&quot;));</span><br><span class="line">		targetMap.put(&quot;宁夏&quot;, targetMap.get(&quot;宁夏&quot;) + addMap.get(&quot;Ningxia Hui Autonomous Region&quot;));</span><br><span class="line">		targetMap.put(&quot;海南&quot;, targetMap.get(&quot;海南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据生成的文本替换Echart的数据，展示效果如下。<br><img src="/img/20200402/2.png" alt><br><a href="https://xuchunlei.top/ipDistributionMap" target="_blank">IP地址分布地图Echarts代码页面</a></p>
+<p><img src="/img/20200402/3.png" alt><br><a href="https://xuchunlei.top/ipDistributionPie" target="_blank">IP地址分布饼状图Echarts代码页面</a></p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>IP</tag>
+        <tag>Echarts</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>IP地址分布分析(国内)·叄</title>
     <url>/2020/05/13/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90-%E5%9B%BD%E5%86%85-%C2%B7%E5%8F%84/</url>
     <content><![CDATA[<h2 id="IP地址分布分析-国内-·叄"><a href="#IP地址分布分析-国内-·叄" class="headerlink" title="IP地址分布分析(国内)·叄"></a>IP地址分布分析(国内)·叄</h2><p><em>最近碰上IP地址数据量百万级的，原来的两套方案根本不能用，于是乎就有了叄。工作可用→工作用</em></p>
@@ -198,85 +215,6 @@
         <tag>Java</tag>
         <tag>IP</tag>
         <tag>Echarts</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Markdown参考</title>
-    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
-    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-
-<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
-
-<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
-
-<hr>
-<hr>
-<hr>
-<hr>
-<hr>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
-<p>第一层嵌套</p>
-<blockquote>
-<ul>
-<li>第二层嵌套1（无序列表）</li>
-<li>第二层嵌套2（无序列表）</li>
-</ul>
-</blockquote>
-</blockquote>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>无序列表一</li>
-<li>无序列表二<ul>
-<li>无序嵌套列表二-1</li>
-<li>无序嵌套列表二-2</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li>有序列表一</li>
-<li>有序列表二</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
-
-<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>默认</th>
-<th align="left">左对齐</th>
-<th align="center">居中</th>
-<th align="right">右对齐</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>单元格</td>
-<td align="left">单元格</td>
-<td align="center"><code>单元格</code></td>
-<td align="right">单元格</td>
-</tr>
-</tbody></table>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
-
-<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
-<pre><code>console.log(&quot;Hello world 空格&quot;)
-console.log(&quot;Hello world 空格&quot;)
-
-console.log(&quot;Hello world Tab&quot;)
-console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>Markdown</tag>
       </tags>
   </entry>
   <entry>
@@ -380,23 +318,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>IP地址分布分析(国内)</title>
-    <url>/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/</url>
-    <content><![CDATA[<h2 id="IP地址分布分析-国内"><a href="#IP地址分布分析-国内" class="headerlink" title="IP地址分布分析(国内)"></a>IP地址分布分析(国内)</h2><p><em>因为工作的原因，简单整理了一下，效率极低，娱乐用</em></p>
-<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为第一次做这个，没弄数据库和根据ip段来判断，直接请求<a href="https://ip.cn/" target="_blank" rel="noopener">ip.cn</a>，通过jsoup来获取页面数据。发现GeoIP数据不是很准确，基本以页面<code>所在地理位置</code>的数据为准，在获取不到准确数据的情况下参考页面<code>GeoIP</code>数据。<br>请求是最影响效率的地方，基本每秒请求一次，偶尔会报错（超时，520之类），毕竟是免费的。实际上分析的时候用的多线程（500条为一组），把没获取全的数据单独执行获取，然后在Excel表格里手动修改错误数据，然后整理计算。<br><img src="/img/20200402/1.png" alt></p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>后来（工作完成后）根据获取数据的规律，简单写了下（渣）代码，基本就是读取ip，获取ip所在省份，ip所在省份加一。执行错误，或者有无法识别的IP（国外，本地，特殊IP等）需要手动判断。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.net.SocketException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import org.apache.commons.lang3.StringUtils;</span><br><span class="line">import org.jsoup.Connection;</span><br><span class="line">import org.jsoup.Jsoup;</span><br><span class="line">import org.jsoup.nodes.Document;</span><br><span class="line">import org.jsoup.select.Elements;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreater &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line">	</span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		Map&lt;String, Integer&gt; provinceGeoIpMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceGeoIpMap.put(&quot;Beijing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tianjin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Chongqing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hebei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Yunnan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Liaoning&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Heilongjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hunan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Anhui&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shandong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Xinjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangsu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Zhejiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hubei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Gansu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanxi&quot;, 0); // 山西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Inner Mongolia Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shaanxi&quot;, 0); // 陕西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jilin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Fujian&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guizhou&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangdong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Qinghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tibet&quot;, 0); // 西藏</span><br><span class="line">		provinceGeoIpMap.put(&quot;Sichuan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Ningxia Hui Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// 获取ip.cn的页面内容</span><br><span class="line">				Document html = httpGet(&quot;https://ip.cn/?ip=&quot; + ips[i], null);</span><br><span class="line">				Elements pelements = html.getElementsByClass(&quot;well&quot;).get(0).getElementsByTag(&quot;p&quot;);</span><br><span class="line">				// 所在地理位置</span><br><span class="line">				String addresStr = pelements.get(1).getElementsByTag(&quot;code&quot;).text();</span><br><span class="line">				String provinceAddresStr = addresStr.substring(0, 2);</span><br><span class="line">				// GeoIP(局域网以及特殊ip没有)</span><br><span class="line">				String geoIpStr = pelements.size() == 3 ? pelements.get(2).getElementsByTag(&quot;code&quot;).text() : &quot;&quot;;</span><br><span class="line">				String[] geoIpAry = geoIpStr.split(&quot;, &quot;);</span><br><span class="line">				String provinceGeoIpStr = 1 &lt; geoIpAry.length ? geoIpAry[geoIpAry.length - 2]</span><br><span class="line">						: 0 &lt; geoIpAry.length ? geoIpAry[0] : &quot;&quot;;</span><br><span class="line"></span><br><span class="line">				System.out.println(i + &quot;\t&quot; + provinceAddresStr + &quot;\t&quot; + provinceGeoIpStr);</span><br><span class="line">				// 根据所在地理位置判断</span><br><span class="line">				if (provinceMap.get(provinceAddresStr) == null) &#123;</span><br><span class="line">					// 根据GeoIP判断</span><br><span class="line">					if (provinceGeoIpMap.get(provinceGeoIpStr) == null) &#123;</span><br><span class="line">						// 其他</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\t&quot; + addresStr + &quot;\t&quot; + geoIpStr + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceGeoIpMap.put(provinceGeoIpStr, provinceGeoIpMap.get(provinceGeoIpStr) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					provinceMap.put(provinceAddresStr, provinceMap.get(provinceAddresStr) + 1);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (SocketException se) &#123;</span><br><span class="line">			System.out.println(&quot;连接超时，请从最后的下标继续执行，然后手动合并数据。&quot;);</span><br><span class="line">			se.printStackTrace();</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				margeCount(provinceMap, provinceGeoIpMap);</span><br><span class="line">				StringBuffer result = new StringBuffer();</span><br><span class="line">				provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">					result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">				&#125;);</span><br><span class="line">				System.out.println(result.toString());</span><br><span class="line">				System.out.println(other);</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * httGet请求</span><br><span class="line">	 */</span><br><span class="line">	private static Document httpGet(String url, String cookie) throws IOException &#123;</span><br><span class="line">		Connection con = Jsoup.connect(url);</span><br><span class="line">		// 请求头设置</span><br><span class="line">		con.header(&quot;Accept&quot;, &quot;*/*&quot;);</span><br><span class="line">		con.header(&quot;User-Agent&quot;,</span><br><span class="line">				&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&quot;);</span><br><span class="line">		if (StringUtils.isNotEmpty(cookie)) &#123;</span><br><span class="line">			// cookie设置</span><br><span class="line">			con.header(&quot;Cookie&quot;, cookie);</span><br><span class="line">		&#125;</span><br><span class="line">		return con.get();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 数据合并</span><br><span class="line">	 */</span><br><span class="line">	private static void margeCount(Map&lt;String, Integer&gt; targetMap, Map&lt;String, Integer&gt; addMap) &#123;</span><br><span class="line">		targetMap.put(&quot;北京&quot;, targetMap.get(&quot;北京&quot;) + addMap.get(&quot;Beijing&quot;));</span><br><span class="line">		targetMap.put(&quot;天津&quot;, targetMap.get(&quot;天津&quot;) + addMap.get(&quot;Tianjin&quot;));</span><br><span class="line">		targetMap.put(&quot;上海&quot;, targetMap.get(&quot;上海&quot;) + addMap.get(&quot;Shanghai&quot;));</span><br><span class="line">		targetMap.put(&quot;重庆&quot;, targetMap.get(&quot;重庆&quot;) + addMap.get(&quot;Chongqing&quot;));</span><br><span class="line">		targetMap.put(&quot;河北&quot;, targetMap.get(&quot;河北&quot;) + addMap.get(&quot;Hebei&quot;));</span><br><span class="line">		targetMap.put(&quot;河南&quot;, targetMap.get(&quot;河南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">		targetMap.put(&quot;云南&quot;, targetMap.get(&quot;云南&quot;) + addMap.get(&quot;Yunnan&quot;));</span><br><span class="line">		targetMap.put(&quot;辽宁&quot;, targetMap.get(&quot;辽宁&quot;) + addMap.get(&quot;Liaoning&quot;));</span><br><span class="line">		targetMap.put(&quot;黑龙江&quot;, targetMap.get(&quot;黑龙&quot;) + addMap.get(&quot;Heilongjiang&quot;));</span><br><span class="line">		targetMap.remove(&quot;黑龙&quot;);</span><br><span class="line">		targetMap.put(&quot;湖南&quot;, targetMap.get(&quot;湖南&quot;) + addMap.get(&quot;Hunan&quot;));</span><br><span class="line">		targetMap.put(&quot;安徽&quot;, targetMap.get(&quot;安徽&quot;) + addMap.get(&quot;Anhui&quot;));</span><br><span class="line">		targetMap.put(&quot;山东&quot;, targetMap.get(&quot;山东&quot;) + addMap.get(&quot;Shandong&quot;));</span><br><span class="line">		targetMap.put(&quot;新疆&quot;, targetMap.get(&quot;新疆&quot;) + addMap.get(&quot;Xinjiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江苏&quot;, targetMap.get(&quot;江苏&quot;) + addMap.get(&quot;Jiangsu&quot;));</span><br><span class="line">		targetMap.put(&quot;浙江&quot;, targetMap.get(&quot;浙江&quot;) + addMap.get(&quot;Zhejiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江西&quot;, targetMap.get(&quot;江西&quot;) + addMap.get(&quot;Jiangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;湖北&quot;, targetMap.get(&quot;湖北&quot;) + addMap.get(&quot;Hubei&quot;));</span><br><span class="line">		targetMap.put(&quot;广西&quot;, targetMap.get(&quot;广西&quot;) + addMap.get(&quot;Guangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;甘肃&quot;, targetMap.get(&quot;甘肃&quot;) + addMap.get(&quot;Gansu&quot;));</span><br><span class="line">		targetMap.put(&quot;山西&quot;, targetMap.get(&quot;山西&quot;) + addMap.get(&quot;Shanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;内蒙古&quot;, targetMap.get(&quot;内蒙&quot;) + addMap.get(&quot;Inner Mongolia Autonomous Region&quot;));</span><br><span class="line">		targetMap.remove(&quot;内蒙&quot;);</span><br><span class="line">		targetMap.put(&quot;陕西&quot;, targetMap.get(&quot;陕西&quot;) + addMap.get(&quot;Shaanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;吉林&quot;, targetMap.get(&quot;吉林&quot;) + addMap.get(&quot;Jilin&quot;));</span><br><span class="line">		targetMap.put(&quot;福建&quot;, targetMap.get(&quot;福建&quot;) + addMap.get(&quot;Fujian&quot;));</span><br><span class="line">		targetMap.put(&quot;贵州&quot;, targetMap.get(&quot;贵州&quot;) + addMap.get(&quot;Guizhou&quot;));</span><br><span class="line">		targetMap.put(&quot;广东&quot;, targetMap.get(&quot;广东&quot;) + addMap.get(&quot;Guangdong&quot;));</span><br><span class="line">		targetMap.put(&quot;青海&quot;, targetMap.get(&quot;青海&quot;) + addMap.get(&quot;Qinghai&quot;));</span><br><span class="line">		targetMap.put(&quot;西藏&quot;, targetMap.get(&quot;西藏&quot;) + addMap.get(&quot;Tibet&quot;));</span><br><span class="line">		targetMap.put(&quot;四川&quot;, targetMap.get(&quot;四川&quot;) + addMap.get(&quot;Sichuan&quot;));</span><br><span class="line">		targetMap.put(&quot;宁夏&quot;, targetMap.get(&quot;宁夏&quot;) + addMap.get(&quot;Ningxia Hui Autonomous Region&quot;));</span><br><span class="line">		targetMap.put(&quot;海南&quot;, targetMap.get(&quot;海南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据生成的文本替换Echart的数据，展示效果如下。<br><img src="/img/20200402/2.png" alt><br><a href="https://xuchunlei.top/ipDistributionMap" target="_blank">IP地址分布地图Echarts代码页面</a></p>
-<p><img src="/img/20200402/3.png" alt><br><a href="https://xuchunlei.top/ipDistributionPie" target="_blank">IP地址分布饼状图Echarts代码页面</a></p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-        <tag>IP</tag>
-        <tag>Echarts</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>IP地址分布分析(国内)·续</title>
     <url>/2020/04/17/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90-%E5%9B%BD%E5%86%85-%C2%B7%E7%BB%AD/</url>
     <content><![CDATA[<h2 id="IP地址分布分析-国内-·续"><a href="#IP地址分布分析-国内-·续" class="headerlink" title="IP地址分布分析(国内)·续"></a>IP地址分布分析(国内)·续</h2><p><em>今天和同事探讨了准确性的问题，觉得地图工具的IP地址判断最为准确，于是改写了原来的程序。因为是调用API，效率大幅提升，工作可用</em></p>
@@ -413,227 +334,82 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>MySQL购买间隔时间计算</title>
-    <url>/2020/08/27/MySQL%E8%B4%AD%E4%B9%B0%E9%97%B4%E9%9A%94%E6%97%B6%E9%97%B4%E8%AE%A1%E7%AE%97/</url>
-    <content><![CDATA[<p><em>因为一些原因被要求按照客户消费金额分类披露客户购买间隔时间，并对其合理性进行补充分析。网上查出来的方法都是你抄我的我抄你的，于是乎自己开始思考如何去实现。</em></p>
-<h3 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#MySQL80018</span><br><span class="line"></span><br><span class="line">CREATE TABLE `order_info`  (</span><br><span class="line">  `id` bigint(20) NOT NULL,</span><br><span class="line">  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT &apos;用户名&apos;,</span><br><span class="line">  `pay_time` datetime(0) NULL DEFAULT NULL COMMENT &apos;付款时间&apos;,</span><br><span class="line">  PRIMARY KEY (`id`) USING BTREE</span><br><span class="line">) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = &apos;订单信息&apos; ROW_FORMAT = Dynamic;</span><br><span class="line"></span><br><span class="line">INSERT INTO `order_info` VALUES (1, &apos;张三&apos;, &apos;2020-01-01 12:50:01&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (2, &apos;李四&apos;, &apos;2020-01-02 12:46:38&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (3, &apos;李四&apos;, &apos;2020-01-04 08:23:06&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (4, &apos;王五&apos;, &apos;2020-02-06 09:47:42&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (5, &apos;王五&apos;, &apos;2020-02-07 18:42:23&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (6, &apos;王五&apos;, &apos;2020-03-12 20:22:45&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (7, &apos;赵六&apos;, &apos;2020-08-01 10:36:49&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (8, &apos;赵六&apos;, &apos;2020-08-04 12:37:09&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (9, &apos;赵六&apos;, &apos;2020-08-14 06:20:33&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (10, &apos;赵六&apos;, &apos;2020-08-27 10:38:02&apos;);</span><br></pre></td></tr></table></figure>
+    <title>Markdown参考</title>
+    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
+    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
 
-<h3 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h3><blockquote>
-<p>可能不是最优思路，以下是我的实现方法。订单间隔时间只比较同一用户的订单。</p>
-</blockquote>
-<p>将原来的表需要的字段查出，添加行号字段，按照名字和时间升序排序，当作临时表用。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	@r := @r + 1 AS &apos;r&apos;,</span><br><span class="line">	`name`,</span><br><span class="line">	pay_time</span><br><span class="line">FROM</span><br><span class="line">	order_info,</span><br><span class="line">	( SELECT @r := 0 ) t</span><br><span class="line">ORDER BY</span><br><span class="line">	`name`,</span><br><span class="line">	pay_time</span><br></pre></td></tr></table></figure>
+<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
 
-<table>
-<thead>
-<tr>
-<th align="center">r</th>
-<th align="center">name</th>
-<th align="center">pay_time</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">1</td>
-<td align="center">张三</td>
-<td align="center">2020-01-01 12:50:01</td>
-</tr>
-<tr>
-<td align="center">2</td>
-<td align="center">李四</td>
-<td align="center">2020-01-02 12:46:38</td>
-</tr>
-<tr>
-<td align="center">3</td>
-<td align="center">李四</td>
-<td align="center">2020-01-04 08:23:06</td>
-</tr>
-<tr>
-<td align="center">4</td>
-<td align="center">王五</td>
-<td align="center">2020-02-06 09:47:42</td>
-</tr>
-<tr>
-<td align="center">5</td>
-<td align="center">王五</td>
-<td align="center">2020-02-07 18:42:23</td>
-</tr>
-<tr>
-<td align="center">6</td>
-<td align="center">王五</td>
-<td align="center">2020-03-12 20:22:45</td>
-</tr>
-<tr>
-<td align="center">7</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-01 10:36:49</td>
-</tr>
-<tr>
-<td align="center">8</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-04 12:37:09</td>
-</tr>
-<tr>
-<td align="center">9</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-14 06:20:33</td>
-</tr>
-<tr>
-<td align="center">10</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-27 10:38:02</td>
-</tr>
-</tbody></table>
-<p>将上面的临时表左连接自己（@r要换名字，不然无法查出后面的数据），连接条件为名字相同，序号错位一格。只有用户有两单以上的时候，才会出现后面的数据。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	*</span><br><span class="line">FROM</span><br><span class="line">	(</span><br><span class="line">	SELECT</span><br><span class="line">		@r := @r + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @r := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp</span><br><span class="line">	LEFT JOIN (</span><br><span class="line">	SELECT</span><br><span class="line">		@rownum := @rownum + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @rownum := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp2 ON temp.r = temp2.r + 1</span><br><span class="line">	AND temp.`name` = temp2.`name`</span><br></pre></td></tr></table></figure>
+<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
 
-<table>
-<thead>
-<tr>
-<th align="center">r</th>
-<th align="center">name</th>
-<th align="center">pay_time</th>
-<th align="center">r(1)</th>
-<th align="center">name(1)</th>
-<th align="center">pay_time(1)</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">1</td>
-<td align="center">张三</td>
-<td align="center">2020-01-01 12:50:01</td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">2</td>
-<td align="center">李四</td>
-<td align="center">2020-01-02 12:46:38</td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">3</td>
-<td align="center">李四</td>
-<td align="center">2020-01-04 08:23:06</td>
-<td align="center">2</td>
-<td align="center">李四</td>
-<td align="center">2020-01-02 12:46:38</td>
-</tr>
-<tr>
-<td align="center">4</td>
-<td align="center">王五</td>
-<td align="center">2020-02-06 09:47:42</td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">5</td>
-<td align="center">王五</td>
-<td align="center">2020-02-07 18:42:23</td>
-<td align="center">4</td>
-<td align="center">王五</td>
-<td align="center">2020-02-06 09:47:42</td>
-</tr>
-<tr>
-<td align="center">6</td>
-<td align="center">王五</td>
-<td align="center">2020-03-12 20:22:45</td>
-<td align="center">5</td>
-<td align="center">王五</td>
-<td align="center">2020-02-07 18:42:23</td>
-</tr>
-<tr>
-<td align="center">7</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-01 10:36:49</td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">8</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-04 12:37:09</td>
-<td align="center">7</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-01 10:36:49</td>
-</tr>
-<tr>
-<td align="center">9</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-14 06:20:33</td>
-<td align="center">8</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-04 12:37:09</td>
-</tr>
-<tr>
-<td align="center">10</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-27 10:38:02</td>
-<td align="center">9</td>
-<td align="center">赵六</td>
-<td align="center">2020-08-14 06:20:33</td>
-</tr>
-</tbody></table>
-<p>过滤掉空数据，使用TIMESTAMPDIFF函数计算时间间隔</p>
+<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
+
+<hr>
+<hr>
+<hr>
+<hr>
+<hr>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
+
 <blockquote>
-<p>TIMESTAMPDIFF(unit,begin,end);<br><code>unit</code>可以是<code>MICROSECOND</code>,<code>SECOND</code>,<code>MINUTE</code>,<code>HOUR</code>,<code>DAY</code>,<code>WEEK</code>,<code>MONTH</code>,<code>QUARTER</code>,<code>YEAR</code><br><code>begin</code>和<code>end</code>是DATE或DATETIME表达式</p>
+<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
+<p>第一层嵌套</p>
+<blockquote>
+<ul>
+<li>第二层嵌套1（无序列表）</li>
+<li>第二层嵌套2（无序列表）</li>
+</ul>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	temp.`name`,</span><br><span class="line">	temp.pay_time AS afterTime,</span><br><span class="line">	temp2.pay_time AS beforeTime,</span><br><span class="line">	TIMESTAMPDIFF( DAY, temp2.pay_time, temp.pay_time ) AS diff</span><br><span class="line">FROM</span><br><span class="line">	(</span><br><span class="line">	SELECT</span><br><span class="line">		@r := @r + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @r := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp</span><br><span class="line">	LEFT JOIN (</span><br><span class="line">	SELECT</span><br><span class="line">		@rownum := @rownum + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @rownum := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp2 ON temp.r = temp2.r + 1</span><br><span class="line">	AND temp.`name` = temp2.`name`</span><br><span class="line">WHERE</span><br><span class="line">	temp2.pay_time IS NOT NULL</span><br></pre></td></tr></table></figure>
+</blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>无序列表一</li>
+<li>无序列表二<ul>
+<li>无序嵌套列表二-1</li>
+<li>无序嵌套列表二-2</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>有序列表一</li>
+<li>有序列表二</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
 
 <table>
 <thead>
 <tr>
-<th align="center">name</th>
-<th align="center">afterTime</th>
-<th align="center">beforeTime</th>
-<th align="center">diff</th>
+<th>默认</th>
+<th align="left">左对齐</th>
+<th align="center">居中</th>
+<th align="right">右对齐</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="center">李四</td>
-<td align="center">2020-01-04 08:23:06</td>
-<td align="center">2020-01-02 12:46:38</td>
-<td align="center">1</td>
-</tr>
-<tr>
-<td align="center">王五</td>
-<td align="center">2020-02-07 18:42:23</td>
-<td align="center">2020-02-06 09:47:42</td>
-<td align="center">1</td>
-</tr>
-<tr>
-<td align="center">王五</td>
-<td align="center">2020-03-12 20:22:45</td>
-<td align="center">2020-02-07 18:42:23</td>
-<td align="center">34</td>
-</tr>
-<tr>
-<td align="center">赵六</td>
-<td align="center">2020-08-04 12:37:09</td>
-<td align="center">2020-08-01 10:36:49</td>
-<td align="center">3</td>
-</tr>
-<tr>
-<td align="center">赵六</td>
-<td align="center">2020-08-14 06:20:33</td>
-<td align="center">2020-08-04 12:37:09</td>
-<td align="center">9</td>
-</tr>
-<tr>
-<td align="center">赵六</td>
-<td align="center">2020-08-27 10:38:02</td>
-<td align="center">2020-08-14 06:20:33</td>
-<td align="center">13</td>
+<td>单元格</td>
+<td align="left">单元格</td>
+<td align="center"><code>单元格</code></td>
+<td align="right">单元格</td>
 </tr>
 </tbody></table>
-<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><p>具体sql要根据自己的业务需求来写，实际使用效率在接受范围内吧，不是很快。<br>比如我最后写的sql就是一坨……<br><img src="/img/20200827/1.png" alt></p>
-]]></content>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
+<pre><code>console.log(&quot;Hello world 空格&quot;)
+console.log(&quot;Hello world 空格&quot;)
+
+console.log(&quot;Hello world Tab&quot;)
+console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
       <tags>
-        <tag>MySQL</tag>
+        <tag>Markdown</tag>
       </tags>
   </entry>
   <entry>
@@ -898,6 +674,230 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
+    <title>MySQL购买间隔时间计算</title>
+    <url>/2020/08/27/MySQL%E8%B4%AD%E4%B9%B0%E9%97%B4%E9%9A%94%E6%97%B6%E9%97%B4%E8%AE%A1%E7%AE%97/</url>
+    <content><![CDATA[<p><em>因为一些原因被要求按照客户消费金额分类披露客户购买间隔时间，并对其合理性进行补充分析。网上查出来的方法都是你抄我的我抄你的，于是乎自己开始思考如何去实现。</em></p>
+<h3 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#MySQL80018</span><br><span class="line"></span><br><span class="line">CREATE TABLE `order_info`  (</span><br><span class="line">  `id` bigint(20) NOT NULL,</span><br><span class="line">  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT &apos;用户名&apos;,</span><br><span class="line">  `pay_time` datetime(0) NULL DEFAULT NULL COMMENT &apos;付款时间&apos;,</span><br><span class="line">  PRIMARY KEY (`id`) USING BTREE</span><br><span class="line">) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = &apos;订单信息&apos; ROW_FORMAT = Dynamic;</span><br><span class="line"></span><br><span class="line">INSERT INTO `order_info` VALUES (1, &apos;张三&apos;, &apos;2020-01-01 12:50:01&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (2, &apos;李四&apos;, &apos;2020-01-02 12:46:38&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (3, &apos;李四&apos;, &apos;2020-01-04 08:23:06&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (4, &apos;王五&apos;, &apos;2020-02-06 09:47:42&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (5, &apos;王五&apos;, &apos;2020-02-07 18:42:23&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (6, &apos;王五&apos;, &apos;2020-03-12 20:22:45&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (7, &apos;赵六&apos;, &apos;2020-08-01 10:36:49&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (8, &apos;赵六&apos;, &apos;2020-08-04 12:37:09&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (9, &apos;赵六&apos;, &apos;2020-08-14 06:20:33&apos;);</span><br><span class="line">INSERT INTO `order_info` VALUES (10, &apos;赵六&apos;, &apos;2020-08-27 10:38:02&apos;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h3><blockquote>
+<p>可能不是最优思路，以下是我的实现方法。订单间隔时间只比较同一用户的订单。</p>
+</blockquote>
+<p>将原来的表需要的字段查出，添加行号字段，按照名字和时间升序排序，当作临时表用。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	@r := @r + 1 AS &apos;r&apos;,</span><br><span class="line">	`name`,</span><br><span class="line">	pay_time</span><br><span class="line">FROM</span><br><span class="line">	order_info,</span><br><span class="line">	( SELECT @r := 0 ) t</span><br><span class="line">ORDER BY</span><br><span class="line">	`name`,</span><br><span class="line">	pay_time</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">r</th>
+<th align="center">name</th>
+<th align="center">pay_time</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">张三</td>
+<td align="center">2020-01-01 12:50:01</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">李四</td>
+<td align="center">2020-01-02 12:46:38</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">李四</td>
+<td align="center">2020-01-04 08:23:06</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">王五</td>
+<td align="center">2020-02-06 09:47:42</td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="center">王五</td>
+<td align="center">2020-02-07 18:42:23</td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="center">王五</td>
+<td align="center">2020-03-12 20:22:45</td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-01 10:36:49</td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-04 12:37:09</td>
+</tr>
+<tr>
+<td align="center">9</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-14 06:20:33</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-27 10:38:02</td>
+</tr>
+</tbody></table>
+<p>将上面的临时表左连接自己（@r要换名字，不然无法查出后面的数据），连接条件为名字相同，序号错位一格。只有用户有两单以上的时候，才会出现后面的数据。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	*</span><br><span class="line">FROM</span><br><span class="line">	(</span><br><span class="line">	SELECT</span><br><span class="line">		@r := @r + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @r := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp</span><br><span class="line">	LEFT JOIN (</span><br><span class="line">	SELECT</span><br><span class="line">		@rownum := @rownum + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @rownum := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp2 ON temp.r = temp2.r + 1</span><br><span class="line">	AND temp.`name` = temp2.`name`</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">r</th>
+<th align="center">name</th>
+<th align="center">pay_time</th>
+<th align="center">r(1)</th>
+<th align="center">name(1)</th>
+<th align="center">pay_time(1)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">张三</td>
+<td align="center">2020-01-01 12:50:01</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">李四</td>
+<td align="center">2020-01-02 12:46:38</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">李四</td>
+<td align="center">2020-01-04 08:23:06</td>
+<td align="center">2</td>
+<td align="center">李四</td>
+<td align="center">2020-01-02 12:46:38</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">王五</td>
+<td align="center">2020-02-06 09:47:42</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="center">王五</td>
+<td align="center">2020-02-07 18:42:23</td>
+<td align="center">4</td>
+<td align="center">王五</td>
+<td align="center">2020-02-06 09:47:42</td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="center">王五</td>
+<td align="center">2020-03-12 20:22:45</td>
+<td align="center">5</td>
+<td align="center">王五</td>
+<td align="center">2020-02-07 18:42:23</td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-01 10:36:49</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-04 12:37:09</td>
+<td align="center">7</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-01 10:36:49</td>
+</tr>
+<tr>
+<td align="center">9</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-14 06:20:33</td>
+<td align="center">8</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-04 12:37:09</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-27 10:38:02</td>
+<td align="center">9</td>
+<td align="center">赵六</td>
+<td align="center">2020-08-14 06:20:33</td>
+</tr>
+</tbody></table>
+<p>过滤掉空数据，使用TIMESTAMPDIFF函数计算时间间隔</p>
+<blockquote>
+<p>TIMESTAMPDIFF(unit,begin,end);<br><code>unit</code>可以是<code>MICROSECOND</code>,<code>SECOND</code>,<code>MINUTE</code>,<code>HOUR</code>,<code>DAY</code>,<code>WEEK</code>,<code>MONTH</code>,<code>QUARTER</code>,<code>YEAR</code><br><code>begin</code>和<code>end</code>是DATE或DATETIME表达式</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	temp.`name`,</span><br><span class="line">	temp.pay_time AS afterTime,</span><br><span class="line">	temp2.pay_time AS beforeTime,</span><br><span class="line">	TIMESTAMPDIFF( DAY, temp2.pay_time, temp.pay_time ) AS diff</span><br><span class="line">FROM</span><br><span class="line">	(</span><br><span class="line">	SELECT</span><br><span class="line">		@r := @r + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @r := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp</span><br><span class="line">	LEFT JOIN (</span><br><span class="line">	SELECT</span><br><span class="line">		@rownum := @rownum + 1 AS &apos;r&apos;,</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	FROM</span><br><span class="line">		order_info,</span><br><span class="line">		( SELECT @rownum := 0 ) t</span><br><span class="line">	ORDER BY</span><br><span class="line">		`name`,</span><br><span class="line">		pay_time</span><br><span class="line">	) temp2 ON temp.r = temp2.r + 1</span><br><span class="line">	AND temp.`name` = temp2.`name`</span><br><span class="line">WHERE</span><br><span class="line">	temp2.pay_time IS NOT NULL</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">name</th>
+<th align="center">afterTime</th>
+<th align="center">beforeTime</th>
+<th align="center">diff</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">李四</td>
+<td align="center">2020-01-04 08:23:06</td>
+<td align="center">2020-01-02 12:46:38</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">王五</td>
+<td align="center">2020-02-07 18:42:23</td>
+<td align="center">2020-02-06 09:47:42</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">王五</td>
+<td align="center">2020-03-12 20:22:45</td>
+<td align="center">2020-02-07 18:42:23</td>
+<td align="center">34</td>
+</tr>
+<tr>
+<td align="center">赵六</td>
+<td align="center">2020-08-04 12:37:09</td>
+<td align="center">2020-08-01 10:36:49</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">赵六</td>
+<td align="center">2020-08-14 06:20:33</td>
+<td align="center">2020-08-04 12:37:09</td>
+<td align="center">9</td>
+</tr>
+<tr>
+<td align="center">赵六</td>
+<td align="center">2020-08-27 10:38:02</td>
+<td align="center">2020-08-14 06:20:33</td>
+<td align="center">13</td>
+</tr>
+</tbody></table>
+<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><p>具体sql要根据自己的业务需求来写，实际使用效率在接受范围内吧，不是很快。<br>比如我最后写的sql就是一坨……<br><img src="/img/20200827/1.png" alt></p>
+]]></content>
+      <tags>
+        <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Vue element-china-area-data 数据源修改</title>
     <url>/2020/06/19/Vue-element-china-area-data-%E6%95%B0%E6%8D%AE%E6%BA%90%E4%BF%AE%E6%94%B9/</url>
     <content><![CDATA[<p><em>Vue前台需要省市区三级联动，但是element-china-area-data的regionData数据太旧了，而且有部分数据不符合现有系统的逻辑。于是乎……</em></p>
@@ -923,25 +923,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       <tags>
         <tag>Java</tag>
         <tag>Vue.js</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>初识Flutter-安装和环境配置</title>
-    <url>/2021/09/13/%E5%88%9D%E8%AF%86Flutter-%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<p><em>新项目需要用到Flutter，于是开始学习，先搞下环境，写个Hello World！</em></p>
-<h3 id="Flutter介绍"><a href="#Flutter介绍" class="headerlink" title="Flutter介绍"></a>Flutter介绍</h3><p>Flutter是Google开源的UI工具包，帮助开发者通过一套代码库高效构建多平台精美应用，支持移动、Web、桌面和嵌入式平台。以上摘自<a href="https://flutter.cn/" target="_blank" rel="noopener">Flutter官方</a>。刚开始学习可以参考<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>。</p>
-<h3 id="安装和环境配置-Win10-64位"><a href="#安装和环境配置-Win10-64位" class="headerlink" title="安装和环境配置(Win10 64位)"></a>安装和环境配置(Win10 64位)</h3><p>获取最新的Flutter SDK压缩包，这里版本是2.5.0，要查看其他发行通道和以往的版本，请参阅<a href="https://flutter.cn/docs/development/tools/sdk/releases" target="_blank" rel="noopener">SDK版本列表</a>页面。这里解压到D盘根目录，并配置环境变量path，添加flutter\bin目录。命令提示符窗口运行<code>flutter doctor</code>检测运行环境（这里出错了一次，不过不影响结果，两次都是）提示缺少Android SDK。<img src="/img/20210913/1.png" alt></p>
-<h4 id="配置Android开发环境"><a href="#配置Android开发环境" class="headerlink" title="配置Android开发环境"></a>配置Android开发环境</h4><p>现在<a href="https://developer.android.google.cn" target="_blank" rel="noopener">Android开发官网</a>里Android SDK集成到Android Studio，直接下载Android Studio即可。之前想单独装Android SDK的，15年开始就没有更新了，结果各种错误，最后放弃。</p>
-<blockquote>
-<p><del>单独装Android SDK失败过程，请忽略<br>这里直接从<a href="https://www.androiddevtools.cn/" target="_blank" rel="noopener">AndroidDevTools</a>单独下载Android SDK压缩包。依旧解压到D盘根目录，文件夹改名为android-sdk。启动SDK Manager.exe，默认选项，直接单击Install XX Packages按钮，弹出框中选中Accept License单选框（每个Packages大项都要点），然后单机Install按钮开始安装，下载需要一段时间。新建环境变量ANDROID_SDK_ROOT到android-sdk目录。配置环境变量path添加%ANDROID_SDK_ROOT%\tools和%ANDROID_SDK_ROOT%\platform-tools两条记录。命令提示符窗口执行<code>adb --version</code>出现版本号表示Android SDK环境安装成功。<br>这里有个问题，就是获取的版本不是最新的，只到29，在SDK Manager.exe貌似没法再提升版本了，开发要用API30和31的，也没有。在<code>sdkmanager --list</code>中是能找到新的版本的，通过<code>sdkmanager --update</code>能把Android SDK Platform-tools 升级到最新的31.0.3。通过<code>sdkmanager &quot;build-tools;30.0.3&quot; &quot;platforms;android-30&quot;</code>和<code>sdkmanager &quot;build-tools;31.0.0&quot; &quot;platforms;android-31&quot;</code>更新编译和开发调试工具。<br>命令提示符窗口运行<code>flutter doctor</code>检测运行环境，新错误cmdline-tools component is missing。命令提示符窗口连接到android-sdk\tools\bin目录，执行<code>sdkmanager &quot;cmdline-tools;latest&quot;</code>安装（Flutter提示多一个–install参数），Accept? (y/N):输入y回车。<br>然后还有一个同意 Android 协议，执行<code>flutter doctor --android-licenses</code>，一路y回车。最后只剩一个[!] Android Studio (not installed)，因为没用Android Studio，忽略。<br>执行AVD Manager.exe创建虚拟设备启动，提示图片没用，明明路径都存在……最后尝试无果，最后放弃，重新去下载了Android Studio</del></p>
-</blockquote>
-<p>安装Android Studio，这里把SDK安装路径改为了D盘<br><img src="/img/20210913/2.png" alt><br>安装完成后通过More Actions-SDK Manager来管理Android SDK。模拟器AVD Manager在下面<br><img src="/img/20210913/3.png" alt><br>新建环境变量ANDROID_SDK_ROOT到android-sdk目录。命令提示符窗口执行<code>flutter doctor</code>检测运行环境，提示cmdline-tools component is missing，安装cmdline-tools<br><img src="/img/20210913/4.png" alt><br>同意Android协议：执行<code>flutter doctor --android-licenses</code>，一路y回车，此时执行<code>flutter doctor</code>检测运行环境，全部通过<br><img src="/img/20210913/5.png" alt><br>配置Android模拟器的时候需要自己按需求下载用到的照片（模拟器是真的大，默认用户文件夹，对应C盘吃紧的我雪上加霜。改路径需要新建环境变量ANDROID_ADV_HOME以及删除默认路径.android后新建）<br><img src="/img/20210913/6.png" alt></p>
-<h4 id="编辑工具设定"><a href="#编辑工具设定" class="headerlink" title="编辑工具设定"></a>编辑工具设定</h4><p>Flutter支持Android Studio、IntelliJ、VS Code以及传说中的编辑器Emacs，这里我用的Visual Studio Code（yyds）<br>打开VS Code，Ctrl+Shift+p打开命令面板，输入install选择Install Extensions，扩展搜索输入框中输入flutter选择Flutter并单击Install按钮（会安装Dart插件）。Enabled&gt;Reload Required重新启动 VS Code。命令面板中输入doctor选择 Flutter: Run Flutter Doctor，输出 (OUTPUT) 面板不报错表示安装完成（就是<code>flutter doctor</code>，只不过多个了参数<code>-v</code>）</p>
-<h3 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h3><p>Ctrl+Shift+p打开命令面板，输入flutter，选择Flutter: New Application Project创建项目文件夹。输入项目名称，确定后在项目目录中就会生成main.dart文件。选择要启动的设备，启动（按F5），就能看到自带的示例程序<br><img src="/img/20210913/7.png" alt><br>这里改为“祖传代码”，用chorme启动，效果如下<br><img src="/img/20210913/8.png" alt><br>开发环境搞完就要开始正式学习了，至此文章就水完了，感觉官方<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>的文档更好，要想入坑可以去看看。</p>
-]]></content>
-      <tags>
-        <tag>Flutter</tag>
-        <tag>Android</tag>
       </tags>
   </entry>
   <entry>
@@ -1011,27 +992,22 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>制作一个简单的博客</title>
-    <url>/2019/11/07/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="制作一个简单的博客"><a href="#制作一个简单的博客" class="headerlink" title="制作一个简单的博客"></a>制作一个简单的博客</h1><p><em>没错，说的就是这个，算是第一篇博客文章吧</em></p>
-<p>基于博客框架<a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">Hexo</a>+<a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a>，通过<a href="http://www.markdown.cn/" target="_blank" rel="noopener">Markdown</a>来书写文章。无域名，无服务器，如果没有什么特殊需求的话，金钱投入0。网上这方面文章烂大街了，这里不做详细介绍。</p>
-<p><a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a>,<a href="https://git-scm.com/" target="_blank" rel="noopener">Git</a>默认都会，不解释。</p>
+    <title>初识Flutter-安装和环境配置</title>
+    <url>/2021/09/13/%E5%88%9D%E8%AF%86Flutter-%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<p><em>新项目需要用到Flutter，于是开始学习，先搞下环境，写个Hello World！</em></p>
+<h3 id="Flutter介绍"><a href="#Flutter介绍" class="headerlink" title="Flutter介绍"></a>Flutter介绍</h3><p>Flutter是Google开源的UI工具包，帮助开发者通过一套代码库高效构建多平台精美应用，支持移动、Web、桌面和嵌入式平台。以上摘自<a href="https://flutter.cn/" target="_blank" rel="noopener">Flutter官方</a>。刚开始学习可以参考<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>。</p>
+<h3 id="安装和环境配置-Win10-64位"><a href="#安装和环境配置-Win10-64位" class="headerlink" title="安装和环境配置(Win10 64位)"></a>安装和环境配置(Win10 64位)</h3><p>获取最新的Flutter SDK压缩包，这里版本是2.5.0，要查看其他发行通道和以往的版本，请参阅<a href="https://flutter.cn/docs/development/tools/sdk/releases" target="_blank" rel="noopener">SDK版本列表</a>页面。这里解压到D盘根目录，并配置环境变量path，添加flutter\bin目录。命令提示符窗口运行<code>flutter doctor</code>检测运行环境（这里出错了一次，不过不影响结果，两次都是）提示缺少Android SDK。<img src="/img/20210913/1.png" alt></p>
+<h4 id="配置Android开发环境"><a href="#配置Android开发环境" class="headerlink" title="配置Android开发环境"></a>配置Android开发环境</h4><p>现在<a href="https://developer.android.google.cn" target="_blank" rel="noopener">Android开发官网</a>里Android SDK集成到Android Studio，直接下载Android Studio即可。之前想单独装Android SDK的，15年开始就没有更新了，结果各种错误，最后放弃。</p>
 <blockquote>
-<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2></blockquote>
-<p>看官网教程就可以，我只看了一点。Hexo有很多主题，找自己喜欢的就行。我的是在<a href="https://github.com/Fechin/hexo-theme-diaspora" target="_blank" rel="noopener">Diaspora</a>基础上改的，主要加了网页背景。</p>
-<h4 id="这里补充两点："><a href="#这里补充两点：" class="headerlink" title="这里补充两点："></a>这里补充两点：</h4><ul>
-<li>主题下载命名问题<br>有的主题带hexo-theme-的前缀，放到themes文件夹的时候要去掉这个。</li>
-<li>主题自定义Front-Matter<br>这个每个主题设置的可能都不一样，比如Diaspora的文章封面参数cover就是自己定义的。</li>
-</ul>
-<blockquote>
-<h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2></blockquote>
-<p>申请一个GitHub账号，新建一个和账号名字一样的仓库即可。不过可能找不到你想要的名字（大部分都被申请过了，比如这个账号的名字就是在我想要的基础上变换出来的）。<br>以前写过关于GithubPage的文章，可以点击<a href="https://mp.weixin.qq.com/s/nm1OPwHY4Lz8ClHroPZZJA" target="_blank" rel="noopener">这里</a>查看。</p>
-<blockquote>
-<h2 id="额外补充"><a href="#额外补充" class="headerlink" title="额外补充"></a>额外补充</h2></blockquote>
-<p><em>到这才知道，GitHub不同账号不能绑定相同的ssh<br>手动部署到GitHub，发现评论不能用，原来还需要配置Gitalk（主题限定）</em></p>
+<p><del>单独装Android SDK失败过程，请忽略<br>这里直接从<a href="https://www.androiddevtools.cn/" target="_blank" rel="noopener">AndroidDevTools</a>单独下载Android SDK压缩包。依旧解压到D盘根目录，文件夹改名为android-sdk。启动SDK Manager.exe，默认选项，直接单击Install XX Packages按钮，弹出框中选中Accept License单选框（每个Packages大项都要点），然后单机Install按钮开始安装，下载需要一段时间。新建环境变量ANDROID_SDK_ROOT到android-sdk目录。配置环境变量path添加%ANDROID_SDK_ROOT%\tools和%ANDROID_SDK_ROOT%\platform-tools两条记录。命令提示符窗口执行<code>adb --version</code>出现版本号表示Android SDK环境安装成功。<br>这里有个问题，就是获取的版本不是最新的，只到29，在SDK Manager.exe貌似没法再提升版本了，开发要用API30和31的，也没有。在<code>sdkmanager --list</code>中是能找到新的版本的，通过<code>sdkmanager --update</code>能把Android SDK Platform-tools 升级到最新的31.0.3。通过<code>sdkmanager &quot;build-tools;30.0.3&quot; &quot;platforms;android-30&quot;</code>和<code>sdkmanager &quot;build-tools;31.0.0&quot; &quot;platforms;android-31&quot;</code>更新编译和开发调试工具。<br>命令提示符窗口运行<code>flutter doctor</code>检测运行环境，新错误cmdline-tools component is missing。命令提示符窗口连接到android-sdk\tools\bin目录，执行<code>sdkmanager &quot;cmdline-tools;latest&quot;</code>安装（Flutter提示多一个–install参数），Accept? (y/N):输入y回车。<br>然后还有一个同意 Android 协议，执行<code>flutter doctor --android-licenses</code>，一路y回车。最后只剩一个[!] Android Studio (not installed)，因为没用Android Studio，忽略。<br>执行AVD Manager.exe创建虚拟设备启动，提示图片没用，明明路径都存在……最后尝试无果，最后放弃，重新去下载了Android Studio</del></p>
+</blockquote>
+<p>安装Android Studio，这里把SDK安装路径改为了D盘<br><img src="/img/20210913/2.png" alt><br>安装完成后通过More Actions-SDK Manager来管理Android SDK。模拟器AVD Manager在下面<br><img src="/img/20210913/3.png" alt><br>新建环境变量ANDROID_SDK_ROOT到android-sdk目录。命令提示符窗口执行<code>flutter doctor</code>检测运行环境，提示cmdline-tools component is missing，安装cmdline-tools<br><img src="/img/20210913/4.png" alt><br>同意Android协议：执行<code>flutter doctor --android-licenses</code>，一路y回车，此时执行<code>flutter doctor</code>检测运行环境，全部通过<br><img src="/img/20210913/5.png" alt><br>配置Android模拟器的时候需要自己按需求下载用到的照片（模拟器是真的大，默认用户文件夹，对应C盘吃紧的我雪上加霜。改路径需要新建环境变量ANDROID_ADV_HOME以及删除默认路径.android后新建）<br><img src="/img/20210913/6.png" alt></p>
+<h4 id="编辑工具设定"><a href="#编辑工具设定" class="headerlink" title="编辑工具设定"></a>编辑工具设定</h4><p>Flutter支持Android Studio、IntelliJ、VS Code以及传说中的编辑器Emacs，这里我用的Visual Studio Code（yyds）<br>打开VS Code，Ctrl+Shift+p打开命令面板，输入install选择Install Extensions，扩展搜索输入框中输入flutter选择Flutter并单击Install按钮（会安装Dart插件）。Enabled&gt;Reload Required重新启动 VS Code。命令面板中输入doctor选择 Flutter: Run Flutter Doctor，输出 (OUTPUT) 面板不报错表示安装完成（就是<code>flutter doctor</code>，只不过多个了参数<code>-v</code>）</p>
+<h3 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h3><p>Ctrl+Shift+p打开命令面板，输入flutter，选择Flutter: New Application Project创建项目文件夹。输入项目名称，确定后在项目目录中就会生成main.dart文件。选择要启动的设备，启动（按F5），就能看到自带的示例程序<br><img src="/img/20210913/7.png" alt><br>这里改为“祖传代码”，用chorme启动，效果如下<br><img src="/img/20210913/8.png" alt><br>开发环境搞完就要开始正式学习了，至此文章就水完了，感觉官方<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>的文档更好，要想入坑可以去看看。</p>
 ]]></content>
       <tags>
-        <tag>博客</tag>
+        <tag>Flutter</tag>
+        <tag>Android</tag>
       </tags>
   </entry>
   <entry>
@@ -1066,15 +1042,24 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>博客修改路上的一些事续</title>
-    <url>/2019/11/12/%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%E7%BB%AD/</url>
-    <content><![CDATA[<h1 id="博客修改路上的一些事续"><a href="#博客修改路上的一些事续" class="headerlink" title="博客修改路上的一些事续"></a>博客修改路上的一些事续</h1><p><em>完善了博客的一些基本功能，到这里基本能够见人了吧，手动滑稽。</em><br><em>好久没投入这么多精力搞一件事情了，果然写代码（bug）是件很快乐的事情。</em></p>
-<p>最近一直在想怎么完善自己的第一个博客网站（伪，实际上就是一个域名），然后更改了以下方面。</p>
-<h4 id="http-→-https"><a href="#http-→-https" class="headerlink" title="http → https"></a>http → https</h4><p>这个很好弄，本来还从阿里云申请了一个免费的SSH证书，发现完全用不上。GitHub Pages可以直接设置https加载。<br>Settings &gt; Options &gt; GitHub Pages 中勾选Enforce HTTPS选项<br><img src="/img/20191112/1.png" alt><br>（还有一个方法是通过Cloudflare（后面会介绍）来控制，Page Rule中设置）</p>
-<h4 id="添加访问统计"><a href="#添加访问统计" class="headerlink" title="添加访问统计"></a>添加访问统计</h4><p>插件是<a href="http://busuanzi.ibruce.info/" target="_blank" rel="noopener">不蒜子</a>,基本没有碰壁，就是文章的阅读数不好加，因为有的连接过去页面没有刷新，计数不增加。暂时没加（以后也可能不加）。<br>反而朋友添加的时候遇到了<a href="http://waygc.net/blog/read/1573545160250" target="_blank" rel="noopener">问题</a>，最后也只能添加主页的访问统计。</p>
-<h4 id="添加音乐列表"><a href="#添加音乐列表" class="headerlink" title="添加音乐列表"></a>添加音乐列表</h4><p>插件是<a href="http://jplayer.org/" target="_blank" rel="noopener">jPlayer</a>,找了一些，有列表的好像不多，最后选了这个。通过<a href="https://link.hhtjim.com/" target="_blank" rel="noopener">外链转换工具</a>转成mp3的地址，但是有些收费的歌曲有时可能会失效。改写了jPlayer的sample文件，然后改写到md文件中。页面写死，没嵌入到主题中，不能通过配置文件更改。<br>插曲，为了适配手机端，改写了它的css文件，然而不知道啥原因，GitHub Pages编译不通过或不反映更改。最后用行内样式解决的。<br><img src="/img/20191112/2.png" alt></p>
-<h4 id="修改DNS提高访问速度"><a href="#修改DNS提高访问速度" class="headerlink" title="修改DNS提高访问速度"></a>修改DNS提高访问速度</h4><p>因为GitHub Pages是国外的，访问速度是真的头疼。压缩了图片的大小，效果依然很差（20到30s，或者以上）。然后想起朋友之前写的文章<a href="https://rudymemo.com/2019/09/26/GitHub-DNS/" target="_blank" rel="noopener">GitHub个人网站修改DNS，解决国内访问慢的问题</a>,然后试着做了，效果拔群。基本五六秒加载完。<br><a href="https://www.cloudflare.com/" target="_blank" rel="noopener">Cloudflare</a>还是很不错的，有免费的dns（收费版更强大）。CDN加速，ip随机，请求分析……<br><img src="/img/20191112/3.png" alt></p>
-<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><p>上次说的背景音乐问题，最后只能禁用自动播放了。算是解决，可喜可贺。<br>另外这篇文章不是直接发出的。因为自己的失误，GitHub上代码没提交全，只能branch新分支，明天merge发布了（开发和静态文件生成还是有差距的）。又正式体验了一下git的功能。</p>
+    <title>制作一个简单的博客</title>
+    <url>/2019/11/07/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="制作一个简单的博客"><a href="#制作一个简单的博客" class="headerlink" title="制作一个简单的博客"></a>制作一个简单的博客</h1><p><em>没错，说的就是这个，算是第一篇博客文章吧</em></p>
+<p>基于博客框架<a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">Hexo</a>+<a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a>，通过<a href="http://www.markdown.cn/" target="_blank" rel="noopener">Markdown</a>来书写文章。无域名，无服务器，如果没有什么特殊需求的话，金钱投入0。网上这方面文章烂大街了，这里不做详细介绍。</p>
+<p><a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a>,<a href="https://git-scm.com/" target="_blank" rel="noopener">Git</a>默认都会，不解释。</p>
+<blockquote>
+<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2></blockquote>
+<p>看官网教程就可以，我只看了一点。Hexo有很多主题，找自己喜欢的就行。我的是在<a href="https://github.com/Fechin/hexo-theme-diaspora" target="_blank" rel="noopener">Diaspora</a>基础上改的，主要加了网页背景。</p>
+<h4 id="这里补充两点："><a href="#这里补充两点：" class="headerlink" title="这里补充两点："></a>这里补充两点：</h4><ul>
+<li>主题下载命名问题<br>有的主题带hexo-theme-的前缀，放到themes文件夹的时候要去掉这个。</li>
+<li>主题自定义Front-Matter<br>这个每个主题设置的可能都不一样，比如Diaspora的文章封面参数cover就是自己定义的。</li>
+</ul>
+<blockquote>
+<h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2></blockquote>
+<p>申请一个GitHub账号，新建一个和账号名字一样的仓库即可。不过可能找不到你想要的名字（大部分都被申请过了，比如这个账号的名字就是在我想要的基础上变换出来的）。<br>以前写过关于GithubPage的文章，可以点击<a href="https://mp.weixin.qq.com/s/nm1OPwHY4Lz8ClHroPZZJA" target="_blank" rel="noopener">这里</a>查看。</p>
+<blockquote>
+<h2 id="额外补充"><a href="#额外补充" class="headerlink" title="额外补充"></a>额外补充</h2></blockquote>
+<p><em>到这才知道，GitHub不同账号不能绑定相同的ssh<br>手动部署到GitHub，发现评论不能用，原来还需要配置Gitalk（主题限定）</em></p>
 ]]></content>
       <tags>
         <tag>博客</tag>
@@ -1094,6 +1079,98 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 ]]></content>
       <tags>
         <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>博客修改路上的一些事续</title>
+    <url>/2019/11/12/%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%E7%BB%AD/</url>
+    <content><![CDATA[<h1 id="博客修改路上的一些事续"><a href="#博客修改路上的一些事续" class="headerlink" title="博客修改路上的一些事续"></a>博客修改路上的一些事续</h1><p><em>完善了博客的一些基本功能，到这里基本能够见人了吧，手动滑稽。</em><br><em>好久没投入这么多精力搞一件事情了，果然写代码（bug）是件很快乐的事情。</em></p>
+<p>最近一直在想怎么完善自己的第一个博客网站（伪，实际上就是一个域名），然后更改了以下方面。</p>
+<h4 id="http-→-https"><a href="#http-→-https" class="headerlink" title="http → https"></a>http → https</h4><p>这个很好弄，本来还从阿里云申请了一个免费的SSH证书，发现完全用不上。GitHub Pages可以直接设置https加载。<br>Settings &gt; Options &gt; GitHub Pages 中勾选Enforce HTTPS选项<br><img src="/img/20191112/1.png" alt><br>（还有一个方法是通过Cloudflare（后面会介绍）来控制，Page Rule中设置）</p>
+<h4 id="添加访问统计"><a href="#添加访问统计" class="headerlink" title="添加访问统计"></a>添加访问统计</h4><p>插件是<a href="http://busuanzi.ibruce.info/" target="_blank" rel="noopener">不蒜子</a>,基本没有碰壁，就是文章的阅读数不好加，因为有的连接过去页面没有刷新，计数不增加。暂时没加（以后也可能不加）。<br>反而朋友添加的时候遇到了<a href="http://waygc.net/blog/read/1573545160250" target="_blank" rel="noopener">问题</a>，最后也只能添加主页的访问统计。</p>
+<h4 id="添加音乐列表"><a href="#添加音乐列表" class="headerlink" title="添加音乐列表"></a>添加音乐列表</h4><p>插件是<a href="http://jplayer.org/" target="_blank" rel="noopener">jPlayer</a>,找了一些，有列表的好像不多，最后选了这个。通过<a href="https://link.hhtjim.com/" target="_blank" rel="noopener">外链转换工具</a>转成mp3的地址，但是有些收费的歌曲有时可能会失效。改写了jPlayer的sample文件，然后改写到md文件中。页面写死，没嵌入到主题中，不能通过配置文件更改。<br>插曲，为了适配手机端，改写了它的css文件，然而不知道啥原因，GitHub Pages编译不通过或不反映更改。最后用行内样式解决的。<br><img src="/img/20191112/2.png" alt></p>
+<h4 id="修改DNS提高访问速度"><a href="#修改DNS提高访问速度" class="headerlink" title="修改DNS提高访问速度"></a>修改DNS提高访问速度</h4><p>因为GitHub Pages是国外的，访问速度是真的头疼。压缩了图片的大小，效果依然很差（20到30s，或者以上）。然后想起朋友之前写的文章<a href="https://rudymemo.com/2019/09/26/GitHub-DNS/" target="_blank" rel="noopener">GitHub个人网站修改DNS，解决国内访问慢的问题</a>,然后试着做了，效果拔群。基本五六秒加载完。<br><a href="https://www.cloudflare.com/" target="_blank" rel="noopener">Cloudflare</a>还是很不错的，有免费的dns（收费版更强大）。CDN加速，ip随机，请求分析……<br><img src="/img/20191112/3.png" alt></p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><p>上次说的背景音乐问题，最后只能禁用自动播放了。算是解决，可喜可贺。<br>另外这篇文章不是直接发出的。因为自己的失误，GitHub上代码没提交全，只能branch新分支，明天merge发布了（开发和静态文件生成还是有差距的）。又正式体验了一下git的功能。</p>
+]]></content>
+      <tags>
+        <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何快速提高打字速度(伪,脚本调用键盘)</title>
+    <url>/2020/05/10/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E6%8F%90%E9%AB%98%E6%89%93%E5%AD%97%E9%80%9F%E5%BA%A6-%E4%BC%AA-%E8%84%9A%E6%9C%AC%E8%B0%83%E7%94%A8%E9%94%AE%E7%9B%98/</url>
+    <content><![CDATA[<h2 id="如何快速提高打字速度-伪-脚本调用键盘"><a href="#如何快速提高打字速度-伪-脚本调用键盘" class="headerlink" title="如何快速提高打字速度(伪,脚本调用键盘)"></a>如何快速提高打字速度(伪,脚本调用键盘)</h2><p><em>本来想搞一个自动复制代码的脚本，后来发现可以用来打字。但是大部分语言模拟键盘主要为了自动化测试……</em></p>
+<h3 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h3><p>最早的起因是在B站看了一个用VBA做游戏的视频（然而过去了一个多月，咕咕咕），被视频里写代码的速度被震惊到了(其实视频中所写的代码都是提前大致打好草稿的)，然后就有了自动打(复制)代码的想法。<br>效果演示如下。</p>
+<p><img src="/img/20200510/1.gif" alt></p>
+<p>只支持键盘上有的按键（英文和字符）。你有中文键盘的话，就当我没说。</p>
+<p><img src="/img/20200510/2.png" alt></p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><h4 id="1-VBS"><a href="#1-VBS" class="headerlink" title="1 VBS"></a>1 VBS</h4><p>最简单暴力的就是VBS，代码简单，速度可控（对打字的模拟最好），但是Windows限定。<br>有设定2秒延迟，最后会在你鼠标（光标）点的位置开始输出。不过要通过打字程序的验证还是有点问题的，以后的代码都没有做这一步。<br>如果你读取的文件过长，想中途停下只能通过杀进程……</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&apos;---------------------</span><br><span class="line">&apos;VBS打字脚本</span><br><span class="line">&apos;只支持英文和字符</span><br><span class="line">&apos;author xuchl</span><br><span class="line">&apos;---------------------</span><br><span class="line"></span><br><span class="line">dim wshshell</span><br><span class="line">set wshshell = createobject(&quot;wscript.shell&quot;)</span><br><span class="line">&apos;打开一个记事本</span><br><span class="line">&apos;wshshell.run &quot;notepad&quot;</span><br><span class="line">wscript.sleep 2000</span><br><span class="line"></span><br><span class="line">&apos;随机延迟设定</span><br><span class="line">dim max, min, num</span><br><span class="line">max = 90</span><br><span class="line">min = 40</span><br><span class="line"></span><br><span class="line">dim fso, f, str, schar</span><br><span class="line">set fso = createobject(&quot;Scripting.FileSystemObject&quot;)</span><br><span class="line">&apos;数据来源文件</span><br><span class="line">set f = fso.opentextfile(&quot;C:\Users\xuchl\Desktop\test.txt&quot;, 1, false)</span><br><span class="line"></span><br><span class="line">do until f.atendofstream</span><br><span class="line">	str = f.ReadLine()</span><br><span class="line">	for i = 1 to len(str)</span><br><span class="line">		&apos;逐行逐个读取字符</span><br><span class="line">		schar = mid(str, i, 1)</span><br><span class="line">		&apos;替换特殊字符</span><br><span class="line">		schar = replace(schar, &quot;+&quot;, &quot;+=&quot;)</span><br><span class="line">		schar = replace(schar, &quot;^&quot;, &quot;+6&quot;)</span><br><span class="line">		schar = replace(schar, &quot;%&quot;, &quot;+5&quot;)</span><br><span class="line">		schar = replace(schar, &quot;&#123;&quot;, &quot;+[&quot;)</span><br><span class="line">		schar = replace(schar, &quot;&#125;&quot;, &quot;+]&quot;)</span><br><span class="line">		schar = replace(schar, &quot;(&quot;, &quot;+9&quot;)</span><br><span class="line">		schar = replace(schar, &quot;)&quot;, &quot;+0&quot;)</span><br><span class="line">		schar = replace(schar, &quot;~&quot;, &quot;+`&quot;)</span><br><span class="line">		wshshell.sendkeys schar</span><br><span class="line">		&apos;随机延迟</span><br><span class="line">		num = Int((max - min + 1) * Rnd + min)</span><br><span class="line">		wscript.sleep num</span><br><span class="line">		&apos;打字模拟用-退格(为了让测试成绩通过机器验证)</span><br><span class="line">		if num &lt; 45 then</span><br><span class="line">			wshshell.sendkeys schar</span><br><span class="line">			wscript.sleep Int((max - min + 1) * Rnd + min)</span><br><span class="line">			wshshell.sendkeys &quot;&#123;BACKSPACE&#125;&quot;</span><br><span class="line">		end if</span><br><span class="line">	next</span><br><span class="line">    wshshell.sendkeys &quot;&#123;ENTER&#125;&quot;</span><br><span class="line">loop</span><br><span class="line"></span><br><span class="line">f.Close()</span><br><span class="line">set f = nothing</span><br><span class="line">set fso = nothing</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-5-VBA"><a href="#1-5-VBA" class="headerlink" title="1.5 VBA"></a>1.5 VBA</h4><p>和VBS类似，但是延迟不好控制。本来还想弄个VB.NET的，但是懒于没有环境，都是Microsoft的产品都差不多。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&apos;---------------------</span><br><span class="line">&apos;VBA打字脚本</span><br><span class="line">&apos;只支持英文和字符</span><br><span class="line">&apos;author xuchl</span><br><span class="line">&apos;---------------------</span><br><span class="line">Sub vbaTyper()</span><br><span class="line"></span><br><span class="line">Dim fileRoot$, curChar$</span><br><span class="line">Dim targetStr</span><br><span class="line"></span><br><span class="line">fileRoot = &quot;C:\Users\xuchl\Desktop\test.txt&quot;</span><br><span class="line"></span><br><span class="line">&apos;读取文本内容</span><br><span class="line">targetStr = Split(ReadUTF(fileRoot), vbCrLf)</span><br><span class="line">If (UBound(targetStr) = 0) Then</span><br><span class="line">    targetStr = Split(targetStr(0), vbLf) &apos;换行符不是\r\n时，以\n重新换行</span><br><span class="line">End If</span><br><span class="line"></span><br><span class="line">&apos;延迟两秒</span><br><span class="line">&apos;延迟毫秒级不好控制，用Windows API函数Sleep可以但是不想</span><br><span class="line">delay (2)</span><br><span class="line"></span><br><span class="line">For i = 0 To UBound(targetStr)</span><br><span class="line">    For m = 1 To Len(targetStr(i))</span><br><span class="line">        curChar = Mid(targetStr(i), m, 1)</span><br><span class="line">        curChar = Replace(curChar, &quot;+&quot;, &quot;+=&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;^&quot;, &quot;+6&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;%&quot;, &quot;+5&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;&#123;&quot;, &quot;+[&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;&#125;&quot;, &quot;+]&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;(&quot;, &quot;+9&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;)&quot;, &quot;+0&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;~&quot;, &quot;+`&quot;)</span><br><span class="line">        </span><br><span class="line">        SendKeys curChar</span><br><span class="line">        delay (0.5)</span><br><span class="line">    Next</span><br><span class="line">Next</span><br><span class="line"></span><br><span class="line">End Sub</span><br><span class="line"></span><br><span class="line">Function ReadUTF(ByVal FileName As String) As String</span><br><span class="line">    With CreateObject(&quot;ADODB.Stream&quot;)</span><br><span class="line">        .Type = 2    &apos;读取文本文件</span><br><span class="line">        .Mode = 3   &apos;读写</span><br><span class="line">        .Open</span><br><span class="line">        .LoadFromFile FileName</span><br><span class="line">        .Charset = &quot;UTF-8&quot;  &apos;设定编码</span><br><span class="line">        .Position = 2</span><br><span class="line">        ReadUTF = .ReadText</span><br><span class="line">        .Close</span><br><span class="line">    End With</span><br><span class="line">End Function</span><br><span class="line"></span><br><span class="line">Function delay(s%)</span><br><span class="line">    tm = Timer</span><br><span class="line">    Do Until Timer - tm &gt; s</span><br><span class="line">        DoEvents</span><br><span class="line">    Loop</span><br><span class="line">End Function</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-Java"><a href="#2-Java" class="headerlink" title="2 Java"></a>2 Java</h4><p>果然这个才是本命，没有VBS简单，不过可以跨平台使用了（未验证）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.awt.AWTException;</span><br><span class="line">import java.awt.Robot;</span><br><span class="line">import java.awt.event.KeyEvent;</span><br><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.HashSet;</span><br><span class="line">import java.util.Map;</span><br><span class="line">import java.util.Set;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * java打字</span><br><span class="line"> * 只支持英文和字符</span><br><span class="line"> * @author xuchl</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">public class javaTyper &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			// 键码对照</span><br><span class="line">			Map&lt;String, Integer&gt; keyCodeMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">			keyCodeMap.put(&quot;~&quot;, 0xC0);</span><br><span class="line">			keyCodeMap.put(&quot;-&quot;, 0x2D);</span><br><span class="line">			keyCodeMap.put(&quot;=&quot;, 0x3D);</span><br><span class="line">			keyCodeMap.put(&quot;	&quot;, (int) &apos;\t&apos;);</span><br><span class="line">			keyCodeMap.put(&quot;[&quot;, 0x5B);</span><br><span class="line">			keyCodeMap.put(&quot;]&quot;, 0x5D);</span><br><span class="line">			keyCodeMap.put(&quot;\\&quot;, 0x5C);</span><br><span class="line">			keyCodeMap.put(&quot;;&quot;, 0x3B);</span><br><span class="line">			keyCodeMap.put(&quot;&apos;&quot;, 0xDE);</span><br><span class="line">			keyCodeMap.put(&quot;,&quot;, 0x2C);</span><br><span class="line">			keyCodeMap.put(&quot;.&quot;, 0x2E);</span><br><span class="line">			keyCodeMap.put(&quot;/&quot;, 0x2F);</span><br><span class="line">			keyCodeMap.put(&quot; &quot;, 0x20);</span><br><span class="line"></span><br><span class="line">			// Shift配合用</span><br><span class="line">			keyCodeMap.put(&quot;`&quot;, 0xC0);</span><br><span class="line">			keyCodeMap.put(&quot;!&quot;, 0x31);</span><br><span class="line">			keyCodeMap.put(&quot;@&quot;, 0x32);</span><br><span class="line">			keyCodeMap.put(&quot;#&quot;, 0x33);</span><br><span class="line">			keyCodeMap.put(&quot;$&quot;, 0x34);</span><br><span class="line">			keyCodeMap.put(&quot;%&quot;, 0x35);</span><br><span class="line">			keyCodeMap.put(&quot;^&quot;, 0x36);</span><br><span class="line">			keyCodeMap.put(&quot;&amp;&quot;, 0x37);</span><br><span class="line">			keyCodeMap.put(&quot;*&quot;, 0x38);</span><br><span class="line">			keyCodeMap.put(&quot;(&quot;, 0x39);</span><br><span class="line">			keyCodeMap.put(&quot;)&quot;, 0x30);</span><br><span class="line">			keyCodeMap.put(&quot;_&quot;, 0x2D);</span><br><span class="line">			keyCodeMap.put(&quot;+&quot;, 0x3D);</span><br><span class="line">			keyCodeMap.put(&quot;&#123;&quot;, 0x5B);</span><br><span class="line">			keyCodeMap.put(&quot;&#125;&quot;, 0x5D);</span><br><span class="line">			keyCodeMap.put(&quot;|&quot;, 0x5C);</span><br><span class="line">			keyCodeMap.put(&quot;:&quot;, 0x3B);</span><br><span class="line">			keyCodeMap.put(&quot;\&quot;&quot;, 0xDE);</span><br><span class="line">			keyCodeMap.put(&quot;&lt;&quot;, 0x2C);</span><br><span class="line">			keyCodeMap.put(&quot;&gt;&quot;, 0x2E);</span><br><span class="line">			keyCodeMap.put(&quot;?&quot;, 0x2F);</span><br><span class="line"></span><br><span class="line">			keyCodeMap.put(&quot;0&quot;, 0x30);</span><br><span class="line">			keyCodeMap.put(&quot;1&quot;, 0x31);</span><br><span class="line">			keyCodeMap.put(&quot;2&quot;, 0x32);</span><br><span class="line">			keyCodeMap.put(&quot;3&quot;, 0x33);</span><br><span class="line">			keyCodeMap.put(&quot;4&quot;, 0x34);</span><br><span class="line">			keyCodeMap.put(&quot;5&quot;, 0x35);</span><br><span class="line">			keyCodeMap.put(&quot;6&quot;, 0x36);</span><br><span class="line">			keyCodeMap.put(&quot;7&quot;, 0x37);</span><br><span class="line">			keyCodeMap.put(&quot;8&quot;, 0x38);</span><br><span class="line">			keyCodeMap.put(&quot;9&quot;, 0x39);</span><br><span class="line"></span><br><span class="line">			keyCodeMap.put(&quot;a&quot;, 0x41);</span><br><span class="line">			keyCodeMap.put(&quot;b&quot;, 0x42);</span><br><span class="line">			keyCodeMap.put(&quot;c&quot;, 0x43);</span><br><span class="line">			keyCodeMap.put(&quot;d&quot;, 0x44);</span><br><span class="line">			keyCodeMap.put(&quot;e&quot;, 0x45);</span><br><span class="line">			keyCodeMap.put(&quot;f&quot;, 0x46);</span><br><span class="line">			keyCodeMap.put(&quot;g&quot;, 0x47);</span><br><span class="line">			keyCodeMap.put(&quot;h&quot;, 0x48);</span><br><span class="line">			keyCodeMap.put(&quot;i&quot;, 0x49);</span><br><span class="line">			keyCodeMap.put(&quot;j&quot;, 0x4A);</span><br><span class="line">			keyCodeMap.put(&quot;k&quot;, 0x4B);</span><br><span class="line">			keyCodeMap.put(&quot;l&quot;, 0x4C);</span><br><span class="line">			keyCodeMap.put(&quot;m&quot;, 0x4D);</span><br><span class="line">			keyCodeMap.put(&quot;n&quot;, 0x4E);</span><br><span class="line">			keyCodeMap.put(&quot;o&quot;, 0x4F);</span><br><span class="line">			keyCodeMap.put(&quot;p&quot;, 0x50);</span><br><span class="line">			keyCodeMap.put(&quot;q&quot;, 0x51);</span><br><span class="line">			keyCodeMap.put(&quot;r&quot;, 0x52);</span><br><span class="line">			keyCodeMap.put(&quot;s&quot;, 0x53);</span><br><span class="line">			keyCodeMap.put(&quot;t&quot;, 0x54);</span><br><span class="line">			keyCodeMap.put(&quot;u&quot;, 0x55);</span><br><span class="line">			keyCodeMap.put(&quot;v&quot;, 0x56);</span><br><span class="line">			keyCodeMap.put(&quot;w&quot;, 0x57);</span><br><span class="line">			keyCodeMap.put(&quot;x&quot;, 0x58);</span><br><span class="line">			keyCodeMap.put(&quot;y&quot;, 0x59);</span><br><span class="line">			keyCodeMap.put(&quot;z&quot;, 0x5A);</span><br><span class="line"></span><br><span class="line">			Set&lt;String&gt; specialCodeSet = new HashSet&lt;String&gt;();</span><br><span class="line">			specialCodeSet.add(&quot;~&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;!&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;@&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;#&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;$&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;%&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;^&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&amp;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;*&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;(&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;)&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;_&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;+&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&#123;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&#125;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;|&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;:&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;\&quot;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&lt;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&gt;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;?&quot;);</span><br><span class="line"></span><br><span class="line">			// 数据来源文件</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;C:\\Users\\xuchl\\Desktop\\test.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			char c;</span><br><span class="line"></span><br><span class="line">			// JDK自带Robot类，用于为测试自动化。</span><br><span class="line">			// 能够控制鼠标和键盘，还能屏幕截图。</span><br><span class="line">			Robot r = new Robot();</span><br><span class="line">			r.delay(2000);</span><br><span class="line"></span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				for (int i = 0; i &lt; lineStr.length(); i++) &#123;</span><br><span class="line">					c = lineStr.charAt(i);</span><br><span class="line">					// 按下键盘按键</span><br><span class="line">					if (65 &lt;= c &amp;&amp; c &lt;= 90 || specialCodeSet.contains(String.valueOf(c))) &#123;</span><br><span class="line">						// 大写字母和部分特殊字符按下shift</span><br><span class="line">						r.keyPress(KeyEvent.VK_SHIFT);</span><br><span class="line">					&#125;</span><br><span class="line">					r.keyPress(keyCodeMap.get(String.valueOf(c).toLowerCase()));</span><br><span class="line"></span><br><span class="line">					// 释放键盘按键</span><br><span class="line">					if (65 &lt;= c &amp;&amp; c &lt;= 90 || specialCodeSet.contains(String.valueOf(c))) &#123;</span><br><span class="line">						r.keyRelease(KeyEvent.VK_SHIFT);</span><br><span class="line">					&#125;</span><br><span class="line">					r.keyRelease(keyCodeMap.get(String.valueOf(c).toLowerCase()));</span><br><span class="line">					// 延迟，不随机了</span><br><span class="line">					r.delay(100);</span><br><span class="line">				&#125;</span><br><span class="line">				r.keyPress(KeyEvent.VK_ENTER);</span><br><span class="line">				r.keyRelease(KeyEvent.VK_ENTER);</span><br><span class="line">			&#125;</span><br><span class="line">			br.close();</span><br><span class="line"></span><br><span class="line">		&#125; catch (FileNotFoundException fnfe) &#123;</span><br><span class="line">			fnfe.printStackTrace();</span><br><span class="line">		&#125; catch (IOException ioe) &#123;</span><br><span class="line">			ioe.printStackTrace();</span><br><span class="line">		&#125; catch (AWTException awte) &#123;</span><br><span class="line">			awte.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-Node-js"><a href="#3-Node-js" class="headerlink" title="3 Node.js"></a>3 Node.js</h4><p>有自己库的语言就是强大啊，比如Python，Go（这两个都不写了，go的go-vgo/robotgo加载不下来），用的第三方的robotjs，不同系统需要的环境不同。<br>本来很简单就写完了，但是朋友的Deepin跑出的效果和Win10不同。然后在自己的的Deepin中验证，效果一样（主要为<code>&lt;</code>和<code>“</code>的问题）。刚开始以为是Deepin自己的问题，然后又装了CentOS7（8太大，7下了第三个镜像才搞定GUI），最后效果一样，不知道是不是官方的锅。提了一个issue，还拉上一个英语老师给我看看英语写的对不对，但愿对方能看懂吧。<br>Node.js也不是很复杂，但是速度不能往小里调。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/*</span><br><span class="line">  nodejs打字</span><br><span class="line">  只支持英文和字符</span><br><span class="line">  author xuchl</span><br><span class="line">*/</span><br><span class="line">const robot = require(&quot;robotjs&quot;);</span><br><span class="line">const fs = require(&apos;fs&apos;);</span><br><span class="line">const readline = require(&apos;readline&apos;);</span><br><span class="line"></span><br><span class="line">// 速度调低明显，把数值调大效果不大</span><br><span class="line">// 800 : Characters per minute</span><br><span class="line">//robot.typeStringDelayed(&quot;`1234567890-=[]\;&apos;,./~!@#$%^&amp;*()_+&quot;, 800);</span><br><span class="line"></span><br><span class="line">// 速度调低明显，把数值调小效果不大</span><br><span class="line">// Sets the delay in milliseconds to sleep after a keyboard event. This is 10ms by default.</span><br><span class="line">//robot.setKeyboardDelay(5);</span><br><span class="line"></span><br><span class="line">// ==========2 start==========</span><br><span class="line">// deepin,centos(Linux)中robotjs特殊字符对应(&lt;, &quot;更为特殊)</span><br><span class="line">const specialCodeAry = [&quot;~&quot;, &quot;!&quot;, &quot;@&quot;, &quot;#&quot;, &quot;$&quot;, &quot;%&quot;, &quot;^&quot;, &quot;&amp;&quot;, &quot;*&quot;, &quot;(&quot;, &quot;)&quot;, &quot;_&quot;, &quot;+&quot;, &quot;&#123;&quot;, &quot;&#125;&quot;, &quot;|&quot;, &quot;:&quot;, &quot;&gt;&quot;, &quot;?&quot;];</span><br><span class="line">// ==========2 end==========</span><br><span class="line"></span><br><span class="line">setTimeout(function() &#123;</span><br><span class="line">	const readInterface = readline.createInterface(&#123;</span><br><span class="line">		input: fs.createReadStream(&apos;../test.txt&apos;)</span><br><span class="line">	&#125;);</span><br><span class="line"></span><br><span class="line">	readInterface.on(&apos;line&apos;, function(line) &#123;</span><br><span class="line">		for (let i = 0; i &lt; line.length; i++) &#123;</span><br><span class="line">			//robot.keyTap(line.charAt(i)); // 需要配合SHIFT的按键字符会变成不按SHIFT的状态，比如大写字母变小写，*变8</span><br><span class="line">			// ==========1 start==========</span><br><span class="line">			//robot.typeString(line.charAt(i)); // 所见即所得(windows限定,在Linux里不好使，keyTap效果一样但是大写字母与&lt;除外)</span><br><span class="line">			// ==========1 end==========</span><br><span class="line">			// ==========2 start==========</span><br><span class="line">			// deepin,centos(Linux)中robotjs特殊字符对应(&lt;, &quot;更为特殊)</span><br><span class="line">			let curChar = line.charAt(i);</span><br><span class="line">			if (curChar === &quot;\&quot;&quot;) &#123;</span><br><span class="line">				robot.keyTap(&quot;&apos;&quot;, [&quot;shift&quot;]);</span><br><span class="line">			&#125; else if (-1 &lt; specialCodeAry.indexOf(curChar)) &#123;</span><br><span class="line">				robot.keyTap(curChar, [&quot;shift&quot;]);</span><br><span class="line">			&#125; else &#123;</span><br><span class="line">				robot.typeString(curChar);</span><br><span class="line">			&#125;</span><br><span class="line">			// ==========2 end==========</span><br><span class="line">		&#125;</span><br><span class="line">		robot.keyTap(&quot;enter&quot;);</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;, 2000);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h4 id="我的安装过程，可以忽略"><a href="#我的安装过程，可以忽略" class="headerlink" title="我的安装过程，可以忽略"></a>我的安装过程，可以忽略</h4><p>robotjs编译环境<br><img src="/img/20200510/3.png" alt></p>
+<blockquote>
+<p>Win10<br>因为笔记本换成了NUC，安装时提示没有Python，装了最新的Python（但是它只支持2.7的），然后再安装又提示没有VS库。<br><img src="/img/20200510/4.png" alt><br>执行一句<code>npm install --global --production windows-build-tools</code>环境就齐了（Python2.7也装上了）</p>
+</blockquote>
+<blockquote>
+<p>Deepin<br>因为之前搞过别的，基本环境都有。提示缺少X11/extensions/XTest.h<br>执行<code>sudo apt-get install libx11-dev</code>和<code>sudo apt-get install xorg-dev</code>后安装成功</p>
+</blockquote>
+<blockquote>
+<p>CentOS7<br>这个就比较痛苦了，需要先装系统<br>使用官网二进制数据包安装Node.js<br><code>wget https://nodejs.org/dist/v12.16.3/node-v12.16.3-linux-x64.tar.xz</code><br><code>tar -xvf node-v12.16.3-linux-x64.tar.xz</code><br><code>ln -s /home/xuchl/桌面/node-v12.16.3-linux-x64/bin/node /usr/bin/node</code><br><code>ln -s /home/xuchl/桌面/node-v12.16.3-linux-x64/bin/npm /usr/bin/npm</code><br><code>node -v</code><br><code>npm -v</code><br>显示版本号，安装成功<br>执行<code>npm i robotjs</code>报错<br>sh: prebuild-install: 未找到命令<br>sh: node-gyp: 未找到命令<br>然后没有解决问题，明明Deepin也是这么装的<br>应该是Node.js安装问题，然后尝试使用yum安装<br><code>curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -</code><br><code>sudo yum install nodejs</code><br>执行<code>npm i robotjs</code>报错<br>make: g++：命令未找到<br>执行<code>yum install gcc-c++</code>安装<br>再安装报错：../src/mouse.c:12:35: 致命错误：X11/extensions/XTest.h：没有那个文件或目录<br>执行以下命令依旧报错<br><code>yum install libX11*</code><br><code>yum install xorg*</code><br><code>yum install libxtst*</code><br><code>yum install libpng*</code><br>然后放弃了，真香警告<br>放大招<code>yum -y upgrade</code>,此命令慎用，因为我是新环境无所谓<br>执行<code>yum install libXtst-devel</code>后安装成功<br>跑出结果已经过了晚上12点了</p>
+</blockquote>
+</blockquote>
+<h4 id="4-没有其他了"><a href="#4-没有其他了" class="headerlink" title="4 没有其他了"></a>4 没有其他了</h4><p>本来还想用别的语言写的，只有能够调用键盘，应该都能写。除了上面写过以及提到过的语言，其他的比如C，PHP都可以实现。但是被Node.js搞的头大，就不了了之了，实现逻辑也都差不多。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>VBS</tag>
+        <tag>Node.js</tag>
+        <tag>VBA</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>工作笔记-Echarts多X轴标签柱状图</title>
+    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Echarts%E5%A4%9AX%E6%88%96Y%E8%BD%B4%E6%A0%87%E7%AD%BE%E6%9F%B1%E7%8A%B6%E5%9B%BE/</url>
+    <content><![CDATA[<h2 id="工作笔记-Echarts多X或Y轴标签柱状图"><a href="#工作笔记-Echarts多X或Y轴标签柱状图" class="headerlink" title="工作笔记-Echarts多X或Y轴标签柱状图"></a>工作笔记-Echarts多X或Y轴标签柱状图</h2><p><em>虽然不是第一次写比较复杂的Echarts，记录一下，以备后用</em></p>
+<h3 id="参考源"><a href="#参考源" class="headerlink" title="参考源"></a>参考源</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xBk7TY_hWx" target="_blank" rel="noopener">Simulate Hierarchy Axis</a><br>有三列，最后一列数据必须要平分，不然行对不齐。</p>
+<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xQPnOKwjkx" target="_blank" rel="noopener">Simulate Hierarchy Axis改</a><br>主要增加了了一个markPoint来表示数量，因为参考的例子中第三列标签为label。<br>实际开发主要是对数据的操作，具体看业务逻辑了。我写的数据逻辑操作如下<br><img src="/img/20200601/1.png" alt><br>项目最后演示的demo如下<br><img src="/img/20200601/2.png" alt></p>
+<p>最后吐槽一下IOS，Echarts渲染的Canvas高度超过4300左右就不显示了。IOS使用谷歌浏览器效果一样，MacOS、Android能够显示，但是数据过多会导致Android浏览器崩溃（还是我手机该换了）。</p>
+]]></content>
+      <tags>
+        <tag>Echarts</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</title>
+    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Vue-js%E4%BD%BF%E7%94%A8%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BEjsAPI%E8%AE%A1%E7%AE%97%E4%B8%A4%E7%82%B9%E9%97%B4%E8%B7%9D%E7%A6%BB/</url>
+    <content><![CDATA[<h2 id="工作笔记-Vue-js使用高德地图jsAPI计算两点间距离"><a href="#工作笔记-Vue-js使用高德地图jsAPI计算两点间距离" class="headerlink" title="工作笔记-Vue.js使用高德地图jsAPI计算两点间距离"></a>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</h2><p><em>只是在Vue里用到，主要还是高德地图jsAPI的逻辑，记录一下，以备后用</em></p>
+<h2 id="vue-amap"><a href="#vue-amap" class="headerlink" title="vue-amap"></a>vue-amap</h2><p><a href="https://elemefe.github.io/vue-amap/" target="_blank" rel="noopener">vue-amap</a>基于 Vue 2.x 和高德地图的地图组件。Vue不是很熟悉，从文档中复制粘贴，这里只提一下。</p>
+<p>npm安装<code>npm install vue-amap --save</code></p>
+<p>引入vue-amap</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import Vue from &apos;vue&apos;;</span><br><span class="line">import VueAMap from &apos;vue-amap&apos;;</span><br><span class="line">Vue.use(VueAMap);</span><br><span class="line">VueAMap.initAMapApiLoader(&#123;</span><br><span class="line">  key: &quot;你的高德地图key&quot;,</span><br><span class="line">  plugin: [</span><br><span class="line">    &quot;Autocomplete&quot;,</span><br><span class="line">    &quot;PlaceSearch&quot;,</span><br><span class="line">    &quot;Scale&quot;,</span><br><span class="line">    &quot;OverView&quot;,</span><br><span class="line">    &quot;ToolBar&quot;,</span><br><span class="line">    &quot;MapType&quot;,</span><br><span class="line">    &quot;PolyEditor&quot;,</span><br><span class="line">    &quot;AMap.CircleEditor&quot;</span><br><span class="line">  ],</span><br><span class="line">  // 默认高德 sdk 版本为 1.4.4</span><br><span class="line">  v: &quot;1.4.4&quot;</span><br><span class="line">&#125;);</span><br><span class="line">data() &#123;</span><br><span class="line">  return &#123;</span><br><span class="line">    // 地图</span><br><span class="line">    zoom: 12,</span><br><span class="line">    center: [117.055185, 36.684594],</span><br><span class="line">    amapManager,</span><br><span class="line">    events: &#123;</span><br><span class="line">      // o下面js中替换成map了</span><br><span class="line">      init(o) &#123;……&#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;el-col :span=&quot;16&quot;&gt;</span><br><span class="line">  &lt;el-form-item label prop=&quot;code&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;amap-page-container&quot;&gt;</span><br><span class="line">      &lt;el-amap</span><br><span class="line">        vid=&quot;amapDemo&quot;</span><br><span class="line">        :center=&quot;center&quot;</span><br><span class="line">        :amap-manager=&quot;amapManager&quot;</span><br><span class="line">        :zoom=&quot;zoom&quot;</span><br><span class="line">        :events=&quot;events&quot;</span><br><span class="line">        class=&quot;amap-demo&quot;</span><br><span class="line">      &gt;&lt;/el-amap&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  &lt;/el-form-item&gt;</span><br><span class="line">&lt;/el-col&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="高德地图jsAPI"><a href="#高德地图jsAPI" class="headerlink" title="高德地图jsAPI"></a>高德地图jsAPI</h2><p>主要记录这部分代码，后来从Vue中独立出来。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">&lt;div id=&quot;container&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;script src=&quot;https://webapi.amap.com/maps?v=1.4.4&amp;key=你的高德地图key&amp;plugin=AMap.Geocoder&quot;&gt;&lt;/script&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">var map = new AMap.Map(&apos;container&apos;);</span><br><span class="line"></span><br><span class="line">var markers = [];</span><br><span class="line">var contentAry = [&quot;注册&quot;, &quot;发函&quot;, &quot;回函&quot;];</span><br><span class="line">var lineStyleAry = [&quot;#80d8ff&quot;, &quot;#ff304e&quot;];</span><br><span class="line">var textStyleAry = [</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#29b6f6&quot;, &quot;border-color&quot;: &quot;#e1f5fe&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;,</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#f62972&quot;, &quot;border-color&quot;: &quot;#fee1ee&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">// 地理编码，什么时候检索完不可控（顺序有时也会变）</span><br><span class="line">var index = 0;</span><br><span class="line">/*</span><br><span class="line">var geocoder = new AMap.Geocoder(&#123;</span><br><span class="line">	city: &quot;010&quot;, //城市设为北京，默认：“全国”</span><br><span class="line">&#125;);</span><br><span class="line">geoCode(&quot;八大胡同&quot;);</span><br><span class="line">geoCode(&quot;三里屯&quot;);</span><br><span class="line">geoCode(&quot;中关村&quot;);</span><br><span class="line"></span><br><span class="line">function geoCode(address) &#123;</span><br><span class="line">	geocoder.getLocation(address, function(status, result) &#123;</span><br><span class="line">		if (status === &apos;complete&apos; &amp;&amp; result.geocodes.length) &#123;</span><br><span class="line">			var lnglat = result.geocodes[0].location;</span><br><span class="line">			var marker = new AMap.Marker();</span><br><span class="line">			marker.setPosition(lnglat);</span><br><span class="line">			map.add(marker);</span><br><span class="line">			marker.setLabel(&#123;</span><br><span class="line">				offset: new AMap.Pixel( - 7, -6),</span><br><span class="line">				direction: &quot;center&quot;,</span><br><span class="line">				content: contentAry[index]</span><br><span class="line">			&#125;);</span><br><span class="line">			markers[index] = marker;</span><br><span class="line">			map.setFitView(marker);</span><br><span class="line">			index++;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">*/</span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">markers = [[116.386511, 39.891422], [116.457960, 39.928583], [116.315869, 39.981125]];</span><br><span class="line">// 标记点</span><br><span class="line">markers.forEach(function(marker) &#123;</span><br><span class="line">	var mk = new AMap.Marker(&#123;</span><br><span class="line">	  map: map,</span><br><span class="line">	  position: [marker[0], marker[1]]</span><br><span class="line">	&#125;);</span><br><span class="line">	mk.setLabel(&#123;</span><br><span class="line">	  offset: new AMap.Pixel(-7, -6),</span><br><span class="line">	  direction: &quot;center&quot;,</span><br><span class="line">	  content: contentAry[index]</span><br><span class="line">	&#125;);</span><br><span class="line">	index++;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">var p1 = new AMap.LngLat(116.386511, 39.891422);</span><br><span class="line">var p2 = new AMap.LngLat(116.457960, 39.928583);</span><br><span class="line">var p3 = new AMap.LngLat(116.315869, 39.981125);</span><br><span class="line">// 连线标记距离</span><br><span class="line">drawLineDistance(p1, p2, lineStyleAry[0], textStyleAry[0]);</span><br><span class="line">drawLineDistance(p2, p3, lineStyleAry[1], textStyleAry[1]);</span><br><span class="line"></span><br><span class="line">// 根据地图上添加的覆盖物分布情况，自动缩放地图到合适的视野级别，参数均可缺省</span><br><span class="line">map.setFitView();</span><br><span class="line"></span><br><span class="line">function drawLineDistance(p1, p2, lineStyle, textStyle) &#123;</span><br><span class="line">	var textPos = p1.divideBy(2).add(p2.divideBy(2));</span><br><span class="line">	// 距离</span><br><span class="line">	var distance = Math.round(p1.distance(p2));</span><br><span class="line">	var path = [p1, p2];</span><br><span class="line"></span><br><span class="line">	var line = new AMap.Polyline(&#123;</span><br><span class="line">		map: map,</span><br><span class="line">		strokeColor: lineStyle,</span><br><span class="line">		isOutline: true,</span><br><span class="line">		outlineColor: &quot;white&quot;,</span><br><span class="line">		path: path</span><br><span class="line">	&#125;);</span><br><span class="line">	// 连线</span><br><span class="line">	line.setPath(path);</span><br><span class="line">	// 设置文本</span><br><span class="line">	var text = new AMap.Text(&#123;</span><br><span class="line">		text: &quot;两点相距&quot; + distance + &quot;米&quot;,</span><br><span class="line">		position: textPos,</span><br><span class="line">		map: map,</span><br><span class="line">		style: textStyle</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;/body&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下</p>
+<iframe width="100%" height="500px" src="https://xuchunlei.top/gaodeMap.html"></iframe>]]></content>
+      <tags>
+        <tag>Vue.js</tag>
+        <tag>高德地图</tag>
+        <tag>笔记</tag>
       </tags>
   </entry>
   <entry>
@@ -1117,19 +1194,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       <tags>
         <tag>硬盘</tag>
         <tag>改造</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>工作笔记-Echarts多X轴标签柱状图</title>
-    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Echarts%E5%A4%9AX%E6%88%96Y%E8%BD%B4%E6%A0%87%E7%AD%BE%E6%9F%B1%E7%8A%B6%E5%9B%BE/</url>
-    <content><![CDATA[<h2 id="工作笔记-Echarts多X或Y轴标签柱状图"><a href="#工作笔记-Echarts多X或Y轴标签柱状图" class="headerlink" title="工作笔记-Echarts多X或Y轴标签柱状图"></a>工作笔记-Echarts多X或Y轴标签柱状图</h2><p><em>虽然不是第一次写比较复杂的Echarts，记录一下，以备后用</em></p>
-<h3 id="参考源"><a href="#参考源" class="headerlink" title="参考源"></a>参考源</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xBk7TY_hWx" target="_blank" rel="noopener">Simulate Hierarchy Axis</a><br>有三列，最后一列数据必须要平分，不然行对不齐。</p>
-<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xQPnOKwjkx" target="_blank" rel="noopener">Simulate Hierarchy Axis改</a><br>主要增加了了一个markPoint来表示数量，因为参考的例子中第三列标签为label。<br>实际开发主要是对数据的操作，具体看业务逻辑了。我写的数据逻辑操作如下<br><img src="/img/20200601/1.png" alt><br>项目最后演示的demo如下<br><img src="/img/20200601/2.png" alt></p>
-<p>最后吐槽一下IOS，Echarts渲染的Canvas高度超过4300左右就不显示了。IOS使用谷歌浏览器效果一样，MacOS、Android能够显示，但是数据过多会导致Android浏览器崩溃（还是我手机该换了）。</p>
-]]></content>
-      <tags>
-        <tag>Echarts</tag>
-        <tag>笔记</tag>
       </tags>
   </entry>
   <entry>
@@ -1230,70 +1294,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 ]]></content>
       <tags>
         <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何快速提高打字速度(伪,脚本调用键盘)</title>
-    <url>/2020/05/10/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E6%8F%90%E9%AB%98%E6%89%93%E5%AD%97%E9%80%9F%E5%BA%A6-%E4%BC%AA-%E8%84%9A%E6%9C%AC%E8%B0%83%E7%94%A8%E9%94%AE%E7%9B%98/</url>
-    <content><![CDATA[<h2 id="如何快速提高打字速度-伪-脚本调用键盘"><a href="#如何快速提高打字速度-伪-脚本调用键盘" class="headerlink" title="如何快速提高打字速度(伪,脚本调用键盘)"></a>如何快速提高打字速度(伪,脚本调用键盘)</h2><p><em>本来想搞一个自动复制代码的脚本，后来发现可以用来打字。但是大部分语言模拟键盘主要为了自动化测试……</em></p>
-<h3 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h3><p>最早的起因是在B站看了一个用VBA做游戏的视频（然而过去了一个多月，咕咕咕），被视频里写代码的速度被震惊到了(其实视频中所写的代码都是提前大致打好草稿的)，然后就有了自动打(复制)代码的想法。<br>效果演示如下。</p>
-<p><img src="/img/20200510/1.gif" alt></p>
-<p>只支持键盘上有的按键（英文和字符）。你有中文键盘的话，就当我没说。</p>
-<p><img src="/img/20200510/2.png" alt></p>
-<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><h4 id="1-VBS"><a href="#1-VBS" class="headerlink" title="1 VBS"></a>1 VBS</h4><p>最简单暴力的就是VBS，代码简单，速度可控（对打字的模拟最好），但是Windows限定。<br>有设定2秒延迟，最后会在你鼠标（光标）点的位置开始输出。不过要通过打字程序的验证还是有点问题的，以后的代码都没有做这一步。<br>如果你读取的文件过长，想中途停下只能通过杀进程……</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&apos;---------------------</span><br><span class="line">&apos;VBS打字脚本</span><br><span class="line">&apos;只支持英文和字符</span><br><span class="line">&apos;author xuchl</span><br><span class="line">&apos;---------------------</span><br><span class="line"></span><br><span class="line">dim wshshell</span><br><span class="line">set wshshell = createobject(&quot;wscript.shell&quot;)</span><br><span class="line">&apos;打开一个记事本</span><br><span class="line">&apos;wshshell.run &quot;notepad&quot;</span><br><span class="line">wscript.sleep 2000</span><br><span class="line"></span><br><span class="line">&apos;随机延迟设定</span><br><span class="line">dim max, min, num</span><br><span class="line">max = 90</span><br><span class="line">min = 40</span><br><span class="line"></span><br><span class="line">dim fso, f, str, schar</span><br><span class="line">set fso = createobject(&quot;Scripting.FileSystemObject&quot;)</span><br><span class="line">&apos;数据来源文件</span><br><span class="line">set f = fso.opentextfile(&quot;C:\Users\xuchl\Desktop\test.txt&quot;, 1, false)</span><br><span class="line"></span><br><span class="line">do until f.atendofstream</span><br><span class="line">	str = f.ReadLine()</span><br><span class="line">	for i = 1 to len(str)</span><br><span class="line">		&apos;逐行逐个读取字符</span><br><span class="line">		schar = mid(str, i, 1)</span><br><span class="line">		&apos;替换特殊字符</span><br><span class="line">		schar = replace(schar, &quot;+&quot;, &quot;+=&quot;)</span><br><span class="line">		schar = replace(schar, &quot;^&quot;, &quot;+6&quot;)</span><br><span class="line">		schar = replace(schar, &quot;%&quot;, &quot;+5&quot;)</span><br><span class="line">		schar = replace(schar, &quot;&#123;&quot;, &quot;+[&quot;)</span><br><span class="line">		schar = replace(schar, &quot;&#125;&quot;, &quot;+]&quot;)</span><br><span class="line">		schar = replace(schar, &quot;(&quot;, &quot;+9&quot;)</span><br><span class="line">		schar = replace(schar, &quot;)&quot;, &quot;+0&quot;)</span><br><span class="line">		schar = replace(schar, &quot;~&quot;, &quot;+`&quot;)</span><br><span class="line">		wshshell.sendkeys schar</span><br><span class="line">		&apos;随机延迟</span><br><span class="line">		num = Int((max - min + 1) * Rnd + min)</span><br><span class="line">		wscript.sleep num</span><br><span class="line">		&apos;打字模拟用-退格(为了让测试成绩通过机器验证)</span><br><span class="line">		if num &lt; 45 then</span><br><span class="line">			wshshell.sendkeys schar</span><br><span class="line">			wscript.sleep Int((max - min + 1) * Rnd + min)</span><br><span class="line">			wshshell.sendkeys &quot;&#123;BACKSPACE&#125;&quot;</span><br><span class="line">		end if</span><br><span class="line">	next</span><br><span class="line">    wshshell.sendkeys &quot;&#123;ENTER&#125;&quot;</span><br><span class="line">loop</span><br><span class="line"></span><br><span class="line">f.Close()</span><br><span class="line">set f = nothing</span><br><span class="line">set fso = nothing</span><br></pre></td></tr></table></figure>
-
-<h4 id="1-5-VBA"><a href="#1-5-VBA" class="headerlink" title="1.5 VBA"></a>1.5 VBA</h4><p>和VBS类似，但是延迟不好控制。本来还想弄个VB.NET的，但是懒于没有环境，都是Microsoft的产品都差不多。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&apos;---------------------</span><br><span class="line">&apos;VBA打字脚本</span><br><span class="line">&apos;只支持英文和字符</span><br><span class="line">&apos;author xuchl</span><br><span class="line">&apos;---------------------</span><br><span class="line">Sub vbaTyper()</span><br><span class="line"></span><br><span class="line">Dim fileRoot$, curChar$</span><br><span class="line">Dim targetStr</span><br><span class="line"></span><br><span class="line">fileRoot = &quot;C:\Users\xuchl\Desktop\test.txt&quot;</span><br><span class="line"></span><br><span class="line">&apos;读取文本内容</span><br><span class="line">targetStr = Split(ReadUTF(fileRoot), vbCrLf)</span><br><span class="line">If (UBound(targetStr) = 0) Then</span><br><span class="line">    targetStr = Split(targetStr(0), vbLf) &apos;换行符不是\r\n时，以\n重新换行</span><br><span class="line">End If</span><br><span class="line"></span><br><span class="line">&apos;延迟两秒</span><br><span class="line">&apos;延迟毫秒级不好控制，用Windows API函数Sleep可以但是不想</span><br><span class="line">delay (2)</span><br><span class="line"></span><br><span class="line">For i = 0 To UBound(targetStr)</span><br><span class="line">    For m = 1 To Len(targetStr(i))</span><br><span class="line">        curChar = Mid(targetStr(i), m, 1)</span><br><span class="line">        curChar = Replace(curChar, &quot;+&quot;, &quot;+=&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;^&quot;, &quot;+6&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;%&quot;, &quot;+5&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;&#123;&quot;, &quot;+[&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;&#125;&quot;, &quot;+]&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;(&quot;, &quot;+9&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;)&quot;, &quot;+0&quot;)</span><br><span class="line">        curChar = Replace(curChar, &quot;~&quot;, &quot;+`&quot;)</span><br><span class="line">        </span><br><span class="line">        SendKeys curChar</span><br><span class="line">        delay (0.5)</span><br><span class="line">    Next</span><br><span class="line">Next</span><br><span class="line"></span><br><span class="line">End Sub</span><br><span class="line"></span><br><span class="line">Function ReadUTF(ByVal FileName As String) As String</span><br><span class="line">    With CreateObject(&quot;ADODB.Stream&quot;)</span><br><span class="line">        .Type = 2    &apos;读取文本文件</span><br><span class="line">        .Mode = 3   &apos;读写</span><br><span class="line">        .Open</span><br><span class="line">        .LoadFromFile FileName</span><br><span class="line">        .Charset = &quot;UTF-8&quot;  &apos;设定编码</span><br><span class="line">        .Position = 2</span><br><span class="line">        ReadUTF = .ReadText</span><br><span class="line">        .Close</span><br><span class="line">    End With</span><br><span class="line">End Function</span><br><span class="line"></span><br><span class="line">Function delay(s%)</span><br><span class="line">    tm = Timer</span><br><span class="line">    Do Until Timer - tm &gt; s</span><br><span class="line">        DoEvents</span><br><span class="line">    Loop</span><br><span class="line">End Function</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-Java"><a href="#2-Java" class="headerlink" title="2 Java"></a>2 Java</h4><p>果然这个才是本命，没有VBS简单，不过可以跨平台使用了（未验证）。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.awt.AWTException;</span><br><span class="line">import java.awt.Robot;</span><br><span class="line">import java.awt.event.KeyEvent;</span><br><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.HashSet;</span><br><span class="line">import java.util.Map;</span><br><span class="line">import java.util.Set;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * java打字</span><br><span class="line"> * 只支持英文和字符</span><br><span class="line"> * @author xuchl</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">public class javaTyper &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			// 键码对照</span><br><span class="line">			Map&lt;String, Integer&gt; keyCodeMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">			keyCodeMap.put(&quot;~&quot;, 0xC0);</span><br><span class="line">			keyCodeMap.put(&quot;-&quot;, 0x2D);</span><br><span class="line">			keyCodeMap.put(&quot;=&quot;, 0x3D);</span><br><span class="line">			keyCodeMap.put(&quot;	&quot;, (int) &apos;\t&apos;);</span><br><span class="line">			keyCodeMap.put(&quot;[&quot;, 0x5B);</span><br><span class="line">			keyCodeMap.put(&quot;]&quot;, 0x5D);</span><br><span class="line">			keyCodeMap.put(&quot;\\&quot;, 0x5C);</span><br><span class="line">			keyCodeMap.put(&quot;;&quot;, 0x3B);</span><br><span class="line">			keyCodeMap.put(&quot;&apos;&quot;, 0xDE);</span><br><span class="line">			keyCodeMap.put(&quot;,&quot;, 0x2C);</span><br><span class="line">			keyCodeMap.put(&quot;.&quot;, 0x2E);</span><br><span class="line">			keyCodeMap.put(&quot;/&quot;, 0x2F);</span><br><span class="line">			keyCodeMap.put(&quot; &quot;, 0x20);</span><br><span class="line"></span><br><span class="line">			// Shift配合用</span><br><span class="line">			keyCodeMap.put(&quot;`&quot;, 0xC0);</span><br><span class="line">			keyCodeMap.put(&quot;!&quot;, 0x31);</span><br><span class="line">			keyCodeMap.put(&quot;@&quot;, 0x32);</span><br><span class="line">			keyCodeMap.put(&quot;#&quot;, 0x33);</span><br><span class="line">			keyCodeMap.put(&quot;$&quot;, 0x34);</span><br><span class="line">			keyCodeMap.put(&quot;%&quot;, 0x35);</span><br><span class="line">			keyCodeMap.put(&quot;^&quot;, 0x36);</span><br><span class="line">			keyCodeMap.put(&quot;&amp;&quot;, 0x37);</span><br><span class="line">			keyCodeMap.put(&quot;*&quot;, 0x38);</span><br><span class="line">			keyCodeMap.put(&quot;(&quot;, 0x39);</span><br><span class="line">			keyCodeMap.put(&quot;)&quot;, 0x30);</span><br><span class="line">			keyCodeMap.put(&quot;_&quot;, 0x2D);</span><br><span class="line">			keyCodeMap.put(&quot;+&quot;, 0x3D);</span><br><span class="line">			keyCodeMap.put(&quot;&#123;&quot;, 0x5B);</span><br><span class="line">			keyCodeMap.put(&quot;&#125;&quot;, 0x5D);</span><br><span class="line">			keyCodeMap.put(&quot;|&quot;, 0x5C);</span><br><span class="line">			keyCodeMap.put(&quot;:&quot;, 0x3B);</span><br><span class="line">			keyCodeMap.put(&quot;\&quot;&quot;, 0xDE);</span><br><span class="line">			keyCodeMap.put(&quot;&lt;&quot;, 0x2C);</span><br><span class="line">			keyCodeMap.put(&quot;&gt;&quot;, 0x2E);</span><br><span class="line">			keyCodeMap.put(&quot;?&quot;, 0x2F);</span><br><span class="line"></span><br><span class="line">			keyCodeMap.put(&quot;0&quot;, 0x30);</span><br><span class="line">			keyCodeMap.put(&quot;1&quot;, 0x31);</span><br><span class="line">			keyCodeMap.put(&quot;2&quot;, 0x32);</span><br><span class="line">			keyCodeMap.put(&quot;3&quot;, 0x33);</span><br><span class="line">			keyCodeMap.put(&quot;4&quot;, 0x34);</span><br><span class="line">			keyCodeMap.put(&quot;5&quot;, 0x35);</span><br><span class="line">			keyCodeMap.put(&quot;6&quot;, 0x36);</span><br><span class="line">			keyCodeMap.put(&quot;7&quot;, 0x37);</span><br><span class="line">			keyCodeMap.put(&quot;8&quot;, 0x38);</span><br><span class="line">			keyCodeMap.put(&quot;9&quot;, 0x39);</span><br><span class="line"></span><br><span class="line">			keyCodeMap.put(&quot;a&quot;, 0x41);</span><br><span class="line">			keyCodeMap.put(&quot;b&quot;, 0x42);</span><br><span class="line">			keyCodeMap.put(&quot;c&quot;, 0x43);</span><br><span class="line">			keyCodeMap.put(&quot;d&quot;, 0x44);</span><br><span class="line">			keyCodeMap.put(&quot;e&quot;, 0x45);</span><br><span class="line">			keyCodeMap.put(&quot;f&quot;, 0x46);</span><br><span class="line">			keyCodeMap.put(&quot;g&quot;, 0x47);</span><br><span class="line">			keyCodeMap.put(&quot;h&quot;, 0x48);</span><br><span class="line">			keyCodeMap.put(&quot;i&quot;, 0x49);</span><br><span class="line">			keyCodeMap.put(&quot;j&quot;, 0x4A);</span><br><span class="line">			keyCodeMap.put(&quot;k&quot;, 0x4B);</span><br><span class="line">			keyCodeMap.put(&quot;l&quot;, 0x4C);</span><br><span class="line">			keyCodeMap.put(&quot;m&quot;, 0x4D);</span><br><span class="line">			keyCodeMap.put(&quot;n&quot;, 0x4E);</span><br><span class="line">			keyCodeMap.put(&quot;o&quot;, 0x4F);</span><br><span class="line">			keyCodeMap.put(&quot;p&quot;, 0x50);</span><br><span class="line">			keyCodeMap.put(&quot;q&quot;, 0x51);</span><br><span class="line">			keyCodeMap.put(&quot;r&quot;, 0x52);</span><br><span class="line">			keyCodeMap.put(&quot;s&quot;, 0x53);</span><br><span class="line">			keyCodeMap.put(&quot;t&quot;, 0x54);</span><br><span class="line">			keyCodeMap.put(&quot;u&quot;, 0x55);</span><br><span class="line">			keyCodeMap.put(&quot;v&quot;, 0x56);</span><br><span class="line">			keyCodeMap.put(&quot;w&quot;, 0x57);</span><br><span class="line">			keyCodeMap.put(&quot;x&quot;, 0x58);</span><br><span class="line">			keyCodeMap.put(&quot;y&quot;, 0x59);</span><br><span class="line">			keyCodeMap.put(&quot;z&quot;, 0x5A);</span><br><span class="line"></span><br><span class="line">			Set&lt;String&gt; specialCodeSet = new HashSet&lt;String&gt;();</span><br><span class="line">			specialCodeSet.add(&quot;~&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;!&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;@&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;#&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;$&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;%&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;^&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&amp;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;*&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;(&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;)&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;_&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;+&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&#123;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&#125;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;|&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;:&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;\&quot;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&lt;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;&gt;&quot;);</span><br><span class="line">			specialCodeSet.add(&quot;?&quot;);</span><br><span class="line"></span><br><span class="line">			// 数据来源文件</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;C:\\Users\\xuchl\\Desktop\\test.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			char c;</span><br><span class="line"></span><br><span class="line">			// JDK自带Robot类，用于为测试自动化。</span><br><span class="line">			// 能够控制鼠标和键盘，还能屏幕截图。</span><br><span class="line">			Robot r = new Robot();</span><br><span class="line">			r.delay(2000);</span><br><span class="line"></span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				for (int i = 0; i &lt; lineStr.length(); i++) &#123;</span><br><span class="line">					c = lineStr.charAt(i);</span><br><span class="line">					// 按下键盘按键</span><br><span class="line">					if (65 &lt;= c &amp;&amp; c &lt;= 90 || specialCodeSet.contains(String.valueOf(c))) &#123;</span><br><span class="line">						// 大写字母和部分特殊字符按下shift</span><br><span class="line">						r.keyPress(KeyEvent.VK_SHIFT);</span><br><span class="line">					&#125;</span><br><span class="line">					r.keyPress(keyCodeMap.get(String.valueOf(c).toLowerCase()));</span><br><span class="line"></span><br><span class="line">					// 释放键盘按键</span><br><span class="line">					if (65 &lt;= c &amp;&amp; c &lt;= 90 || specialCodeSet.contains(String.valueOf(c))) &#123;</span><br><span class="line">						r.keyRelease(KeyEvent.VK_SHIFT);</span><br><span class="line">					&#125;</span><br><span class="line">					r.keyRelease(keyCodeMap.get(String.valueOf(c).toLowerCase()));</span><br><span class="line">					// 延迟，不随机了</span><br><span class="line">					r.delay(100);</span><br><span class="line">				&#125;</span><br><span class="line">				r.keyPress(KeyEvent.VK_ENTER);</span><br><span class="line">				r.keyRelease(KeyEvent.VK_ENTER);</span><br><span class="line">			&#125;</span><br><span class="line">			br.close();</span><br><span class="line"></span><br><span class="line">		&#125; catch (FileNotFoundException fnfe) &#123;</span><br><span class="line">			fnfe.printStackTrace();</span><br><span class="line">		&#125; catch (IOException ioe) &#123;</span><br><span class="line">			ioe.printStackTrace();</span><br><span class="line">		&#125; catch (AWTException awte) &#123;</span><br><span class="line">			awte.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="3-Node-js"><a href="#3-Node-js" class="headerlink" title="3 Node.js"></a>3 Node.js</h4><p>有自己库的语言就是强大啊，比如Python，Go（这两个都不写了，go的go-vgo/robotgo加载不下来），用的第三方的robotjs，不同系统需要的环境不同。<br>本来很简单就写完了，但是朋友的Deepin跑出的效果和Win10不同。然后在自己的的Deepin中验证，效果一样（主要为<code>&lt;</code>和<code>“</code>的问题）。刚开始以为是Deepin自己的问题，然后又装了CentOS7（8太大，7下了第三个镜像才搞定GUI），最后效果一样，不知道是不是官方的锅。提了一个issue，还拉上一个英语老师给我看看英语写的对不对，但愿对方能看懂吧。<br>Node.js也不是很复杂，但是速度不能往小里调。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/*</span><br><span class="line">  nodejs打字</span><br><span class="line">  只支持英文和字符</span><br><span class="line">  author xuchl</span><br><span class="line">*/</span><br><span class="line">const robot = require(&quot;robotjs&quot;);</span><br><span class="line">const fs = require(&apos;fs&apos;);</span><br><span class="line">const readline = require(&apos;readline&apos;);</span><br><span class="line"></span><br><span class="line">// 速度调低明显，把数值调大效果不大</span><br><span class="line">// 800 : Characters per minute</span><br><span class="line">//robot.typeStringDelayed(&quot;`1234567890-=[]\;&apos;,./~!@#$%^&amp;*()_+&quot;, 800);</span><br><span class="line"></span><br><span class="line">// 速度调低明显，把数值调小效果不大</span><br><span class="line">// Sets the delay in milliseconds to sleep after a keyboard event. This is 10ms by default.</span><br><span class="line">//robot.setKeyboardDelay(5);</span><br><span class="line"></span><br><span class="line">// ==========2 start==========</span><br><span class="line">// deepin,centos(Linux)中robotjs特殊字符对应(&lt;, &quot;更为特殊)</span><br><span class="line">const specialCodeAry = [&quot;~&quot;, &quot;!&quot;, &quot;@&quot;, &quot;#&quot;, &quot;$&quot;, &quot;%&quot;, &quot;^&quot;, &quot;&amp;&quot;, &quot;*&quot;, &quot;(&quot;, &quot;)&quot;, &quot;_&quot;, &quot;+&quot;, &quot;&#123;&quot;, &quot;&#125;&quot;, &quot;|&quot;, &quot;:&quot;, &quot;&gt;&quot;, &quot;?&quot;];</span><br><span class="line">// ==========2 end==========</span><br><span class="line"></span><br><span class="line">setTimeout(function() &#123;</span><br><span class="line">	const readInterface = readline.createInterface(&#123;</span><br><span class="line">		input: fs.createReadStream(&apos;../test.txt&apos;)</span><br><span class="line">	&#125;);</span><br><span class="line"></span><br><span class="line">	readInterface.on(&apos;line&apos;, function(line) &#123;</span><br><span class="line">		for (let i = 0; i &lt; line.length; i++) &#123;</span><br><span class="line">			//robot.keyTap(line.charAt(i)); // 需要配合SHIFT的按键字符会变成不按SHIFT的状态，比如大写字母变小写，*变8</span><br><span class="line">			// ==========1 start==========</span><br><span class="line">			//robot.typeString(line.charAt(i)); // 所见即所得(windows限定,在Linux里不好使，keyTap效果一样但是大写字母与&lt;除外)</span><br><span class="line">			// ==========1 end==========</span><br><span class="line">			// ==========2 start==========</span><br><span class="line">			// deepin,centos(Linux)中robotjs特殊字符对应(&lt;, &quot;更为特殊)</span><br><span class="line">			let curChar = line.charAt(i);</span><br><span class="line">			if (curChar === &quot;\&quot;&quot;) &#123;</span><br><span class="line">				robot.keyTap(&quot;&apos;&quot;, [&quot;shift&quot;]);</span><br><span class="line">			&#125; else if (-1 &lt; specialCodeAry.indexOf(curChar)) &#123;</span><br><span class="line">				robot.keyTap(curChar, [&quot;shift&quot;]);</span><br><span class="line">			&#125; else &#123;</span><br><span class="line">				robot.typeString(curChar);</span><br><span class="line">			&#125;</span><br><span class="line">			// ==========2 end==========</span><br><span class="line">		&#125;</span><br><span class="line">		robot.keyTap(&quot;enter&quot;);</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;, 2000);</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<h4 id="我的安装过程，可以忽略"><a href="#我的安装过程，可以忽略" class="headerlink" title="我的安装过程，可以忽略"></a>我的安装过程，可以忽略</h4><p>robotjs编译环境<br><img src="/img/20200510/3.png" alt></p>
-<blockquote>
-<p>Win10<br>因为笔记本换成了NUC，安装时提示没有Python，装了最新的Python（但是它只支持2.7的），然后再安装又提示没有VS库。<br><img src="/img/20200510/4.png" alt><br>执行一句<code>npm install --global --production windows-build-tools</code>环境就齐了（Python2.7也装上了）</p>
-</blockquote>
-<blockquote>
-<p>Deepin<br>因为之前搞过别的，基本环境都有。提示缺少X11/extensions/XTest.h<br>执行<code>sudo apt-get install libx11-dev</code>和<code>sudo apt-get install xorg-dev</code>后安装成功</p>
-</blockquote>
-<blockquote>
-<p>CentOS7<br>这个就比较痛苦了，需要先装系统<br>使用官网二进制数据包安装Node.js<br><code>wget https://nodejs.org/dist/v12.16.3/node-v12.16.3-linux-x64.tar.xz</code><br><code>tar -xvf node-v12.16.3-linux-x64.tar.xz</code><br><code>ln -s /home/xuchl/桌面/node-v12.16.3-linux-x64/bin/node /usr/bin/node</code><br><code>ln -s /home/xuchl/桌面/node-v12.16.3-linux-x64/bin/npm /usr/bin/npm</code><br><code>node -v</code><br><code>npm -v</code><br>显示版本号，安装成功<br>执行<code>npm i robotjs</code>报错<br>sh: prebuild-install: 未找到命令<br>sh: node-gyp: 未找到命令<br>然后没有解决问题，明明Deepin也是这么装的<br>应该是Node.js安装问题，然后尝试使用yum安装<br><code>curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -</code><br><code>sudo yum install nodejs</code><br>执行<code>npm i robotjs</code>报错<br>make: g++：命令未找到<br>执行<code>yum install gcc-c++</code>安装<br>再安装报错：../src/mouse.c:12:35: 致命错误：X11/extensions/XTest.h：没有那个文件或目录<br>执行以下命令依旧报错<br><code>yum install libX11*</code><br><code>yum install xorg*</code><br><code>yum install libxtst*</code><br><code>yum install libpng*</code><br>然后放弃了，真香警告<br>放大招<code>yum -y upgrade</code>,此命令慎用，因为我是新环境无所谓<br>执行<code>yum install libXtst-devel</code>后安装成功<br>跑出结果已经过了晚上12点了</p>
-</blockquote>
-</blockquote>
-<h4 id="4-没有其他了"><a href="#4-没有其他了" class="headerlink" title="4 没有其他了"></a>4 没有其他了</h4><p>本来还想用别的语言写的，只有能够调用键盘，应该都能写。除了上面写过以及提到过的语言，其他的比如C，PHP都可以实现。但是被Node.js搞的头大，就不了了之了，实现逻辑也都差不多。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-        <tag>VBS</tag>
-        <tag>Node.js</tag>
-        <tag>VBA</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</title>
-    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Vue-js%E4%BD%BF%E7%94%A8%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BEjsAPI%E8%AE%A1%E7%AE%97%E4%B8%A4%E7%82%B9%E9%97%B4%E8%B7%9D%E7%A6%BB/</url>
-    <content><![CDATA[<h2 id="工作笔记-Vue-js使用高德地图jsAPI计算两点间距离"><a href="#工作笔记-Vue-js使用高德地图jsAPI计算两点间距离" class="headerlink" title="工作笔记-Vue.js使用高德地图jsAPI计算两点间距离"></a>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</h2><p><em>只是在Vue里用到，主要还是高德地图jsAPI的逻辑，记录一下，以备后用</em></p>
-<h2 id="vue-amap"><a href="#vue-amap" class="headerlink" title="vue-amap"></a>vue-amap</h2><p><a href="https://elemefe.github.io/vue-amap/" target="_blank" rel="noopener">vue-amap</a>基于 Vue 2.x 和高德地图的地图组件。Vue不是很熟悉，从文档中复制粘贴，这里只提一下。</p>
-<p>npm安装<code>npm install vue-amap --save</code></p>
-<p>引入vue-amap</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import Vue from &apos;vue&apos;;</span><br><span class="line">import VueAMap from &apos;vue-amap&apos;;</span><br><span class="line">Vue.use(VueAMap);</span><br><span class="line">VueAMap.initAMapApiLoader(&#123;</span><br><span class="line">  key: &quot;你的高德地图key&quot;,</span><br><span class="line">  plugin: [</span><br><span class="line">    &quot;Autocomplete&quot;,</span><br><span class="line">    &quot;PlaceSearch&quot;,</span><br><span class="line">    &quot;Scale&quot;,</span><br><span class="line">    &quot;OverView&quot;,</span><br><span class="line">    &quot;ToolBar&quot;,</span><br><span class="line">    &quot;MapType&quot;,</span><br><span class="line">    &quot;PolyEditor&quot;,</span><br><span class="line">    &quot;AMap.CircleEditor&quot;</span><br><span class="line">  ],</span><br><span class="line">  // 默认高德 sdk 版本为 1.4.4</span><br><span class="line">  v: &quot;1.4.4&quot;</span><br><span class="line">&#125;);</span><br><span class="line">data() &#123;</span><br><span class="line">  return &#123;</span><br><span class="line">    // 地图</span><br><span class="line">    zoom: 12,</span><br><span class="line">    center: [117.055185, 36.684594],</span><br><span class="line">    amapManager,</span><br><span class="line">    events: &#123;</span><br><span class="line">      // o下面js中替换成map了</span><br><span class="line">      init(o) &#123;……&#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;el-col :span=&quot;16&quot;&gt;</span><br><span class="line">  &lt;el-form-item label prop=&quot;code&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;amap-page-container&quot;&gt;</span><br><span class="line">      &lt;el-amap</span><br><span class="line">        vid=&quot;amapDemo&quot;</span><br><span class="line">        :center=&quot;center&quot;</span><br><span class="line">        :amap-manager=&quot;amapManager&quot;</span><br><span class="line">        :zoom=&quot;zoom&quot;</span><br><span class="line">        :events=&quot;events&quot;</span><br><span class="line">        class=&quot;amap-demo&quot;</span><br><span class="line">      &gt;&lt;/el-amap&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  &lt;/el-form-item&gt;</span><br><span class="line">&lt;/el-col&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="高德地图jsAPI"><a href="#高德地图jsAPI" class="headerlink" title="高德地图jsAPI"></a>高德地图jsAPI</h2><p>主要记录这部分代码，后来从Vue中独立出来。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">&lt;div id=&quot;container&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;script src=&quot;https://webapi.amap.com/maps?v=1.4.4&amp;key=你的高德地图key&amp;plugin=AMap.Geocoder&quot;&gt;&lt;/script&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">var map = new AMap.Map(&apos;container&apos;);</span><br><span class="line"></span><br><span class="line">var markers = [];</span><br><span class="line">var contentAry = [&quot;注册&quot;, &quot;发函&quot;, &quot;回函&quot;];</span><br><span class="line">var lineStyleAry = [&quot;#80d8ff&quot;, &quot;#ff304e&quot;];</span><br><span class="line">var textStyleAry = [</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#29b6f6&quot;, &quot;border-color&quot;: &quot;#e1f5fe&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;,</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#f62972&quot;, &quot;border-color&quot;: &quot;#fee1ee&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">// 地理编码，什么时候检索完不可控（顺序有时也会变）</span><br><span class="line">var index = 0;</span><br><span class="line">/*</span><br><span class="line">var geocoder = new AMap.Geocoder(&#123;</span><br><span class="line">	city: &quot;010&quot;, //城市设为北京，默认：“全国”</span><br><span class="line">&#125;);</span><br><span class="line">geoCode(&quot;八大胡同&quot;);</span><br><span class="line">geoCode(&quot;三里屯&quot;);</span><br><span class="line">geoCode(&quot;中关村&quot;);</span><br><span class="line"></span><br><span class="line">function geoCode(address) &#123;</span><br><span class="line">	geocoder.getLocation(address, function(status, result) &#123;</span><br><span class="line">		if (status === &apos;complete&apos; &amp;&amp; result.geocodes.length) &#123;</span><br><span class="line">			var lnglat = result.geocodes[0].location;</span><br><span class="line">			var marker = new AMap.Marker();</span><br><span class="line">			marker.setPosition(lnglat);</span><br><span class="line">			map.add(marker);</span><br><span class="line">			marker.setLabel(&#123;</span><br><span class="line">				offset: new AMap.Pixel( - 7, -6),</span><br><span class="line">				direction: &quot;center&quot;,</span><br><span class="line">				content: contentAry[index]</span><br><span class="line">			&#125;);</span><br><span class="line">			markers[index] = marker;</span><br><span class="line">			map.setFitView(marker);</span><br><span class="line">			index++;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">*/</span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">markers = [[116.386511, 39.891422], [116.457960, 39.928583], [116.315869, 39.981125]];</span><br><span class="line">// 标记点</span><br><span class="line">markers.forEach(function(marker) &#123;</span><br><span class="line">	var mk = new AMap.Marker(&#123;</span><br><span class="line">	  map: map,</span><br><span class="line">	  position: [marker[0], marker[1]]</span><br><span class="line">	&#125;);</span><br><span class="line">	mk.setLabel(&#123;</span><br><span class="line">	  offset: new AMap.Pixel(-7, -6),</span><br><span class="line">	  direction: &quot;center&quot;,</span><br><span class="line">	  content: contentAry[index]</span><br><span class="line">	&#125;);</span><br><span class="line">	index++;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">var p1 = new AMap.LngLat(116.386511, 39.891422);</span><br><span class="line">var p2 = new AMap.LngLat(116.457960, 39.928583);</span><br><span class="line">var p3 = new AMap.LngLat(116.315869, 39.981125);</span><br><span class="line">// 连线标记距离</span><br><span class="line">drawLineDistance(p1, p2, lineStyleAry[0], textStyleAry[0]);</span><br><span class="line">drawLineDistance(p2, p3, lineStyleAry[1], textStyleAry[1]);</span><br><span class="line"></span><br><span class="line">// 根据地图上添加的覆盖物分布情况，自动缩放地图到合适的视野级别，参数均可缺省</span><br><span class="line">map.setFitView();</span><br><span class="line"></span><br><span class="line">function drawLineDistance(p1, p2, lineStyle, textStyle) &#123;</span><br><span class="line">	var textPos = p1.divideBy(2).add(p2.divideBy(2));</span><br><span class="line">	// 距离</span><br><span class="line">	var distance = Math.round(p1.distance(p2));</span><br><span class="line">	var path = [p1, p2];</span><br><span class="line"></span><br><span class="line">	var line = new AMap.Polyline(&#123;</span><br><span class="line">		map: map,</span><br><span class="line">		strokeColor: lineStyle,</span><br><span class="line">		isOutline: true,</span><br><span class="line">		outlineColor: &quot;white&quot;,</span><br><span class="line">		path: path</span><br><span class="line">	&#125;);</span><br><span class="line">	// 连线</span><br><span class="line">	line.setPath(path);</span><br><span class="line">	// 设置文本</span><br><span class="line">	var text = new AMap.Text(&#123;</span><br><span class="line">		text: &quot;两点相距&quot; + distance + &quot;米&quot;,</span><br><span class="line">		position: textPos,</span><br><span class="line">		map: map,</span><br><span class="line">		style: textStyle</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;/body&gt;</span><br></pre></td></tr></table></figure>
-
-<p>效果如下</p>
-<iframe width="100%" height="500px" src="https://xuchunlei.top/gaodeMap.html"></iframe>]]></content>
-      <tags>
-        <tag>Vue.js</tag>
-        <tag>高德地图</tag>
-        <tag>笔记</tag>
       </tags>
   </entry>
 </search>
