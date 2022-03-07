@@ -1,6 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Docker学习笔记（二）-使用</title>
+    <url>/2020/03/18/Docker%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89-%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="Docker学习笔记（二）-使用"><a href="#Docker学习笔记（二）-使用" class="headerlink" title="Docker学习笔记（二）-使用"></a>Docker学习笔记（二）-使用</h2><p><em>因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单</em></p>
+<h3 id="5-Docker数据卷"><a href="#5-Docker数据卷" class="headerlink" title="5 Docker数据卷"></a>5 Docker数据卷</h3><p>数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和文件和文件夹，为了持久化和共享数据。当数据卷目录挂载到容器目录后，修改会立即同步。容器和数据卷都可以一对多。<br><img src="/img/20200318/1.png" alt><br>配置数据卷<br>创建容器时使用<code>-v</code>参数来挂载数据卷，主机目录不写会默认分配一个目录<br>目录必须是绝对路径，目录不存在会自动创建，可以挂载多个数据卷（多个<code>-v</code>）<br><code>docker run ... -v 主机目录（文件）:容器内目录（文件） ...</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=c3 \</span><br><span class="line">    -v /root/data:/root/data \</span><br><span class="line">    -v /root/data2:/root/data2 \</span><br><span class="line">    centos:8</span><br></pre></td></tr></table></figure>
+
+<p>以上数据卷，容器c3，容器c4的目录操作都会同步（共享数据）。删除容器，数据卷的数据还存在（持久化）。<br>通过<code>docker inspect</code>命令查看容器信息，在HostConfig下的Binds（Mounts里也能）查看绑定数据卷信息。</p>
+<p>配置数据卷容器<br>通过<code>--volume-from</code>参数配置，可以简化数据配置。容器会直接和数据卷关联，删除数据卷容器不影响下面的容器和数据卷的交互。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=cd1 --volumes-from c3 centos:8</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Docker应用部署"><a href="#6-Docker应用部署" class="headerlink" title="6 Docker应用部署"></a>6 Docker应用部署</h3><p>应用部署一般过程为：搜索镜像，拉取镜像，创建容器。这里以mysql来举例，其他的也差不多，只是容器创建的时候有所不同，比如挂载数据卷之类的。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">搜索镜像（版本号需要从Docker Hub上看）</span><br><span class="line">docker search mysql</span><br><span class="line"></span><br><span class="line">拉取镜像</span><br><span class="line">docker pull mysql:8</span><br><span class="line"></span><br><span class="line">创建容器（设置端口映射）</span><br><span class="line">docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -id mysql:8</span><br></pre></td></tr></table></figure>
+
+<p><code>-p 3306:3306</code> 将容器的3306端口映射到主机的3306端口<br><code>-e MYSQL_ROOT_PASSWORD=123456</code> 初始化root用户的密码</p>
+<p>远程连接mysql数据库成功<br><img src="/img/20200318/2.png" alt></p>
+<h3 id="7-Dockerfile"><a href="#7-Dockerfile" class="headerlink" title="7 Dockerfile"></a>7 Dockerfile</h3><p>Docker镜像由一层一层的文件系统（UnionFS联合文件系统）组成，Dockerfile 是一个用来构建镜像的文本文件，文本内容包含了一条条构建镜像所需的指令和说明。<br>镜像制作可以通过容器转为镜像<br>容器转镜像（挂载的目录不会写入镜像，root目录下的生效）<br><code>docker commit [容器id] [镜像名称]:[镜像版本号]</code><br>镜像转压缩文件<br><code>docker save -o [压缩文件名称] [镜像名称]:[镜像版本号]</code><br>压缩文件解压（还原）<br><code>docker load -i [压缩文件名称]</code></p>
+<p>这里用tomcat来举例，简单创建一个tomcat容器。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker search tomcat</span><br><span class="line">docker pull tomcat</span><br><span class="line">docker run -id --name mytomcat -p 8080:8080 -v /root/tomcat:/usr/local/tomcat/webapps tomcat</span><br><span class="line">cd /root/tomcat/</span><br><span class="line">mkdir HelloWorld</span><br><span class="line">cd HelloWorld/</span><br><span class="line">vim index.html</span><br><span class="line">写入&lt;h1&gt;Hello World By Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过url访问<br><img src="/img/20200318/3.png" alt></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">容器转镜像</span><br><span class="line">docker commit e3bb40626a58 myimg_tomcat:1.0</span><br><span class="line">进入容器</span><br><span class="line">docker exec -it myimg_tomcat bash</span><br><span class="line">镜像转压缩文件</span><br><span class="line">docker save -o myimg_tomcat.tar myimg_tomcat:1.0</span><br><span class="line">删除原镜像</span><br><span class="line">docker rmi myimg_tomcat:1.0</span><br><span class="line">压缩文件解压（还原）</span><br><span class="line">docker load -i myimg_tomcat.tar</span><br><span class="line">创建新容器</span><br><span class="line">docker run -it --name load_tomcat  myimg_tomcat:1.0 bash</span><br><span class="line">容器内查看webapps目录，原来挂载文件消失</span><br><span class="line">cd /usr/local/tomcat/webapps</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
+
+<p>推荐使用dockerfile来创建自定义镜像<br>书写可以参考Docker Hub上面的Dockerfile文件的写法或者<a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" target="_blank" rel="noopener">官方文档</a>，这里简单列一下关键字。<br><code>FROM</code> 基于那个image构建（scratch为空镜像）<br><code>LABEL</code> 一些标签说明<br><code>RUN</code> 执行命令，在docker build时运行<br><code>CMD</code> 类似RUN，在docker run时运行，可被 docker run 命令行参数中指定要运行的程序所覆盖<br><code>ENTRYPOINT</code> 类似CMD，但其不会被 docker run 的命令行参数指定的指令所覆盖<br><code>EXPOSE</code> 声明端口<br><code>ENV</code> 设置环境变量<br><code>ARG</code> 类似ENV，环境变量仅对 Dockerfile 内有效<br><code>COPY</code> 复制文件或者目录到容器里指定路径<br><code>ADD</code> 类似COPY，同样功能推荐用COPY，ADD可以自动解压压缩文件到目标路径<br><code>VOLUME</code> 定义匿名数据卷<br><code>USER</code> 指定执行后续命令的用户和用户组<br><code>WORKDIR</code> 指定工作目录<br><code>ONBUILD</code> 延迟构建命令的执行<br><code>LABEL</code> 标签<br><code>MAINTAINER</code> 作者信息<br><code>HEALTHCHECK</code> 健康检查<br><code>SHELL</code> 指定执行脚本的shell</p>
+<p>使用Dockerfile创建镜像<br><code>docker build -f [Dockerfile路径] -t [镜像名]</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">这里新建Dockerfile文件来创建镜像</span><br><span class="line">vim tomcat_dockerfile</span><br><span class="line">写入</span><br><span class="line">FROM tomcat:latest</span><br><span class="line">MAINTAINER xuchl&lt;xuchl@xuchunlei.top&gt;</span><br><span class="line"></span><br><span class="line">WORKDIR /usr/local/tomcat/webapps</span><br><span class="line">RUN mkdir HelloWorld</span><br><span class="line">WORKDIR /usr/local/tomcat/webapps/HelloWorld</span><br><span class="line">RUN echo &quot;&lt;h1&gt;Tomcat From Dockerfile&lt;/h1&gt;&quot; &gt; index.html</span><br><span class="line"></span><br><span class="line">创建镜像</span><br><span class="line">docker build -f ./tomcat_dockerfile  -t dcfile_tomcat:1.0 .</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/5.png" alt><br>用Dockerfile Build镜像时Docker client会默认把Dockerfile同级所有文件发给docker Deamon中导致发送内容过大。<br><img src="/img/20200318/4.png" alt><br>可以新建一个空目录放Dockerfile文件，或者使用.dockerignore文件设置黑名单，该文件包含的目录不会被发送到Docker daemon中。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">创建容器</span><br><span class="line">docker run --name dcc -p 8080:8080 -d dcfile_tomcat:1.0</span><br></pre></td></tr></table></figure>
+
+<p>通过url访问<br><img src="/img/20200318/6.png" alt></p>
+<h3 id="8-Docker服务编排"><a href="#8-Docker服务编排" class="headerlink" title="8 Docker服务编排"></a>8 Docker服务编排</h3><p>Compose是用于定义和运行多容器Docker应用程序的工具，Compose具有用于管理应用程序整个生命周期的命令，包括启动，停止和重建服务等。</p>
+<blockquote>
+<p>步骤<br>1 使用Dockerfile定义应用环境，以便可以在任何地方复制。<br>2 使用docker-compose.yml定义组成应用程序服务，以便它们可以在隔离的环境中一起运行。<br>3 运行 docker-compose up启动并运行整个应用程序。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">安装Docker Compose的当前稳定版本（下了几次失败，换了国内的地址秒好）</span><br><span class="line">curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` &gt; /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">设置文件可执行权限</span><br><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">查看版本信息来验证是否安装成功</span><br><span class="line">docker-compose -v</span><br></pre></td></tr></table></figure>
+
+<p>简单写一个yml启动的例子（进入容器内加的页面），关键字就不（偷）解释（懒）了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mkdir composeHelloWorld</span><br><span class="line">cd composeHelloWorld/</span><br><span class="line"></span><br><span class="line">vim docker-compose.yml</span><br><span class="line"></span><br><span class="line">version: &apos;3&apos;</span><br><span class="line">services:</span><br><span class="line">  tomcat:</span><br><span class="line">    image: tomcat</span><br><span class="line">    ports:</span><br><span class="line">     - &quot;8090:8080&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/7.png" alt></p>
+<h3 id="9-Docker私有仓库"><a href="#9-Docker私有仓库" class="headerlink" title="9 Docker私有仓库"></a>9 Docker私有仓库</h3><p>私有仓库registry是一个官方提供的镜像。这里仓库放在本机，实际上是要放到不同机器上的。<br>搭建</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取仓库镜像</span><br><span class="line">docker pull registry</span><br><span class="line">创建容器并启动</span><br><span class="line">docker run -id --name registry -p 5000:5000 registry</span><br></pre></td></tr></table></figure>
+
+<p>访问<code>http://私库ip地址:5000/v2</code>出现<code>{}</code>说明运行正常</p>
+<p>上传</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标记镜像</span><br><span class="line">docker tag centos:8 localhost:5000/centos:8</span><br><span class="line"></span><br><span class="line">推送镜像</span><br><span class="line">docker push localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/8.png" alt><br>访问<code>http://私库ip地址:5000/v2/_catalog</code>出现<code>{&quot;repositories&quot;:[&quot;centos&quot;]}</code>说明上传成功</p>
+<p>拉取</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取镜像</span><br><span class="line">docker pull localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/9.png" alt><br>这里因为是本机，需要先删除才能拉取下来。</p>
+<p>Docker官方提供的私有仓库registry虽然简单但在管理上存在不足。可以通过<a href="https://github.com/goharbor/harbor" target="_blank" rel="noopener">Harbor</a>来弥补以上不足（这里只提一下）。</p>
+]]></content>
+      <tags>
+        <tag>Docker</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Docker学习笔记（一）—认识与安装（Deepin15.11）</title>
     <url>/2020/03/15/Docker%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E8%AE%A4%E8%AF%86%E4%B8%8E%E5%AE%89%E8%A3%85/</url>
     <content><![CDATA[<h2 id="Docker学习笔记（一）"><a href="#Docker学习笔记（一）" class="headerlink" title="Docker学习笔记（一）"></a>Docker学习笔记（一）</h2><h2 id="认识与安装（Deepin15-11）"><a href="#认识与安装（Deepin15-11）" class="headerlink" title="认识与安装（Deepin15.11）"></a>认识与安装（Deepin15.11）</h2><p><em>老早就知道Docker了，但是没有静下心来去看。终于简单的学习了一下，记一下笔记。但是篇幅有点多，分开写吧。</em></p>
@@ -95,66 +155,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Docker学习笔记（二）-使用</title>
-    <url>/2020/03/18/Docker%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89-%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="Docker学习笔记（二）-使用"><a href="#Docker学习笔记（二）-使用" class="headerlink" title="Docker学习笔记（二）-使用"></a>Docker学习笔记（二）-使用</h2><p><em>因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单</em></p>
-<h3 id="5-Docker数据卷"><a href="#5-Docker数据卷" class="headerlink" title="5 Docker数据卷"></a>5 Docker数据卷</h3><p>数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和文件和文件夹，为了持久化和共享数据。当数据卷目录挂载到容器目录后，修改会立即同步。容器和数据卷都可以一对多。<br><img src="/img/20200318/1.png" alt><br>配置数据卷<br>创建容器时使用<code>-v</code>参数来挂载数据卷，主机目录不写会默认分配一个目录<br>目录必须是绝对路径，目录不存在会自动创建，可以挂载多个数据卷（多个<code>-v</code>）<br><code>docker run ... -v 主机目录（文件）:容器内目录（文件） ...</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=c3 \</span><br><span class="line">    -v /root/data:/root/data \</span><br><span class="line">    -v /root/data2:/root/data2 \</span><br><span class="line">    centos:8</span><br></pre></td></tr></table></figure>
-
-<p>以上数据卷，容器c3，容器c4的目录操作都会同步（共享数据）。删除容器，数据卷的数据还存在（持久化）。<br>通过<code>docker inspect</code>命令查看容器信息，在HostConfig下的Binds（Mounts里也能）查看绑定数据卷信息。</p>
-<p>配置数据卷容器<br>通过<code>--volume-from</code>参数配置，可以简化数据配置。容器会直接和数据卷关联，删除数据卷容器不影响下面的容器和数据卷的交互。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=cd1 --volumes-from c3 centos:8</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-Docker应用部署"><a href="#6-Docker应用部署" class="headerlink" title="6 Docker应用部署"></a>6 Docker应用部署</h3><p>应用部署一般过程为：搜索镜像，拉取镜像，创建容器。这里以mysql来举例，其他的也差不多，只是容器创建的时候有所不同，比如挂载数据卷之类的。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">搜索镜像（版本号需要从Docker Hub上看）</span><br><span class="line">docker search mysql</span><br><span class="line"></span><br><span class="line">拉取镜像</span><br><span class="line">docker pull mysql:8</span><br><span class="line"></span><br><span class="line">创建容器（设置端口映射）</span><br><span class="line">docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -id mysql:8</span><br></pre></td></tr></table></figure>
-
-<p><code>-p 3306:3306</code> 将容器的3306端口映射到主机的3306端口<br><code>-e MYSQL_ROOT_PASSWORD=123456</code> 初始化root用户的密码</p>
-<p>远程连接mysql数据库成功<br><img src="/img/20200318/2.png" alt></p>
-<h3 id="7-Dockerfile"><a href="#7-Dockerfile" class="headerlink" title="7 Dockerfile"></a>7 Dockerfile</h3><p>Docker镜像由一层一层的文件系统（UnionFS联合文件系统）组成，Dockerfile 是一个用来构建镜像的文本文件，文本内容包含了一条条构建镜像所需的指令和说明。<br>镜像制作可以通过容器转为镜像<br>容器转镜像（挂载的目录不会写入镜像，root目录下的生效）<br><code>docker commit [容器id] [镜像名称]:[镜像版本号]</code><br>镜像转压缩文件<br><code>docker save -o [压缩文件名称] [镜像名称]:[镜像版本号]</code><br>压缩文件解压（还原）<br><code>docker load -i [压缩文件名称]</code></p>
-<p>这里用tomcat来举例，简单创建一个tomcat容器。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker search tomcat</span><br><span class="line">docker pull tomcat</span><br><span class="line">docker run -id --name mytomcat -p 8080:8080 -v /root/tomcat:/usr/local/tomcat/webapps tomcat</span><br><span class="line">cd /root/tomcat/</span><br><span class="line">mkdir HelloWorld</span><br><span class="line">cd HelloWorld/</span><br><span class="line">vim index.html</span><br><span class="line">写入&lt;h1&gt;Hello World By Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
-
-<p>通过url访问<br><img src="/img/20200318/3.png" alt></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">容器转镜像</span><br><span class="line">docker commit e3bb40626a58 myimg_tomcat:1.0</span><br><span class="line">进入容器</span><br><span class="line">docker exec -it myimg_tomcat bash</span><br><span class="line">镜像转压缩文件</span><br><span class="line">docker save -o myimg_tomcat.tar myimg_tomcat:1.0</span><br><span class="line">删除原镜像</span><br><span class="line">docker rmi myimg_tomcat:1.0</span><br><span class="line">压缩文件解压（还原）</span><br><span class="line">docker load -i myimg_tomcat.tar</span><br><span class="line">创建新容器</span><br><span class="line">docker run -it --name load_tomcat  myimg_tomcat:1.0 bash</span><br><span class="line">容器内查看webapps目录，原来挂载文件消失</span><br><span class="line">cd /usr/local/tomcat/webapps</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
-
-<p>推荐使用dockerfile来创建自定义镜像<br>书写可以参考Docker Hub上面的Dockerfile文件的写法或者<a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" target="_blank" rel="noopener">官方文档</a>，这里简单列一下关键字。<br><code>FROM</code> 基于那个image构建（scratch为空镜像）<br><code>LABEL</code> 一些标签说明<br><code>RUN</code> 执行命令，在docker build时运行<br><code>CMD</code> 类似RUN，在docker run时运行，可被 docker run 命令行参数中指定要运行的程序所覆盖<br><code>ENTRYPOINT</code> 类似CMD，但其不会被 docker run 的命令行参数指定的指令所覆盖<br><code>EXPOSE</code> 声明端口<br><code>ENV</code> 设置环境变量<br><code>ARG</code> 类似ENV，环境变量仅对 Dockerfile 内有效<br><code>COPY</code> 复制文件或者目录到容器里指定路径<br><code>ADD</code> 类似COPY，同样功能推荐用COPY，ADD可以自动解压压缩文件到目标路径<br><code>VOLUME</code> 定义匿名数据卷<br><code>USER</code> 指定执行后续命令的用户和用户组<br><code>WORKDIR</code> 指定工作目录<br><code>ONBUILD</code> 延迟构建命令的执行<br><code>LABEL</code> 标签<br><code>MAINTAINER</code> 作者信息<br><code>HEALTHCHECK</code> 健康检查<br><code>SHELL</code> 指定执行脚本的shell</p>
-<p>使用Dockerfile创建镜像<br><code>docker build -f [Dockerfile路径] -t [镜像名]</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">这里新建Dockerfile文件来创建镜像</span><br><span class="line">vim tomcat_dockerfile</span><br><span class="line">写入</span><br><span class="line">FROM tomcat:latest</span><br><span class="line">MAINTAINER xuchl&lt;xuchl@xuchunlei.top&gt;</span><br><span class="line"></span><br><span class="line">WORKDIR /usr/local/tomcat/webapps</span><br><span class="line">RUN mkdir HelloWorld</span><br><span class="line">WORKDIR /usr/local/tomcat/webapps/HelloWorld</span><br><span class="line">RUN echo &quot;&lt;h1&gt;Tomcat From Dockerfile&lt;/h1&gt;&quot; &gt; index.html</span><br><span class="line"></span><br><span class="line">创建镜像</span><br><span class="line">docker build -f ./tomcat_dockerfile  -t dcfile_tomcat:1.0 .</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/5.png" alt><br>用Dockerfile Build镜像时Docker client会默认把Dockerfile同级所有文件发给docker Deamon中导致发送内容过大。<br><img src="/img/20200318/4.png" alt><br>可以新建一个空目录放Dockerfile文件，或者使用.dockerignore文件设置黑名单，该文件包含的目录不会被发送到Docker daemon中。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">创建容器</span><br><span class="line">docker run --name dcc -p 8080:8080 -d dcfile_tomcat:1.0</span><br></pre></td></tr></table></figure>
-
-<p>通过url访问<br><img src="/img/20200318/6.png" alt></p>
-<h3 id="8-Docker服务编排"><a href="#8-Docker服务编排" class="headerlink" title="8 Docker服务编排"></a>8 Docker服务编排</h3><p>Compose是用于定义和运行多容器Docker应用程序的工具，Compose具有用于管理应用程序整个生命周期的命令，包括启动，停止和重建服务等。</p>
-<blockquote>
-<p>步骤<br>1 使用Dockerfile定义应用环境，以便可以在任何地方复制。<br>2 使用docker-compose.yml定义组成应用程序服务，以便它们可以在隔离的环境中一起运行。<br>3 运行 docker-compose up启动并运行整个应用程序。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">安装Docker Compose的当前稳定版本（下了几次失败，换了国内的地址秒好）</span><br><span class="line">curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` &gt; /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">设置文件可执行权限</span><br><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">查看版本信息来验证是否安装成功</span><br><span class="line">docker-compose -v</span><br></pre></td></tr></table></figure>
-
-<p>简单写一个yml启动的例子（进入容器内加的页面），关键字就不（偷）解释（懒）了。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mkdir composeHelloWorld</span><br><span class="line">cd composeHelloWorld/</span><br><span class="line"></span><br><span class="line">vim docker-compose.yml</span><br><span class="line"></span><br><span class="line">version: &apos;3&apos;</span><br><span class="line">services:</span><br><span class="line">  tomcat:</span><br><span class="line">    image: tomcat</span><br><span class="line">    ports:</span><br><span class="line">     - &quot;8090:8080&quot;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/7.png" alt></p>
-<h3 id="9-Docker私有仓库"><a href="#9-Docker私有仓库" class="headerlink" title="9 Docker私有仓库"></a>9 Docker私有仓库</h3><p>私有仓库registry是一个官方提供的镜像。这里仓库放在本机，实际上是要放到不同机器上的。<br>搭建</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取仓库镜像</span><br><span class="line">docker pull registry</span><br><span class="line">创建容器并启动</span><br><span class="line">docker run -id --name registry -p 5000:5000 registry</span><br></pre></td></tr></table></figure>
-
-<p>访问<code>http://私库ip地址:5000/v2</code>出现<code>{}</code>说明运行正常</p>
-<p>上传</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标记镜像</span><br><span class="line">docker tag centos:8 localhost:5000/centos:8</span><br><span class="line"></span><br><span class="line">推送镜像</span><br><span class="line">docker push localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/8.png" alt><br>访问<code>http://私库ip地址:5000/v2/_catalog</code>出现<code>{&quot;repositories&quot;:[&quot;centos&quot;]}</code>说明上传成功</p>
-<p>拉取</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取镜像</span><br><span class="line">docker pull localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/9.png" alt><br>这里因为是本机，需要先删除才能拉取下来。</p>
-<p>Docker官方提供的私有仓库registry虽然简单但在管理上存在不足。可以通过<a href="https://github.com/goharbor/harbor" target="_blank" rel="noopener">Harbor</a>来弥补以上不足（这里只提一下）。</p>
-]]></content>
-      <tags>
-        <tag>Docker</tag>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>GitHub Pages绑定域名</title>
     <url>/2019/11/08/GitHub-Pages%E7%BB%91%E5%AE%9A%E5%9F%9F%E5%90%8D/</url>
     <content><![CDATA[<h1 id="GitHub-Pages绑定域名"><a href="#GitHub-Pages绑定域名" class="headerlink" title="GitHub Pages绑定域名"></a>GitHub Pages绑定域名</h1><blockquote>
@@ -215,106 +215,6 @@
         <tag>Java</tag>
         <tag>IP</tag>
         <tag>Echarts</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux服务器搭建-Redis与FastDFS</title>
-    <url>/2020/02/11/Linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA-Redis%E4%B8%8EFastDFS/</url>
-    <content><![CDATA[<h1 id="Linux服务器搭建-Redis与FastDFS"><a href="#Linux服务器搭建-Redis与FastDFS" class="headerlink" title="Linux服务器搭建-Redis与FastDFS"></a>Linux服务器搭建-Redis与FastDFS</h1><p><em>简单记录了配置过程，仅供个人学习用。实际上会用到多台服务器，配置更复杂。</em></p>
-<h4 id="起因（可忽略）"><a href="#起因（可忽略）" class="headerlink" title="起因（可忽略）"></a>起因（可忽略）</h4><p>因为新型冠状病毒的影响，没有火车站的小县城在市际班车停运的情况下，无法回到工作岗位，然后就开始在家办公模式。因为有新任务，加上自己的电脑没有公司的开发环境，只好通过TeamViewer（公司没有VPN）远程公司电脑（公司有人，帮忙开机之类的）。用了不到一天就被逼疯了，效率太低。然后决定自己搭建开发环境。不过这个是我很不想干的事情，总会出幺蛾子，比如头疼的Maven，死活下不下来，远程复制公司的jar包到Maven仓库下，jar不出错了，但是还是编译不通过，最后删掉所有的私有仓库和插件库好了……公司的框架比较老，比较重（全面），和我电脑环境有点不兼容，比如MySQL的数据库。因为新任务比较简单，用不了太多的功能，主要搭建了Redis缓存和FastDFS文件服务器。</p>
-<h4 id="Redis安装"><a href="#Redis安装" class="headerlink" title="Redis安装"></a>Redis安装</h4><p>以前在Win7中装过-<a href="https://mp.weixin.qq.com/s?__biz=MzIwMjgwNTI0Mg==&mid=2247483713&idx=1&sn=d35bd94c0abf527b56229487d79fdabc&scene=19#wechat_redirect" target="_blank" rel="noopener">NoSQL数据库Redis从入门到没有然后</a>，这次在Linux虚拟机中安装。先把VMware虚拟机的网络适配器改成桥接模式，以便于设置固定ip。</p>
-<p>先从<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a>下载最新稳定版本5.0.7，解压，编译。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-5.0.7.tar.gz</span><br><span class="line">tar xzf redis-5.0.7.tar.gz</span><br><span class="line">cd cd redis-5.0.7/</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
-
-<p>make完后 redis-5.0.7目录src下会出现编译后的redis服务程序redis-server，执行<code>./redis-server</code>就可以通过前端模式启动了，不过ssh命令窗口关闭，redis-server程序就结束了。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd src</span><br><span class="line">./redis-server</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>后端模式启动</p>
-<blockquote>
-<p>修改redis.conf配置文件把<code>daemonize no</code>改为线程守护<code>yes</code></p>
-</blockquote>
-</blockquote>
-<p>修改配置文件redis.conf，打开远程连接（把<code>protected-mode yes</code>改为<code>no</code>并注释掉（前加#）<code>bing 127.0.0.1</code>未设置密码<code>requirepass</code>）。</p>
-<p>重启Redis，查找并关闭进程。并指定启动服务配置文件，不然按默认启动（这里坑了，修改了配置文件，一直提示我不能远程连接）。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ps -ef|grep redis</span><br><span class="line">kill 相关进程</span><br><span class="line">./redis-server redis.conf</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200211/1.jpg" alt><br>你也可以建立redis服务，设置成开机启动，这里偷懒。</p>
-<h4 id="FastDFS安装"><a href="#FastDFS安装" class="headerlink" title="FastDFS安装"></a>FastDFS安装</h4><p>FastDFS是一个开源的轻量级分布式文件系统，这里主要用来保存图片和文件并访问。</p>
-<ol>
-<li><p>先用git（没有git环境先执行<code>git apt-get install git</code>）克隆libfastcommon库（libfastcommon是从 FastDFS 和 FastDHT 中提取出来的公共 C 函数库，基础环境），进入目录编译并且安装。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/happyfish100/libfastcommon.git</span><br><span class="line">cd libfastcommon/</span><br><span class="line">./make.sh</span><br><span class="line">./make.sh install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>设置环境变量（注意32位系统没有64）和软连接</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">export LD_LIBRARY_PATH=/usr/lib64/</span><br><span class="line">ln -s /usr/lib64/libfastcommon.so /usr/local/lib/libfastcommon.so</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>安装FastDFS<br>从<a href="https://github.com/happyfish100/fastdfs/releases" target="_blank" rel="noopener">https://github.com/happyfish100/fastdfs/releases</a>获取最新版本6.06，解压编译安装。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget wget https://github.com/happyfish100/fastdfs/archive/V6.06.tar.gz</span><br><span class="line">tar xzf V6.06.tar.gz </span><br><span class="line">cd fastdfs-6.06/</span><br><span class="line">./make.sh</span><br><span class="line">./make.sh install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>修改配置文件<br>默认安装路径/etc/fdfs下的client.conf.sample，storage.conf.sample，tracker.conf.sample三个参考配置文件。<br>配置跟踪器 tracker.conf，这里端口使用默认的22122，不建议修改。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp tracker.conf.sample tracker.conf</span><br><span class="line">vim tracker.conf</span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-<p>修改下面两个参数<br>Tracker数据和日志目录地址（目录必须存在）<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/tracker</code><br>HTTP 服务端口<br><code>http.server_port = 80</code></p>
-<p>配置存储 storage.conf，端口依旧使用默认的23000。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp storage.conf.sample storage.conf</span><br><span class="line">vim storage.conf</span><br></pre></td></tr></table></figure>
-
-<p>Storage 数据和日志目录地址（目录必须存在）<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/storage</code><br>逐一配置 store_path_count 个路径（索引号从0开始，不配置store_path0就和base_path路径一样）<br><code>store_path0 = /home/xuchunlei/Desktop/linkstart/upload/file</code><br>tracker_server列表，这里只有一个，注释掉多余的，ip对应linux服务器的ip<br><code>tracker_server = 192.168.1.111:22122</code><br>访问端口<br><code>http.server_port = 80</code></p>
-<ol start="5">
-<li><p>启动服务<br>启动服务，22122和23000端口被监听说明启动成功。这里依然可以添加到服务，并开机启动。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/usr/bin/fdfs_trackerd /etc/fdfs/tracker.conf</span><br><span class="line">/usr/bin/fdfs_storaged /etc/fdfs/storage.conf</span><br><span class="line">netstat -unltp|grep fdfs</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>测试上传文件<br>修改客户端 client.conf</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp client.conf.sample client.conf</span><br><span class="line">vim client.conf</span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-<p>Client 的数据和日志目录<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/log</code><br>Tracker端口<br><code>tracker_server = 192.168.1.111:22122</code></p>
-<p>文件上传</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fdfs_test /etc/fdfs/client.conf upload /home/xuchunlei/Desktop/test.png</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200211/2.png" alt></p>
-<h4 id="FastDFS-http访问"><a href="#FastDFS-http访问" class="headerlink" title="FastDFS http访问"></a>FastDFS http访问</h4><p>虽然上传成功文件，但是这个时候是不能通过http来访问的，一般通过Nginx访问扩展模块来访问。</p>
-<ol>
-<li><p>安装Nginx<br>从<a href="https://nginx.org/en/download.html" target="_blank" rel="noopener">https://nginx.org/en/download.html</a>选择最新版本1.17.8。使用默认配置编译安装启动。浏览器访问localhost，出现Nginx界面表示安装成功。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget http://nginx.org/download/nginx-1.17.8.tar.gz</span><br><span class="line">tar xzf nginx-1.17.8.tar.gz </span><br><span class="line">cd nginx-1.17.8</span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line">/usr/local/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>安装fastdfs-nginx-module模块<br>在Nginx中添加fastdfs-nginx处理模块。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/happyfish100/fastdfs-nginx-module.git</span><br><span class="line">cd fastdfs-nginx-module/</span><br><span class="line">./configure --add-module=/home/xuchunlei/Desktop/linkstart/fastdfs/fastdfs-nginx-module/src</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-<p>此时通过<code>/usr/local/nginx/sbin/nginx -V</code>来查看版本和模块信息。</p>
-<ol start="3">
-<li>配置nginx.conf<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vim /usr/local/nginx/conf/nginx.conf</span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-<p>配置文件中加入新的location，root配置到Storage的store_path0路径加上data</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">location /group1/M00 &#123;</span><br><span class="line">    root /home/xuchunlei/Desktop/linkstart/upload/file/data;</span><br><span class="line">    ngx_fastdfs_module;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建/M00到data的软连接</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ln -s /home/xuchunlei/Desktop/linkstart/upload/file/data/ /home/xuchunlei/Desktop/linkstart/upload/file/data/group1/M00</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>配置mod_fastdfs.conf<br>复制fastdfs-nginx-module源码中的配置文件到/etc/fdfs目录并修改。<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp mod_fastdfs.conf /etc/fdfs/</span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-<p>tracker_server<br><code>tracker_server=192.168.1.111:22122</code><br>false时，即访问地址不使用分组名称，nginx中不需要分组<br><code>url_have_group_name = true</code><br>必须和storage.conf中配置的store_path0路径的一致<br><code>store_path0=/home/xuchunlei/Desktop/linkstart/upload/file</code></p>
-<p>复制FastDFS的部分配置文件（解压文件conf文件夹中）到/etc/fdfs目录</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp http.conf /etc/fdfs/</span><br><span class="line">cp mime.types /etc/fdfs/</span><br></pre></td></tr></table></figure>
-
-<p>重启Nginx</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/usr/local/nginx/sbin/nginx -s stop</span><br><span class="line">/usr/local/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
-
-<p>通过文件上传返回路径<code>http://192.168.1.111/group1/M00/00/00/wKgBb15BbKWAETJpAAGCZONuhNo096.png</code>来访问<br><img src="/img/20200211/3.jpg" alt></p>
-]]></content>
-      <tags>
-        <tag>Linux</tag>
-        <tag>Redis</tag>
-        <tag>FastDFS</tag>
       </tags>
   </entry>
   <entry>
@@ -608,69 +508,103 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>SSH远程登录</title>
-    <url>/2021/06/25/SSH%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/</url>
-    <content><![CDATA[<h1 id="SSH远程登录"><a href="#SSH远程登录" class="headerlink" title="SSH远程登录"></a>SSH远程登录</h1><p><em>起因是服务器在儿童节那天数据库连不上了，原因是中了之前横行的勒索病毒的变种……然后就有了后来的各种加强：windos变更为linux,通过SSH连接等等，这里就简单梳理一下SSH的相关知识</em><br><img src="/img/20210625/1.jpg" alt></p>
-<h4 id="什么是SSH"><a href="#什么是SSH" class="headerlink" title="什么是SSH"></a>什么是SSH</h4><p>SSH (Secure Shell 安全外壳协议)是为远程登录会话和其他网络服务提供安全性的网络协议。利用SSH协议可以有效防止远程管理过程中的信息泄露问题，即使被中途截获，密码和数据也不会泄露。可以防止中间人(man-in-the-middle)攻击。</p>
-<h4 id="口令登录"><a href="#口令登录" class="headerlink" title="口令登录"></a>口令登录</h4><p>之前的deepin使用的是OpenSSH，默认使用口令的安全验证，就是只有账号和口令就可以登录远程主机。因为之前改过端口，需要同通过参数-p来指定端口。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+    <title>Linux服务器搭建-Redis与FastDFS</title>
+    <url>/2020/02/11/Linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA-Redis%E4%B8%8EFastDFS/</url>
+    <content><![CDATA[<h1 id="Linux服务器搭建-Redis与FastDFS"><a href="#Linux服务器搭建-Redis与FastDFS" class="headerlink" title="Linux服务器搭建-Redis与FastDFS"></a>Linux服务器搭建-Redis与FastDFS</h1><p><em>简单记录了配置过程，仅供个人学习用。实际上会用到多台服务器，配置更复杂。</em></p>
+<h4 id="起因（可忽略）"><a href="#起因（可忽略）" class="headerlink" title="起因（可忽略）"></a>起因（可忽略）</h4><p>因为新型冠状病毒的影响，没有火车站的小县城在市际班车停运的情况下，无法回到工作岗位，然后就开始在家办公模式。因为有新任务，加上自己的电脑没有公司的开发环境，只好通过TeamViewer（公司没有VPN）远程公司电脑（公司有人，帮忙开机之类的）。用了不到一天就被逼疯了，效率太低。然后决定自己搭建开发环境。不过这个是我很不想干的事情，总会出幺蛾子，比如头疼的Maven，死活下不下来，远程复制公司的jar包到Maven仓库下，jar不出错了，但是还是编译不通过，最后删掉所有的私有仓库和插件库好了……公司的框架比较老，比较重（全面），和我电脑环境有点不兼容，比如MySQL的数据库。因为新任务比较简单，用不了太多的功能，主要搭建了Redis缓存和FastDFS文件服务器。</p>
+<h4 id="Redis安装"><a href="#Redis安装" class="headerlink" title="Redis安装"></a>Redis安装</h4><p>以前在Win7中装过-<a href="https://mp.weixin.qq.com/s?__biz=MzIwMjgwNTI0Mg==&mid=2247483713&idx=1&sn=d35bd94c0abf527b56229487d79fdabc&scene=19#wechat_redirect" target="_blank" rel="noopener">NoSQL数据库Redis从入门到没有然后</a>，这次在Linux虚拟机中安装。先把VMware虚拟机的网络适配器改成桥接模式，以便于设置固定ip。</p>
+<p>先从<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a>下载最新稳定版本5.0.7，解压，编译。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-5.0.7.tar.gz</span><br><span class="line">tar xzf redis-5.0.7.tar.gz</span><br><span class="line">cd cd redis-5.0.7/</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
 
-<p>第一次登录时，会提示你确认主机的真实性，yes后会提示你输入密码，如图<br><img src="/img/20210625/2.png" alt></p>
-<h4 id="私钥登录"><a href="#私钥登录" class="headerlink" title="私钥登录"></a>私钥登录</h4><p>现在改为基于密匙的安全验证，通过一对密钥进行安全认证。</p>
-<p>执行<code>ssh-keygen</code>生成公钥和私钥，公钥（通常做法是使用-t参数，指定密钥的加密算法，如dsa rsa），生成时会询问一些问题，一般默认回车就好，这里设置私钥密码。<br>第一个问题询问密钥保存的文件名。</p>
+<p>make完后 redis-5.0.7目录src下会出现编译后的redis服务程序redis-server，执行<code>./redis-server</code>就可以通过前端模式启动了，不过ssh命令窗口关闭，redis-server程序就结束了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd src</span><br><span class="line">./redis-server</span><br></pre></td></tr></table></figure>
+
 <blockquote>
-<p>Enter file in which to save the key (/root/.ssh/id_rsa):</p>
-</blockquote>
-<p>第二个问题询问私钥是否设定密码保护,直接回车就默认为空。这里设置，然后再确认一遍密码。</p>
+<p>后端模式启动</p>
 <blockquote>
-<p>Enter passphrase (empty for no passphrase): </p>
+<p>修改redis.conf配置文件把<code>daemonize no</code>改为线程守护<code>yes</code></p>
 </blockquote>
-<p><img src="/img/20210625/3.png" alt></p>
-<blockquote>
-<p>id_rsa 生成的私钥文件<br>id_rsa.pub 生成的公钥文件</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+<p>修改配置文件redis.conf，打开远程连接（把<code>protected-mode yes</code>改为<code>no</code>并注释掉（前加#）<code>bing 127.0.0.1</code>未设置密码<code>requirepass</code>）。</p>
+<p>重启Redis，查找并关闭进程。并指定启动服务配置文件，不然按默认启动（这里坑了，修改了配置文件，一直提示我不能远程连接）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ps -ef|grep redis</span><br><span class="line">kill 相关进程</span><br><span class="line">./redis-server redis.conf</span><br></pre></td></tr></table></figure>
 
-<p>修改如下</p>
-<blockquote>
-<p>#root用户登录<br>PermitRootLogin yes</p>
-<p>#密钥认证<br>PubkeyAuthentication yes</p>
-<p>#密码认证（可以关闭，关闭后只能通过密钥进入）<br>PasswordAuthentication yes</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#重启SSH</span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+<p><img src="/img/20200211/1.jpg" alt><br>你也可以建立redis服务，设置成开机启动，这里偷懒。</p>
+<h4 id="FastDFS安装"><a href="#FastDFS安装" class="headerlink" title="FastDFS安装"></a>FastDFS安装</h4><p>FastDFS是一个开源的轻量级分布式文件系统，这里主要用来保存图片和文件并访问。</p>
+<ol>
+<li><p>先用git（没有git环境先执行<code>git apt-get install git</code>）克隆libfastcommon库（libfastcommon是从 FastDFS 和 FastDHT 中提取出来的公共 C 函数库，基础环境），进入目录编译并且安装。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/happyfish100/libfastcommon.git</span><br><span class="line">cd libfastcommon/</span><br><span class="line">./make.sh</span><br><span class="line">./make.sh install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置环境变量（注意32位系统没有64）和软连接</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">export LD_LIBRARY_PATH=/usr/lib64/</span><br><span class="line">ln -s /usr/lib64/libfastcommon.so /usr/local/lib/libfastcommon.so</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装FastDFS<br>从<a href="https://github.com/happyfish100/fastdfs/releases" target="_blank" rel="noopener">https://github.com/happyfish100/fastdfs/releases</a>获取最新版本6.06，解压编译安装。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget wget https://github.com/happyfish100/fastdfs/archive/V6.06.tar.gz</span><br><span class="line">tar xzf V6.06.tar.gz </span><br><span class="line">cd fastdfs-6.06/</span><br><span class="line">./make.sh</span><br><span class="line">./make.sh install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改配置文件<br>默认安装路径/etc/fdfs下的client.conf.sample，storage.conf.sample，tracker.conf.sample三个参考配置文件。<br>配置跟踪器 tracker.conf，这里端口使用默认的22122，不建议修改。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp tracker.conf.sample tracker.conf</span><br><span class="line">vim tracker.conf</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#私钥登录，把远程主机的私钥发放给客户端用户</span><br><span class="line">ssh root@192.168.112.128 -p 122 -i C:/Users/xuchl/.ssh/deepin_rsa</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>修改下面两个参数<br>Tracker数据和日志目录地址（目录必须存在）<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/tracker</code><br>HTTP 服务端口<br><code>http.server_port = 80</code></p>
+<p>配置存储 storage.conf，端口依旧使用默认的23000。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp storage.conf.sample storage.conf</span><br><span class="line">vim storage.conf</span><br></pre></td></tr></table></figure>
 
-<p>因为我有设置私钥密码，这里需要输入私钥密码。<br><img src="/img/20210625/4.png" alt></p>
-<h4 id="公钥登录"><a href="#公钥登录" class="headerlink" title="公钥登录"></a>公钥登录</h4><p>公钥登录，要客户端公钥写入远程主机authorized_keys文件中，这里直接复制粘贴的，试了几个linux命令都没有实现。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+<p>Storage 数据和日志目录地址（目录必须存在）<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/storage</code><br>逐一配置 store_path_count 个路径（索引号从0开始，不配置store_path0就和base_path路径一样）<br><code>store_path0 = /home/xuchunlei/Desktop/linkstart/upload/file</code><br>tracker_server列表，这里只有一个，注释掉多余的，ip对应linux服务器的ip<br><code>tracker_server = 192.168.1.111:22122</code><br>访问端口<br><code>http.server_port = 80</code></p>
+<ol start="5">
+<li><p>启动服务<br>启动服务，22122和23000端口被监听说明启动成功。这里依然可以添加到服务，并开机启动。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/usr/bin/fdfs_trackerd /etc/fdfs/tracker.conf</span><br><span class="line">/usr/bin/fdfs_storaged /etc/fdfs/storage.conf</span><br><span class="line">netstat -unltp|grep fdfs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>测试上传文件<br>修改客户端 client.conf</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd /etc/fdfs</span><br><span class="line">cp client.conf.sample client.conf</span><br><span class="line">vim client.conf</span><br></pre></td></tr></table></figure>
 
-<p>修改如下</p>
-<blockquote>
-<p>PubkeyAuthentication yes<br>AuthorizedKeysFile .ssh/authorized_keys</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改文件权限</span><br><span class="line">chmod 600 ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>Client 的数据和日志目录<br><code>base_path = /home/xuchunlei/Desktop/linkstart/upload/log</code><br>Tracker端口<br><code>tracker_server = 192.168.1.111:22122</code></p>
+<p>文件上传</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fdfs_test /etc/fdfs/client.conf upload /home/xuchunlei/Desktop/test.png</span><br></pre></td></tr></table></figure>
 
-<p>PS:这里的文件使用root用户建的，其他用户通过密钥登录的话还需要再输入一遍密码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#公钥登录</span><br><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+<p><img src="/img/20200211/2.png" alt></p>
+<h4 id="FastDFS-http访问"><a href="#FastDFS-http访问" class="headerlink" title="FastDFS http访问"></a>FastDFS http访问</h4><p>虽然上传成功文件，但是这个时候是不能通过http来访问的，一般通过Nginx访问扩展模块来访问。</p>
+<ol>
+<li><p>安装Nginx<br>从<a href="https://nginx.org/en/download.html" target="_blank" rel="noopener">https://nginx.org/en/download.html</a>选择最新版本1.17.8。使用默认配置编译安装启动。浏览器访问localhost，出现Nginx界面表示安装成功。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">wget http://nginx.org/download/nginx-1.17.8.tar.gz</span><br><span class="line">tar xzf nginx-1.17.8.tar.gz </span><br><span class="line">cd nginx-1.17.8</span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line">/usr/local/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装fastdfs-nginx-module模块<br>在Nginx中添加fastdfs-nginx处理模块。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/happyfish100/fastdfs-nginx-module.git</span><br><span class="line">cd fastdfs-nginx-module/</span><br><span class="line">./configure --add-module=/home/xuchunlei/Desktop/linkstart/fastdfs/fastdfs-nginx-module/src</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
 
-<p><img src="/img/20210625/5.png" alt></p>
-<h4 id="本地端口转发"><a href="#本地端口转发" class="headerlink" title="本地端口转发"></a>本地端口转发</h4><p>本地1和服务器2无法直接连接，但是中继3可以连接1和2，1通过3连上2。本地1到中继3形成数据传输的秘密隧道，即SSH隧道。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#本地1执行（本地1端口:服务器2:服务器2端口 中继3）</span><br><span class="line">ssh -L 1121:192.168.112.128:122 192.168.112.3</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>此时通过<code>/usr/local/nginx/sbin/nginx -V</code>来查看版本和模块信息。</p>
+<ol start="3">
+<li>配置nginx.conf<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vim /usr/local/nginx/conf/nginx.conf</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过本地的1121端口就可以直接登录服务器</span><br><span class="line">ssh -p 1121 root@localhost</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>配置文件中加入新的location，root配置到Storage的store_path0路径加上data</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">location /group1/M00 &#123;</span><br><span class="line">    root /home/xuchunlei/Desktop/linkstart/upload/file/data;</span><br><span class="line">    ngx_fastdfs_module;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/img/20210625/6.png" alt></p>
-<h4 id="远程端口转发"><a href="#远程端口转发" class="headerlink" title="远程端口转发"></a>远程端口转发</h4><p>本地1和服务器2无法直接连接，并且本地1无法连接中继3，但是中继3可以连接1和2，1通过3连上2。<br>额，这个没成功，win10连不上，不保证正确。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#中继3执行（中继3端口:服务器2:服务器2端口 本地1）</span><br><span class="line">ssh -R 1122:192.168.112.128:122 192.168.88.27</span><br></pre></td></tr></table></figure>
+<p>创建/M00到data的软连接</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ln -s /home/xuchunlei/Desktop/linkstart/upload/file/data/ /home/xuchunlei/Desktop/linkstart/upload/file/data/group1/M00</span><br></pre></td></tr></table></figure>
 
-<h4 id="示例：通过SSH通道连接MariaDB"><a href="#示例：通过SSH通道连接MariaDB" class="headerlink" title="示例：通过SSH通道连接MariaDB"></a>示例：通过SSH通道连接MariaDB</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过Docker拉取最新MariaDB镜像</span><br><span class="line">docker pull mariadb</span><br><span class="line">#简单创建容器并启动</span><br><span class="line">docker run --name mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 mariadb:latest</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>配置mod_fastdfs.conf<br>复制fastdfs-nginx-module源码中的配置文件到/etc/fdfs目录并修改。<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp mod_fastdfs.conf /etc/fdfs/</span><br></pre></td></tr></table></figure>
 
-<p>通过SSH通道登录数据库<br><img src="/img/20210625/7.jpg" alt></p>
+</li>
+</ol>
+<p>tracker_server<br><code>tracker_server=192.168.1.111:22122</code><br>false时，即访问地址不使用分组名称，nginx中不需要分组<br><code>url_have_group_name = true</code><br>必须和storage.conf中配置的store_path0路径的一致<br><code>store_path0=/home/xuchunlei/Desktop/linkstart/upload/file</code></p>
+<p>复制FastDFS的部分配置文件（解压文件conf文件夹中）到/etc/fdfs目录</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp http.conf /etc/fdfs/</span><br><span class="line">cp mime.types /etc/fdfs/</span><br></pre></td></tr></table></figure>
+
+<p>重启Nginx</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/usr/local/nginx/sbin/nginx -s stop</span><br><span class="line">/usr/local/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
+
+<p>通过文件上传返回路径<code>http://192.168.1.111/group1/M00/00/00/wKgBb15BbKWAETJpAAGCZONuhNo096.png</code>来访问<br><img src="/img/20200211/3.jpg" alt></p>
 ]]></content>
       <tags>
         <tag>Linux</tag>
-        <tag>SSH</tag>
+        <tag>Redis</tag>
+        <tag>FastDFS</tag>
       </tags>
   </entry>
   <entry>
@@ -926,6 +860,257 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
+    <title>MySQL连续日期分组统计(by连续登录天数)</title>
+    <url>/2022/03/07/MySQL%E8%BF%9E%E7%BB%AD%E6%97%A5%E6%9C%9F%E5%88%86%E7%BB%84%E7%BB%9F%E8%AE%A1-by%E8%BF%9E%E7%BB%AD%E7%99%BB%E5%BD%95%E5%A4%A9%E6%95%B0/</url>
+    <content><![CDATA[<p><em>今天又被朋友问到（要）去年11月底一个夜晚帮他写的sql-一个广告投放的数据，想根据连续的投放日期来分组。开始完全不知道如何去分组，不过当晚灵机一动-用连续登录天数的思路貌似可以解决。然后马上实现就丢了回去（分组条件有点多，还搞了下去重，结果都是独立的，没有重复……白干了好多）。今天问到我的时候已经忘的差不多了，整理下思路备用</em></p>
+<h3 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#MySQL80018</span><br><span class="line"></span><br><span class="line">CREATE TABLE `ad_serving`  (</span><br><span class="line">  `order_id` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,</span><br><span class="line">  `serving_date` date NULL DEFAULT NULL COMMENT &apos;投放日期&apos;</span><br><span class="line">) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;</span><br><span class="line"></span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;1&apos;, &apos;2022-03-01&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;1&apos;, &apos;2022-03-02&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;1&apos;, &apos;2022-03-03&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;1&apos;, &apos;2022-03-05&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;1&apos;, &apos;2022-03-06&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;2&apos;, &apos;2022-03-01&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;2&apos;, &apos;2022-03-02&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;2&apos;, &apos;2022-03-04&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;2&apos;, &apos;2022-03-05&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;2&apos;, &apos;2022-03-06&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;2&apos;, &apos;2022-03-07&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;3&apos;, &apos;2022-03-01&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;3&apos;, &apos;2022-03-03&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;3&apos;, &apos;2022-03-05&apos;);</span><br><span class="line">INSERT INTO `ad_serving` VALUES (&apos;3&apos;, &apos;2022-03-06&apos;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h3><blockquote>
+<p>可能不是最优思路，以下是我的实现方法。</p>
+</blockquote>
+<p>先将数据按照条件，日期进行排序，这里是根据订单ID分区，然后投放日期升序排列。根据顺序新增一个行号列，用于后面起始日期计算。<br><del><code>这里之前我用的row_number()，前提是没有重复的日期。有重复日期的话请用dense_rank()，这样下一步计算起始日期才对</code></del></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#分组添加行号</span><br><span class="line">create table temp_ad_serving as select ad_serving.*, dense_rank() over(partition by order_id order by serving_date) AS r from ad_serving order by order_id, serving_date</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">order_id</th>
+<th align="center">serving_date</th>
+<th align="center">r</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">2022-03-01</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-02</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-03</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-05</td>
+<td align="center">4</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-06</td>
+<td align="center">5</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-01</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-02</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-04</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-05</td>
+<td align="center">4</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-06</td>
+<td align="center">5</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-07</td>
+<td align="center">6</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-01</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-03</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-05</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-06</td>
+<td align="center">4</td>
+</tr>
+</tbody></table>
+<p>然后计算分组辅助日期，用日期减去上面的行号=天数(这里天数去掉一天了, 不减去也可以，只是用于分组的条件)。新增一列分组辅助日期。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#添加分组辅助日期</span><br><span class="line">create table temp_ad_serving_group as select temp_ad_serving.*, date_sub(serving_date, interval r - 1 day) 分组辅助日期 from temp_ad_serving</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">order_id</th>
+<th align="center">serving_date</th>
+<th align="center">r</th>
+<th align="center">分组辅助日期</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">2022-03-01</td>
+<td align="center">1</td>
+<td align="center">2022-03-01</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-02</td>
+<td align="center">2</td>
+<td align="center">2022-03-01</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-03</td>
+<td align="center">3</td>
+<td align="center">2022-03-01</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-05</td>
+<td align="center">4</td>
+<td align="center">2022-03-02</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2022-03-06</td>
+<td align="center">5</td>
+<td align="center">2022-03-02</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-01</td>
+<td align="center">1</td>
+<td align="center">2022-03-01</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-02</td>
+<td align="center">2</td>
+<td align="center">2022-03-01</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-04</td>
+<td align="center">3</td>
+<td align="center">2022-03-02</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-05</td>
+<td align="center">4</td>
+<td align="center">2022-03-02</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-06</td>
+<td align="center">5</td>
+<td align="center">2022-03-02</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2022-03-07</td>
+<td align="center">6</td>
+<td align="center">2022-03-02</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-01</td>
+<td align="center">1</td>
+<td align="center">2022-03-01</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-03</td>
+<td align="center">2</td>
+<td align="center">2022-03-02</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-05</td>
+<td align="center">3</td>
+<td align="center">2022-03-03</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2022-03-06</td>
+<td align="center">4</td>
+<td align="center">2022-03-03</td>
+</tr>
+</tbody></table>
+<p>根据分组条件，分组辅助日期进行分组（MySQL不需要把所有的分组条件写入SELECT，好评）。日期区间需要判断日期数量（<del><code>这里之前用的count(*)，有重复日期的时候区间显示的不对，需要去除重复日期</code></del>），就一天的时候直接显示，多天的话获取最小和最大时间进行展示。实际上就是连续天数统计，这里主要显示日期区间。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select order_id, case when count(distinct serving_date) = 1 then min(serving_date) else concat(min(serving_date), &apos;-&apos;, max(serving_date)) end 投放期间, count(distinct serving_date) 连续天数 from temp_ad_serving_group group by order_id, 分组辅助日期</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">order_id</th>
+<th align="center"><code>投放期间</code></th>
+<th align="center">连续天数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center"><code>2022-03-01-2022-03-03</code></td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center"><code>2022-03-05-2022-03-06</code></td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center"><code>2022-03-01-2022-03-02</code></td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center"><code>2022-03-04-2022-03-07</code></td>
+<td align="center">4</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center"><code>2022-03-01</code></td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center"><code>2022-03-03</code></td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center"><code>2022-03-05-2022-03-06</code></td>
+<td align="center">2</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>不吐不快-记录ASM小助手卸载过程</title>
     <url>/2020/12/09/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95ASM%E5%B0%8F%E5%8A%A9%E6%89%8B%E5%8D%B8%E8%BD%BD%E8%BF%87%E7%A8%8B/</url>
     <content><![CDATA[<h2 id="不吐不快-记录ASM小助手卸载过程"><a href="#不吐不快-记录ASM小助手卸载过程" class="headerlink" title="不吐不快-记录ASM小助手卸载过程"></a>不吐不快-记录ASM小助手卸载过程</h2><p><em>吐槽专用，图片是卸载的时候弄的，不是很全</em></p>
@@ -941,6 +1126,91 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 <p>打开文件属性，发现安全标签页无法查看，就是没有权限呗。然后打开高级选项把文件所有者改为当前用户，这样还是删除不掉，还需要把显示出来的权限所有拒绝权限条目删除。<br><img src="/img/20201209/6.png" alt></p>
 <p>至此，所有文件都进入回收站了，然后右键清空。<br><img src="/img/20201209/7.png" alt></p>
 <h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>上次这么搞还是Office365的弹出广告来着，不过那个和这个比起来友好多了。</p>
+]]></content>
+      <tags>
+        <tag>吐槽</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SSH远程登录</title>
+    <url>/2021/06/25/SSH%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="SSH远程登录"><a href="#SSH远程登录" class="headerlink" title="SSH远程登录"></a>SSH远程登录</h1><p><em>起因是服务器在儿童节那天数据库连不上了，原因是中了之前横行的勒索病毒的变种……然后就有了后来的各种加强：windos变更为linux,通过SSH连接等等，这里就简单梳理一下SSH的相关知识</em><br><img src="/img/20210625/1.jpg" alt></p>
+<h4 id="什么是SSH"><a href="#什么是SSH" class="headerlink" title="什么是SSH"></a>什么是SSH</h4><p>SSH (Secure Shell 安全外壳协议)是为远程登录会话和其他网络服务提供安全性的网络协议。利用SSH协议可以有效防止远程管理过程中的信息泄露问题，即使被中途截获，密码和数据也不会泄露。可以防止中间人(man-in-the-middle)攻击。</p>
+<h4 id="口令登录"><a href="#口令登录" class="headerlink" title="口令登录"></a>口令登录</h4><p>之前的deepin使用的是OpenSSH，默认使用口令的安全验证，就是只有账号和口令就可以登录远程主机。因为之前改过端口，需要同通过参数-p来指定端口。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+
+<p>第一次登录时，会提示你确认主机的真实性，yes后会提示你输入密码，如图<br><img src="/img/20210625/2.png" alt></p>
+<h4 id="私钥登录"><a href="#私钥登录" class="headerlink" title="私钥登录"></a>私钥登录</h4><p>现在改为基于密匙的安全验证，通过一对密钥进行安全认证。</p>
+<p>执行<code>ssh-keygen</code>生成公钥和私钥，公钥（通常做法是使用-t参数，指定密钥的加密算法，如dsa rsa），生成时会询问一些问题，一般默认回车就好，这里设置私钥密码。<br>第一个问题询问密钥保存的文件名。</p>
+<blockquote>
+<p>Enter file in which to save the key (/root/.ssh/id_rsa):</p>
+</blockquote>
+<p>第二个问题询问私钥是否设定密码保护,直接回车就默认为空。这里设置，然后再确认一遍密码。</p>
+<blockquote>
+<p>Enter passphrase (empty for no passphrase): </p>
+</blockquote>
+<p><img src="/img/20210625/3.png" alt></p>
+<blockquote>
+<p>id_rsa 生成的私钥文件<br>id_rsa.pub 生成的公钥文件</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p>修改如下</p>
+<blockquote>
+<p>#root用户登录<br>PermitRootLogin yes</p>
+<p>#密钥认证<br>PubkeyAuthentication yes</p>
+<p>#密码认证（可以关闭，关闭后只能通过密钥进入）<br>PasswordAuthentication yes</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#重启SSH</span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#私钥登录，把远程主机的私钥发放给客户端用户</span><br><span class="line">ssh root@192.168.112.128 -p 122 -i C:/Users/xuchl/.ssh/deepin_rsa</span><br></pre></td></tr></table></figure>
+
+<p>因为我有设置私钥密码，这里需要输入私钥密码。<br><img src="/img/20210625/4.png" alt></p>
+<h4 id="公钥登录"><a href="#公钥登录" class="headerlink" title="公钥登录"></a>公钥登录</h4><p>公钥登录，要客户端公钥写入远程主机authorized_keys文件中，这里直接复制粘贴的，试了几个linux命令都没有实现。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p>修改如下</p>
+<blockquote>
+<p>PubkeyAuthentication yes<br>AuthorizedKeysFile .ssh/authorized_keys</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改文件权限</span><br><span class="line">chmod 600 ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+
+<p>PS:这里的文件使用root用户建的，其他用户通过密钥登录的话还需要再输入一遍密码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#公钥登录</span><br><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20210625/5.png" alt></p>
+<h4 id="本地端口转发"><a href="#本地端口转发" class="headerlink" title="本地端口转发"></a>本地端口转发</h4><p>本地1和服务器2无法直接连接，但是中继3可以连接1和2，1通过3连上2。本地1到中继3形成数据传输的秘密隧道，即SSH隧道。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#本地1执行（本地1端口:服务器2:服务器2端口 中继3）</span><br><span class="line">ssh -L 1121:192.168.112.128:122 192.168.112.3</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过本地的1121端口就可以直接登录服务器</span><br><span class="line">ssh -p 1121 root@localhost</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20210625/6.png" alt></p>
+<h4 id="远程端口转发"><a href="#远程端口转发" class="headerlink" title="远程端口转发"></a>远程端口转发</h4><p>本地1和服务器2无法直接连接，并且本地1无法连接中继3，但是中继3可以连接1和2，1通过3连上2。<br>额，这个没成功，win10连不上，不保证正确。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#中继3执行（中继3端口:服务器2:服务器2端口 本地1）</span><br><span class="line">ssh -R 1122:192.168.112.128:122 192.168.88.27</span><br></pre></td></tr></table></figure>
+
+<h4 id="示例：通过SSH通道连接MariaDB"><a href="#示例：通过SSH通道连接MariaDB" class="headerlink" title="示例：通过SSH通道连接MariaDB"></a>示例：通过SSH通道连接MariaDB</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过Docker拉取最新MariaDB镜像</span><br><span class="line">docker pull mariadb</span><br><span class="line">#简单创建容器并启动</span><br><span class="line">docker run --name mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 mariadb:latest</span><br></pre></td></tr></table></figure>
+
+<p>通过SSH通道登录数据库<br><img src="/img/20210625/7.jpg" alt></p>
+]]></content>
+      <tags>
+        <tag>Linux</tag>
+        <tag>SSH</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>不吐不快-记录一次千万级数据统计</title>
+    <url>/2020/06/04/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1%E5%8D%83%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%9F%E8%AE%A1/</url>
+    <content><![CDATA[<h2 id="不吐不快-记录一次千万级数据统计"><a href="#不吐不快-记录一次千万级数据统计" class="headerlink" title="不吐不快-记录一次千万级数据统计"></a>不吐不快-记录一次千万级数据统计</h2><p><em>吐槽专用，没啥干货</em></p>
+<h2 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h2><p>甲方发来了两个压缩包，一个Google的，一个IOS的游戏充值数据。因为数据量较大，超出了Excel的处理范围，只好让我们来处理分析。Google里面原始数据有10G，还有他们自己拆分的csv文件（Excel超过1048576行后无法完全加载文件），这也为以后的操作埋下了雷。IOS的很小，txt文本文件，合计15M，但是后期计算却花费了不少时间。<br>Google字段：<code>Description</code>,<code>Transaction Date</code>,<code>Transaction Time</code>,<code>Tax Type</code>,<code>Transaction Type</code>,<code>Refund Type</code>,<code>Product Title</code>,<code>Product id</code>,<code>Product Type</code>,<code>Sku Id</code>,<code>Hardware</code>,<code>Buyer Country</code>,<code>Buyer State</code>,<code>Buyer Postal Code</code>,<code>Buyer Currency</code>,<code>Amount (Buyer Currency)</code>,<code>Currency Conversion Rate</code>,<code>Merchant Currency</code>,<code>Amount (Merchant Currency)</code><br>IOS字段：<code>Start Date</code>,<code>End Date</code>,<code>UPC</code>,<code>ISRC/ISBN</code>,<code>Vendor Identifier</code>,<code>Quantity</code>,<code>Partner Share</code>,<code>Extended Partner Share</code>,<code>Partner Share Currency</code>,<code>Sales or Return</code>,<code>Apple Identifier</code>,<code>Artist/Show/Developer/Author</code>,<code>Title</code>,<code>Label/Studio/Network/Developer/Publisher</code>,<code>Grid</code>,<code>Product Type Identifier</code>,<code>ISAN/Other Identifier</code>,<code>Country Of Sale</code>,<code>Pre-order Flag</code>,<code>Promo Code</code>,<code>Customer Price</code>,<code>Customer Currency</code></p>
+<h2 id="处理"><a href="#处理" class="headerlink" title="处理"></a>处理</h2><ol>
+<li><p>首先对Google的一个渠道数据进行处理，先用了他们给的拆分数据，根据月份划分文件夹，每个文件夹里有3个csv文件。通过批处理复制到同一目录下，通过<code>copy *.csv all.csv</code>来合并为一个csv文件。因为之前的数据分析用的SQLServer数据库，效率比较好，一亿多的数据量秒级导入。但是这次就不行了，ManagementStudio的导入无法识别csv文件，通过平面文件源只能以<code>,</code>号来分割。但是因为有107格式的英文日期<code>Jan 1, 2019</code>，导致列错位。另外字段<code>Buyer State</code>是按照当地语言的，乱码导致无法通过验证。尝试了很久无果，就用Navicate导入，但是速度很慢。<br>第一次导入1800万数据，用时接近3小时，传输速率在7Mbps左右。<br><img src="/img/20200604/1.png" alt><br>然后根据月份分组查看，发现缺少2月份的数据（11月份拆分数据异常，只有1k，未导入）。然后用<code>certutil -hashfile filename MD5</code>复查数据，发现拆分好的数据1月和2月居然是一样的（想打人），压缩包的CRC32也是一样的。<br><img src="/img/20200604/2.png" alt><br>无奈和甲方沟通，让使用原始数据……然后又导入一遍，1900万数据，用时3个多小时，弄到公司只剩我一个人。<br><img src="/img/20200604/3.png" alt></p>
+</li>
+<li><p>第二天对另外一个渠道进行处理，这次鉴于前面的情况，直接用原始数据。然而二月份的压缩包居然是坏的（被他们玩坏了吧），经过沟通让使用他们拆分好的文件。这次按照季度汇总，分了四个表，四倍速导入。千兆带宽还是很给力的。<br><img src="/img/20200604/4.png" alt><br>导入3000多万数据，一个半小时，传输速率在30Mbps左右。<br><img src="/img/20200604/5.png" alt><br>然后计算的时候又暴雷了（哎）。经排查2月份部分数据因为拆分出的字段<code>Buyer State</code>乱码，导致后面的字段全部向前偏移。因为要用到后面的字段就通过update语句修改了数据。然而把字段位置修正，然而格式转换的时候还是报错，看数据没啥问题，复制粘贴出来，感觉多出一个换号符，然后通过Len发现确实多了一个长度，通过replace替换CHAR(13)后转换正常。</p>
+</li>
+<li><p>又过了一天，最后对IOS的数据处理，以为很快，然而也是个坑。就14万数据，导入很快，没啥问题，就是计算的时候来回沟通了好几次。Google是每条都计算好的，IOS不是，没有汇率，只有客户的货币。不是很清楚游戏划分种类，根据字段<code>Vendor Identifier</code>（和<code>Apple Identifier</code>一一对应）来划分，有1170种……再按月份，货币划分，最后统计出9万数据。显然这个不行，后来的想法是根据新提供过来的每月汇率来来计算出人民币。没有汇率的货币就远远本本表示，最后各整理出8千和9千的数据。不知道以后还会提出啥要求。以防万一，SQL都保存了，因为写的比较复杂。</p>
+</li>
+</ol>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>还好是按工作量算钱的，不过甲方就是甲方。<br>能看完的都是勇士（手动滑稽）。</p>
 ]]></content>
       <tags>
         <tag>吐槽</tag>
@@ -970,25 +1240,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       <tags>
         <tag>足迹</tag>
         <tag>百度地图</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>不吐不快-记录一次千万级数据统计</title>
-    <url>/2020/06/04/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1%E5%8D%83%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%9F%E8%AE%A1/</url>
-    <content><![CDATA[<h2 id="不吐不快-记录一次千万级数据统计"><a href="#不吐不快-记录一次千万级数据统计" class="headerlink" title="不吐不快-记录一次千万级数据统计"></a>不吐不快-记录一次千万级数据统计</h2><p><em>吐槽专用，没啥干货</em></p>
-<h2 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h2><p>甲方发来了两个压缩包，一个Google的，一个IOS的游戏充值数据。因为数据量较大，超出了Excel的处理范围，只好让我们来处理分析。Google里面原始数据有10G，还有他们自己拆分的csv文件（Excel超过1048576行后无法完全加载文件），这也为以后的操作埋下了雷。IOS的很小，txt文本文件，合计15M，但是后期计算却花费了不少时间。<br>Google字段：<code>Description</code>,<code>Transaction Date</code>,<code>Transaction Time</code>,<code>Tax Type</code>,<code>Transaction Type</code>,<code>Refund Type</code>,<code>Product Title</code>,<code>Product id</code>,<code>Product Type</code>,<code>Sku Id</code>,<code>Hardware</code>,<code>Buyer Country</code>,<code>Buyer State</code>,<code>Buyer Postal Code</code>,<code>Buyer Currency</code>,<code>Amount (Buyer Currency)</code>,<code>Currency Conversion Rate</code>,<code>Merchant Currency</code>,<code>Amount (Merchant Currency)</code><br>IOS字段：<code>Start Date</code>,<code>End Date</code>,<code>UPC</code>,<code>ISRC/ISBN</code>,<code>Vendor Identifier</code>,<code>Quantity</code>,<code>Partner Share</code>,<code>Extended Partner Share</code>,<code>Partner Share Currency</code>,<code>Sales or Return</code>,<code>Apple Identifier</code>,<code>Artist/Show/Developer/Author</code>,<code>Title</code>,<code>Label/Studio/Network/Developer/Publisher</code>,<code>Grid</code>,<code>Product Type Identifier</code>,<code>ISAN/Other Identifier</code>,<code>Country Of Sale</code>,<code>Pre-order Flag</code>,<code>Promo Code</code>,<code>Customer Price</code>,<code>Customer Currency</code></p>
-<h2 id="处理"><a href="#处理" class="headerlink" title="处理"></a>处理</h2><ol>
-<li><p>首先对Google的一个渠道数据进行处理，先用了他们给的拆分数据，根据月份划分文件夹，每个文件夹里有3个csv文件。通过批处理复制到同一目录下，通过<code>copy *.csv all.csv</code>来合并为一个csv文件。因为之前的数据分析用的SQLServer数据库，效率比较好，一亿多的数据量秒级导入。但是这次就不行了，ManagementStudio的导入无法识别csv文件，通过平面文件源只能以<code>,</code>号来分割。但是因为有107格式的英文日期<code>Jan 1, 2019</code>，导致列错位。另外字段<code>Buyer State</code>是按照当地语言的，乱码导致无法通过验证。尝试了很久无果，就用Navicate导入，但是速度很慢。<br>第一次导入1800万数据，用时接近3小时，传输速率在7Mbps左右。<br><img src="/img/20200604/1.png" alt><br>然后根据月份分组查看，发现缺少2月份的数据（11月份拆分数据异常，只有1k，未导入）。然后用<code>certutil -hashfile filename MD5</code>复查数据，发现拆分好的数据1月和2月居然是一样的（想打人），压缩包的CRC32也是一样的。<br><img src="/img/20200604/2.png" alt><br>无奈和甲方沟通，让使用原始数据……然后又导入一遍，1900万数据，用时3个多小时，弄到公司只剩我一个人。<br><img src="/img/20200604/3.png" alt></p>
-</li>
-<li><p>第二天对另外一个渠道进行处理，这次鉴于前面的情况，直接用原始数据。然而二月份的压缩包居然是坏的（被他们玩坏了吧），经过沟通让使用他们拆分好的文件。这次按照季度汇总，分了四个表，四倍速导入。千兆带宽还是很给力的。<br><img src="/img/20200604/4.png" alt><br>导入3000多万数据，一个半小时，传输速率在30Mbps左右。<br><img src="/img/20200604/5.png" alt><br>然后计算的时候又暴雷了（哎）。经排查2月份部分数据因为拆分出的字段<code>Buyer State</code>乱码，导致后面的字段全部向前偏移。因为要用到后面的字段就通过update语句修改了数据。然而把字段位置修正，然而格式转换的时候还是报错，看数据没啥问题，复制粘贴出来，感觉多出一个换号符，然后通过Len发现确实多了一个长度，通过replace替换CHAR(13)后转换正常。</p>
-</li>
-<li><p>又过了一天，最后对IOS的数据处理，以为很快，然而也是个坑。就14万数据，导入很快，没啥问题，就是计算的时候来回沟通了好几次。Google是每条都计算好的，IOS不是，没有汇率，只有客户的货币。不是很清楚游戏划分种类，根据字段<code>Vendor Identifier</code>（和<code>Apple Identifier</code>一一对应）来划分，有1170种……再按月份，货币划分，最后统计出9万数据。显然这个不行，后来的想法是根据新提供过来的每月汇率来来计算出人民币。没有汇率的货币就远远本本表示，最后各整理出8千和9千的数据。不知道以后还会提出啥要求。以防万一，SQL都保存了，因为写的比较复杂。</p>
-</li>
-</ol>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>还好是按工作量算钱的，不过甲方就是甲方。<br>能看完的都是勇士（手动滑稽）。</p>
-]]></content>
-      <tags>
-        <tag>吐槽</tag>
       </tags>
   </entry>
   <entry>
