@@ -334,6 +334,20 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 }
 #footer {color: rgba(255, 255, 255, 0.5); position: relative; text-align: center;}
 
+.to-top:hover {
+  -webkit-animation: pagetop ease-out .7s infinite;
+  animation: pagetop ease-out .7s infinite;
+}
+@keyframes pagetop {
+  50% {
+    bottom: 50px;
+  }
+
+  100% {
+    bottom: 30px;
+  }
+}
+
 .set .search {}
 .set .search .search-input {width: 100%;height: 42px;background: transparent;border: 0px;border-bottom:3px solid #6558BC;font-size:23px;padding: 20px auto 20px;}
 .set .search .search-input[type=text]:focus{outline: none;border: 0px;border-bottom:3px solid #6558BC;}

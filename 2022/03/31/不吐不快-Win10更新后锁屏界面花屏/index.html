@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>不吐不快-Win10更新后锁屏界面花屏 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,吐槽,Win10,花屏"> 
+    <meta name="description" content="一个战五渣的个人博客,不吐不快-Win10更新后锁屏界面花屏吐槽专用，本以为眼不见为净就行，结果发现治标不治本
+起因今天win10不知道自己更新了啥，只知道通知中提示了和显示相关的信息，让我重启电脑生效。因为在工作中没有,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">不吐不快-Win10更新后锁屏界面花屏</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">不吐不快-Win10更新后锁屏界面花屏</h1>
+        <div class="stuff">
+            <span>三月 31, 2022</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/吐槽/">吐槽</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="不吐不快-Win10更新后锁屏界面花屏"><a href="#不吐不快-Win10更新后锁屏界面花屏" class="headerlink" title="不吐不快-Win10更新后锁屏界面花屏"></a>不吐不快-Win10更新后锁屏界面花屏</h2><p><em>吐槽专用，本以为眼不见为净就行，结果发现治标不治本</em></p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>今天win10不知道自己更新了啥，只知道通知中提示了和显示相关的信息，让我重启电脑生效。因为在工作中没有在意，就关掉继续工作了。后来重启后发现电脑，锁屏界面输入密码时就花屏了，每次都出现不同的效果，效果如下：<br><img src="/img/20220331/1.jpg" alt></p>
+<h2 id="排查"><a href="#排查" class="headerlink" title="排查"></a>排查</h2><p>首先用笔记本连接显示器，显示正常，排除显示器和连接线的问题。<br>更换显示器，更换接口(typec dp hdmi1 hdmi2)，更换连接线问题依旧存在，基本确定是我电脑自身的问题了。<br>首先想到的是显卡驱动，下了 360驱动 来查看驱动情况，显示显卡驱动是最新的(软件用完即卸)。 打开<code>设备管理器</code>查看显卡驱动程序，并没有发现什么端倪。<br><img src="/img/20220331/2.jpg" alt></p>
+<p>不过事件选项卡里有错误信息，还是当天的，不过<code>事件查看器里</code>也没看出什么端倪(毕竟不懂)。<br><img src="/img/20220331/3.png" alt></p>
+<p>查看Windows更新历史记录也没看出啥异常来。<br><img src="/img/20220331/4.jpg" alt></p>
+<p>然后想知道当时通知的情况，打开<code>可靠性监视程序</code>查看系统通知发现确实更新了显卡驱动，基本确定了原因。</p>
+<blockquote>
+<p>win10系统通知历史查看方法：win+R快捷键打开运行，输入<code>control</code>打开控制面板。依次点击 系统和安全 安全和维护，左边栏点击 查看存档的消息 打开 可靠性监视程序。并不能记录所有，但可以参考一下。</p>
+</blockquote>
+<p><img src="/img/20220331/5.jpg" alt></p>
+<h2 id="修缮"><a href="#修缮" class="headerlink" title="修缮"></a>修缮</h2><p>知道原因，但是除了锁屏界面貌似没有啥问题。刚开始就通过<code>组策略编辑器</code>把锁屏界面的模糊特效去除了，效果不错，没有花屏了。<br><img src="/img/20220331/6.jpg" alt><br>但是，在弄博客的时候发现，还是有花屏的地方，治标不治本啊。<br><img src="/img/20220331/7.jpg" alt></p>
+<p>最终只能还原驱动了。<code>设备管理器</code>中的显卡驱动程序 回退驱动程序 按键不可用，这要就需要自己手动下载了。<br>这里是inter的核显，可以参考官方文档<a href="https://www.intel.cn/content/www/cn/zh/support/articles/000008628/graphics.html" target="_blank" rel="noopener">如何在 Windows® 10 和 Windows 11* 中将驱动程序回滚到之前的版本</a>）。在<a href="https://www.intel.cn/content/www/cn/zh/download-center/home.html" target="_blank" rel="noopener">下载中心</a>搜索栏中输入我的处理器编号 i5-8259U ，搜索驱动程序，找到对应我系统内部版本号 21H2 的显卡驱动程序（下载安装[英特尔® 驱动程序和支持助理]自动识别不出显卡驱动来，放弃）下载下来安装重启完成。锁屏页面和博客页面均显示正常。<br><img src="/img/20220331/8.jpg" alt></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/724495.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='http://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/163/32046426.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/163/413961906.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://link.hhtjim.com/163/536622304.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
