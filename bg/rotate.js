@@ -62,7 +62,30 @@ window.onload=function ()
 		mouseX/=5;
 		mouseY/=5;
 	};
-	
+
+	// 手机触摸 姑且能动
+	var touchStartX;
+	var touchStartY;
+	oDiv.addEventListener("touchend", function(evt){
+		active=false;
+	},false)
+	oDiv.addEventListener("touchstart", function(evt){
+		var touch = evt.touches[0];
+		touchStartX = parseInt(touch.clientX),
+		touchStartY = parseInt(touch.clientX);
+		active=true;
+		setTimeout(function(){active=false;},5000)
+	},false)
+	oDiv.addEventListener("touchmove", function(evt){
+		var oEvent=window.event || ev;
+
+		mouseX=touchStartX-(oDiv.offsetLeft+oDiv.offsetWidth/2);
+		mouseY=touchStartY-(oDiv.offsetTop+oDiv.offsetHeight/2);
+
+		mouseX/=5;
+		mouseY/=5;
+	},false)
+
 	setInterval(update, 30);
 };
 
