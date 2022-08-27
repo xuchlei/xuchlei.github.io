@@ -1,95 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Docker学习笔记（二）-使用</title>
-    <url>/2020/03/18/Docker%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89-%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="Docker学习笔记（二）-使用"><a href="#Docker学习笔记（二）-使用" class="headerlink" title="Docker学习笔记（二）-使用"></a>Docker学习笔记（二）-使用</h2><p><em>因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单</em></p>
-<h3 id="5-Docker数据卷"><a href="#5-Docker数据卷" class="headerlink" title="5 Docker数据卷"></a>5 Docker数据卷</h3><p>数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和文件和文件夹，为了持久化和共享数据。当数据卷目录挂载到容器目录后，修改会立即同步。容器和数据卷都可以一对多。<br><img src="/img/20200318/1.png" alt><br>配置数据卷<br>创建容器时使用<code>-v</code>参数来挂载数据卷，主机目录不写会默认分配一个目录<br>目录必须是绝对路径，目录不存在会自动创建，可以挂载多个数据卷（多个<code>-v</code>）<br><code>docker run ... -v 主机目录（文件）:容器内目录（文件） ...</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=c3 \</span><br><span class="line">    -v /root/data:/root/data \</span><br><span class="line">    -v /root/data2:/root/data2 \</span><br><span class="line">    centos:8</span><br></pre></td></tr></table></figure>
-
-<p>以上数据卷，容器c3，容器c4的目录操作都会同步（共享数据）。删除容器，数据卷的数据还存在（持久化）。<br>通过<code>docker inspect</code>命令查看容器信息，在HostConfig下的Binds（Mounts里也能）查看绑定数据卷信息。</p>
-<p>配置数据卷容器<br>通过<code>--volume-from</code>参数配置，可以简化数据配置。容器会直接和数据卷关联，删除数据卷容器不影响下面的容器和数据卷的交互。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=cd1 --volumes-from c3 centos:8</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-Docker应用部署"><a href="#6-Docker应用部署" class="headerlink" title="6 Docker应用部署"></a>6 Docker应用部署</h3><p>应用部署一般过程为：搜索镜像，拉取镜像，创建容器。这里以mysql来举例，其他的也差不多，只是容器创建的时候有所不同，比如挂载数据卷之类的。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">搜索镜像（版本号需要从Docker Hub上看）</span><br><span class="line">docker search mysql</span><br><span class="line"></span><br><span class="line">拉取镜像</span><br><span class="line">docker pull mysql:8</span><br><span class="line"></span><br><span class="line">创建容器（设置端口映射）</span><br><span class="line">docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -id mysql:8</span><br></pre></td></tr></table></figure>
-
-<p><code>-p 3306:3306</code> 将容器的3306端口映射到主机的3306端口<br><code>-e MYSQL_ROOT_PASSWORD=123456</code> 初始化root用户的密码</p>
-<p>远程连接mysql数据库成功<br><img src="/img/20200318/2.png" alt></p>
-<h3 id="7-Dockerfile"><a href="#7-Dockerfile" class="headerlink" title="7 Dockerfile"></a>7 Dockerfile</h3><p>Docker镜像由一层一层的文件系统（UnionFS联合文件系统）组成，Dockerfile 是一个用来构建镜像的文本文件，文本内容包含了一条条构建镜像所需的指令和说明。<br>镜像制作可以通过容器转为镜像<br>容器转镜像（挂载的目录不会写入镜像，root目录下的生效）<br><code>docker commit [容器id] [镜像名称]:[镜像版本号]</code><br>镜像转压缩文件<br><code>docker save -o [压缩文件名称] [镜像名称]:[镜像版本号]</code><br>压缩文件解压（还原）<br><code>docker load -i [压缩文件名称]</code></p>
-<p>这里用tomcat来举例，简单创建一个tomcat容器。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker search tomcat</span><br><span class="line">docker pull tomcat</span><br><span class="line">docker run -id --name mytomcat -p 8080:8080 -v /root/tomcat:/usr/local/tomcat/webapps tomcat</span><br><span class="line">cd /root/tomcat/</span><br><span class="line">mkdir HelloWorld</span><br><span class="line">cd HelloWorld/</span><br><span class="line">vim index.html</span><br><span class="line">写入&lt;h1&gt;Hello World By Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
-
-<p>通过url访问<br><img src="/img/20200318/3.png" alt></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">容器转镜像</span><br><span class="line">docker commit e3bb40626a58 myimg_tomcat:1.0</span><br><span class="line">进入容器</span><br><span class="line">docker exec -it myimg_tomcat bash</span><br><span class="line">镜像转压缩文件</span><br><span class="line">docker save -o myimg_tomcat.tar myimg_tomcat:1.0</span><br><span class="line">删除原镜像</span><br><span class="line">docker rmi myimg_tomcat:1.0</span><br><span class="line">压缩文件解压（还原）</span><br><span class="line">docker load -i myimg_tomcat.tar</span><br><span class="line">创建新容器</span><br><span class="line">docker run -it --name load_tomcat  myimg_tomcat:1.0 bash</span><br><span class="line">容器内查看webapps目录，原来挂载文件消失</span><br><span class="line">cd /usr/local/tomcat/webapps</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
-
-<p>推荐使用dockerfile来创建自定义镜像<br>书写可以参考Docker Hub上面的Dockerfile文件的写法或者<a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" target="_blank" rel="noopener">官方文档</a>，这里简单列一下关键字。<br><code>FROM</code> 基于那个image构建（scratch为空镜像）<br><code>LABEL</code> 一些标签说明<br><code>RUN</code> 执行命令，在docker build时运行<br><code>CMD</code> 类似RUN，在docker run时运行，可被 docker run 命令行参数中指定要运行的程序所覆盖<br><code>ENTRYPOINT</code> 类似CMD，但其不会被 docker run 的命令行参数指定的指令所覆盖<br><code>EXPOSE</code> 声明端口<br><code>ENV</code> 设置环境变量<br><code>ARG</code> 类似ENV，环境变量仅对 Dockerfile 内有效<br><code>COPY</code> 复制文件或者目录到容器里指定路径<br><code>ADD</code> 类似COPY，同样功能推荐用COPY，ADD可以自动解压压缩文件到目标路径<br><code>VOLUME</code> 定义匿名数据卷<br><code>USER</code> 指定执行后续命令的用户和用户组<br><code>WORKDIR</code> 指定工作目录<br><code>ONBUILD</code> 延迟构建命令的执行<br><code>LABEL</code> 标签<br><code>MAINTAINER</code> 作者信息<br><code>HEALTHCHECK</code> 健康检查<br><code>SHELL</code> 指定执行脚本的shell</p>
-<p>使用Dockerfile创建镜像<br><code>docker build -f [Dockerfile路径] -t [镜像名]</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">这里新建Dockerfile文件来创建镜像</span><br><span class="line">vim tomcat_dockerfile</span><br><span class="line">写入</span><br><span class="line">FROM tomcat:latest</span><br><span class="line">MAINTAINER xuchl&lt;xuchl@xuchunlei.top&gt;</span><br><span class="line"></span><br><span class="line">WORKDIR /usr/local/tomcat/webapps</span><br><span class="line">RUN mkdir HelloWorld</span><br><span class="line">WORKDIR /usr/local/tomcat/webapps/HelloWorld</span><br><span class="line">RUN echo &quot;&lt;h1&gt;Tomcat From Dockerfile&lt;/h1&gt;&quot; &gt; index.html</span><br><span class="line"></span><br><span class="line">创建镜像</span><br><span class="line">docker build -f ./tomcat_dockerfile  -t dcfile_tomcat:1.0 .</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/5.png" alt><br>用Dockerfile Build镜像时Docker client会默认把Dockerfile同级所有文件发给docker Deamon中导致发送内容过大。<br><img src="/img/20200318/4.png" alt><br>可以新建一个空目录放Dockerfile文件，或者使用.dockerignore文件设置黑名单，该文件包含的目录不会被发送到Docker daemon中。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">创建容器</span><br><span class="line">docker run --name dcc -p 8080:8080 -d dcfile_tomcat:1.0</span><br></pre></td></tr></table></figure>
-
-<p>通过url访问<br><img src="/img/20200318/6.png" alt></p>
-<h3 id="8-Docker服务编排"><a href="#8-Docker服务编排" class="headerlink" title="8 Docker服务编排"></a>8 Docker服务编排</h3><p>Compose是用于定义和运行多容器Docker应用程序的工具，Compose具有用于管理应用程序整个生命周期的命令，包括启动，停止和重建服务等。</p>
-<blockquote>
-<p>步骤<br>1 使用Dockerfile定义应用环境，以便可以在任何地方复制。<br>2 使用docker-compose.yml定义组成应用程序服务，以便它们可以在隔离的环境中一起运行。<br>3 运行 docker-compose up启动并运行整个应用程序。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">安装Docker Compose的当前稳定版本（下了几次失败，换了国内的地址秒好）</span><br><span class="line">curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` &gt; /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">设置文件可执行权限</span><br><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">查看版本信息来验证是否安装成功</span><br><span class="line">docker-compose -v</span><br></pre></td></tr></table></figure>
-
-<p>简单写一个yml启动的例子（进入容器内加的页面），关键字就不（偷）解释（懒）了。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mkdir composeHelloWorld</span><br><span class="line">cd composeHelloWorld/</span><br><span class="line"></span><br><span class="line">vim docker-compose.yml</span><br><span class="line"></span><br><span class="line">version: &apos;3&apos;</span><br><span class="line">services:</span><br><span class="line">  tomcat:</span><br><span class="line">    image: tomcat</span><br><span class="line">    ports:</span><br><span class="line">     - &quot;8090:8080&quot;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/7.png" alt></p>
-<h3 id="9-Docker私有仓库"><a href="#9-Docker私有仓库" class="headerlink" title="9 Docker私有仓库"></a>9 Docker私有仓库</h3><p>私有仓库registry是一个官方提供的镜像。这里仓库放在本机，实际上是要放到不同机器上的。<br>搭建</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取仓库镜像</span><br><span class="line">docker pull registry</span><br><span class="line">创建容器并启动</span><br><span class="line">docker run -id --name registry -p 5000:5000 registry</span><br></pre></td></tr></table></figure>
-
-<p>访问<code>http://私库ip地址:5000/v2</code>出现<code>{}</code>说明运行正常</p>
-<p>上传</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标记镜像</span><br><span class="line">docker tag centos:8 localhost:5000/centos:8</span><br><span class="line"></span><br><span class="line">推送镜像</span><br><span class="line">docker push localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/8.png" alt><br>访问<code>http://私库ip地址:5000/v2/_catalog</code>出现<code>{&quot;repositories&quot;:[&quot;centos&quot;]}</code>说明上传成功</p>
-<p>拉取</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取镜像</span><br><span class="line">docker pull localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20200318/9.png" alt><br>这里因为是本机，需要先删除才能拉取下来。</p>
-<p>Docker官方提供的私有仓库registry虽然简单但在管理上存在不足。可以通过<a href="https://github.com/goharbor/harbor" target="_blank" rel="noopener">Harbor</a>来弥补以上不足（这里只提一下）。</p>
-]]></content>
-      <tags>
-        <tag>Docker</tag>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GitHub Pages绑定域名</title>
-    <url>/2019/11/08/GitHub-Pages%E7%BB%91%E5%AE%9A%E5%9F%9F%E5%90%8D/</url>
-    <content><![CDATA[<h1 id="GitHub-Pages绑定域名"><a href="#GitHub-Pages绑定域名" class="headerlink" title="GitHub Pages绑定域名"></a>GitHub Pages绑定域名</h1><blockquote>
-<h4 id="准备-申请域名"><a href="#准备-申请域名" class="headerlink" title="准备 申请域名"></a>准备 申请域名</h4></blockquote>
-<p>老早就想申请一个域名了，和GitHub的用户名一样，可选的也不是很多。个人用的话推荐.top顶级域名，便宜（万网相对便宜吧，续费每年26￥）。<br>然后我是新用户，首年1元就可以（有的首次开通便宜，可以多买几年）。<br>大部分顶级域名国内都需要实名认证，一般2到3个工作日审核。我早上申请的，过了一会域名就实名通过了，可以进行解析了。</p>
-<blockquote>
-<h4 id="GitHub仓库配置"><a href="#GitHub仓库配置" class="headerlink" title="GitHub仓库配置"></a>GitHub仓库配置</h4></blockquote>
-<p>xxx.github.io仓库 &gt; Settings &gt; Custom domain中写入申请的域名 &gt; Save<br><a href="https://help.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site" target="_blank" rel="noopener">官方文档</a></p>
-<blockquote>
-<h4 id="添加域名解析"><a href="#添加域名解析" class="headerlink" title="添加域名解析"></a>添加域名解析</h4></blockquote>
-<ul>
-<li><p>获取GitHub Pages域名：ping自己的地址xxx.github.io，获取到ip</p>
-</li>
-<li><p>添加域名解析：可以加两条A类型的，一条www，一条@。</p>
-</li>
-</ul>
-<p>过一段时间就能访问了</p>
-<blockquote>
-<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4></blockquote>
-<p>以下主题限定<br>从 xxx.github.io 到新域名，需要更改Hexo的url配置，这样对应的主页地址才能更改。<br>Gitalk的Homepage URL和Authorization callback URL也要修改。<br>顺便删掉了部分代码，去掉谷歌403错误（疑似广告）<br>音乐本地话，去除”A cookie associated with a cross-site resourced……”警告</p>
-<p>p.s：新建这篇文章发现，名字中如果有空格需要加引号，不然空格前面的就会忽略掉（即《Pages绑定域名》）。加上引号，生成的文件名空格会被-替代。</p>
-]]></content>
-      <tags>
-        <tag>博客</tag>
-        <tag>GitHub Pages</tag>
-        <tag>域名</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Docker学习笔记（一）—认识与安装（Deepin15.11）</title>
     <url>/2020/03/15/Docker%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E8%AE%A4%E8%AF%86%E4%B8%8E%E5%AE%89%E8%A3%85/</url>
     <content><![CDATA[<h2 id="Docker学习笔记（一）"><a href="#Docker学习笔记（一）" class="headerlink" title="Docker学习笔记（一）"></a>Docker学习笔记（一）</h2><h2 id="认识与安装（Deepin15-11）"><a href="#认识与安装（Deepin15-11）" class="headerlink" title="认识与安装（Deepin15.11）"></a>认识与安装（Deepin15.11）</h2><p><em>老早就知道Docker了，但是没有静下心来去看。终于简单的学习了一下，记一下笔记。但是篇幅有点多，分开写吧。</em></p>
@@ -181,6 +92,95 @@
       <tags>
         <tag>Docker</tag>
         <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Docker学习笔记（二）-使用</title>
+    <url>/2020/03/18/Docker%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89-%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="Docker学习笔记（二）-使用"><a href="#Docker学习笔记（二）-使用" class="headerlink" title="Docker学习笔记（二）-使用"></a>Docker学习笔记（二）-使用</h2><p><em>因为不是运维，只是简单了解一下，有一个概念，所以这里写的很简单</em></p>
+<h3 id="5-Docker数据卷"><a href="#5-Docker数据卷" class="headerlink" title="5 Docker数据卷"></a>5 Docker数据卷</h3><p>数据卷（Data Volume）是在宿主中可以在容器之间进行共享和重用的一系列和文件和文件夹，为了持久化和共享数据。当数据卷目录挂载到容器目录后，修改会立即同步。容器和数据卷都可以一对多。<br><img src="/img/20200318/1.png" alt><br>配置数据卷<br>创建容器时使用<code>-v</code>参数来挂载数据卷，主机目录不写会默认分配一个目录<br>目录必须是绝对路径，目录不存在会自动创建，可以挂载多个数据卷（多个<code>-v</code>）<br><code>docker run ... -v 主机目录（文件）:容器内目录（文件） ...</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=c3 \</span><br><span class="line">    -v /root/data:/root/data \</span><br><span class="line">    -v /root/data2:/root/data2 \</span><br><span class="line">    centos:8</span><br></pre></td></tr></table></figure>
+
+<p>以上数据卷，容器c3，容器c4的目录操作都会同步（共享数据）。删除容器，数据卷的数据还存在（持久化）。<br>通过<code>docker inspect</code>命令查看容器信息，在HostConfig下的Binds（Mounts里也能）查看绑定数据卷信息。</p>
+<p>配置数据卷容器<br>通过<code>--volume-from</code>参数配置，可以简化数据配置。容器会直接和数据卷关联，删除数据卷容器不影响下面的容器和数据卷的交互。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker run -it --name=cd1 --volumes-from c3 centos:8</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-Docker应用部署"><a href="#6-Docker应用部署" class="headerlink" title="6 Docker应用部署"></a>6 Docker应用部署</h3><p>应用部署一般过程为：搜索镜像，拉取镜像，创建容器。这里以mysql来举例，其他的也差不多，只是容器创建的时候有所不同，比如挂载数据卷之类的。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">搜索镜像（版本号需要从Docker Hub上看）</span><br><span class="line">docker search mysql</span><br><span class="line"></span><br><span class="line">拉取镜像</span><br><span class="line">docker pull mysql:8</span><br><span class="line"></span><br><span class="line">创建容器（设置端口映射）</span><br><span class="line">docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -id mysql:8</span><br></pre></td></tr></table></figure>
+
+<p><code>-p 3306:3306</code> 将容器的3306端口映射到主机的3306端口<br><code>-e MYSQL_ROOT_PASSWORD=123456</code> 初始化root用户的密码</p>
+<p>远程连接mysql数据库成功<br><img src="/img/20200318/2.png" alt></p>
+<h3 id="7-Dockerfile"><a href="#7-Dockerfile" class="headerlink" title="7 Dockerfile"></a>7 Dockerfile</h3><p>Docker镜像由一层一层的文件系统（UnionFS联合文件系统）组成，Dockerfile 是一个用来构建镜像的文本文件，文本内容包含了一条条构建镜像所需的指令和说明。<br>镜像制作可以通过容器转为镜像<br>容器转镜像（挂载的目录不会写入镜像，root目录下的生效）<br><code>docker commit [容器id] [镜像名称]:[镜像版本号]</code><br>镜像转压缩文件<br><code>docker save -o [压缩文件名称] [镜像名称]:[镜像版本号]</code><br>压缩文件解压（还原）<br><code>docker load -i [压缩文件名称]</code></p>
+<p>这里用tomcat来举例，简单创建一个tomcat容器。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker search tomcat</span><br><span class="line">docker pull tomcat</span><br><span class="line">docker run -id --name mytomcat -p 8080:8080 -v /root/tomcat:/usr/local/tomcat/webapps tomcat</span><br><span class="line">cd /root/tomcat/</span><br><span class="line">mkdir HelloWorld</span><br><span class="line">cd HelloWorld/</span><br><span class="line">vim index.html</span><br><span class="line">写入&lt;h1&gt;Hello World By Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过url访问<br><img src="/img/20200318/3.png" alt></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">容器转镜像</span><br><span class="line">docker commit e3bb40626a58 myimg_tomcat:1.0</span><br><span class="line">进入容器</span><br><span class="line">docker exec -it myimg_tomcat bash</span><br><span class="line">镜像转压缩文件</span><br><span class="line">docker save -o myimg_tomcat.tar myimg_tomcat:1.0</span><br><span class="line">删除原镜像</span><br><span class="line">docker rmi myimg_tomcat:1.0</span><br><span class="line">压缩文件解压（还原）</span><br><span class="line">docker load -i myimg_tomcat.tar</span><br><span class="line">创建新容器</span><br><span class="line">docker run -it --name load_tomcat  myimg_tomcat:1.0 bash</span><br><span class="line">容器内查看webapps目录，原来挂载文件消失</span><br><span class="line">cd /usr/local/tomcat/webapps</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
+
+<p>推荐使用dockerfile来创建自定义镜像<br>书写可以参考Docker Hub上面的Dockerfile文件的写法或者<a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" target="_blank" rel="noopener">官方文档</a>，这里简单列一下关键字。<br><code>FROM</code> 基于那个image构建（scratch为空镜像）<br><code>LABEL</code> 一些标签说明<br><code>RUN</code> 执行命令，在docker build时运行<br><code>CMD</code> 类似RUN，在docker run时运行，可被 docker run 命令行参数中指定要运行的程序所覆盖<br><code>ENTRYPOINT</code> 类似CMD，但其不会被 docker run 的命令行参数指定的指令所覆盖<br><code>EXPOSE</code> 声明端口<br><code>ENV</code> 设置环境变量<br><code>ARG</code> 类似ENV，环境变量仅对 Dockerfile 内有效<br><code>COPY</code> 复制文件或者目录到容器里指定路径<br><code>ADD</code> 类似COPY，同样功能推荐用COPY，ADD可以自动解压压缩文件到目标路径<br><code>VOLUME</code> 定义匿名数据卷<br><code>USER</code> 指定执行后续命令的用户和用户组<br><code>WORKDIR</code> 指定工作目录<br><code>ONBUILD</code> 延迟构建命令的执行<br><code>LABEL</code> 标签<br><code>MAINTAINER</code> 作者信息<br><code>HEALTHCHECK</code> 健康检查<br><code>SHELL</code> 指定执行脚本的shell</p>
+<p>使用Dockerfile创建镜像<br><code>docker build -f [Dockerfile路径] -t [镜像名]</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">这里新建Dockerfile文件来创建镜像</span><br><span class="line">vim tomcat_dockerfile</span><br><span class="line">写入</span><br><span class="line">FROM tomcat:latest</span><br><span class="line">MAINTAINER xuchl&lt;xuchl@xuchunlei.top&gt;</span><br><span class="line"></span><br><span class="line">WORKDIR /usr/local/tomcat/webapps</span><br><span class="line">RUN mkdir HelloWorld</span><br><span class="line">WORKDIR /usr/local/tomcat/webapps/HelloWorld</span><br><span class="line">RUN echo &quot;&lt;h1&gt;Tomcat From Dockerfile&lt;/h1&gt;&quot; &gt; index.html</span><br><span class="line"></span><br><span class="line">创建镜像</span><br><span class="line">docker build -f ./tomcat_dockerfile  -t dcfile_tomcat:1.0 .</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/5.png" alt><br>用Dockerfile Build镜像时Docker client会默认把Dockerfile同级所有文件发给docker Deamon中导致发送内容过大。<br><img src="/img/20200318/4.png" alt><br>可以新建一个空目录放Dockerfile文件，或者使用.dockerignore文件设置黑名单，该文件包含的目录不会被发送到Docker daemon中。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">创建容器</span><br><span class="line">docker run --name dcc -p 8080:8080 -d dcfile_tomcat:1.0</span><br></pre></td></tr></table></figure>
+
+<p>通过url访问<br><img src="/img/20200318/6.png" alt></p>
+<h3 id="8-Docker服务编排"><a href="#8-Docker服务编排" class="headerlink" title="8 Docker服务编排"></a>8 Docker服务编排</h3><p>Compose是用于定义和运行多容器Docker应用程序的工具，Compose具有用于管理应用程序整个生命周期的命令，包括启动，停止和重建服务等。</p>
+<blockquote>
+<p>步骤<br>1 使用Dockerfile定义应用环境，以便可以在任何地方复制。<br>2 使用docker-compose.yml定义组成应用程序服务，以便它们可以在隔离的环境中一起运行。<br>3 运行 docker-compose up启动并运行整个应用程序。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">安装Docker Compose的当前稳定版本（下了几次失败，换了国内的地址秒好）</span><br><span class="line">curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` &gt; /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">设置文件可执行权限</span><br><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br><span class="line"></span><br><span class="line">查看版本信息来验证是否安装成功</span><br><span class="line">docker-compose -v</span><br></pre></td></tr></table></figure>
+
+<p>简单写一个yml启动的例子（进入容器内加的页面），关键字就不（偷）解释（懒）了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mkdir composeHelloWorld</span><br><span class="line">cd composeHelloWorld/</span><br><span class="line"></span><br><span class="line">vim docker-compose.yml</span><br><span class="line"></span><br><span class="line">version: &apos;3&apos;</span><br><span class="line">services:</span><br><span class="line">  tomcat:</span><br><span class="line">    image: tomcat</span><br><span class="line">    ports:</span><br><span class="line">     - &quot;8090:8080&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/7.png" alt></p>
+<h3 id="9-Docker私有仓库"><a href="#9-Docker私有仓库" class="headerlink" title="9 Docker私有仓库"></a>9 Docker私有仓库</h3><p>私有仓库registry是一个官方提供的镜像。这里仓库放在本机，实际上是要放到不同机器上的。<br>搭建</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取仓库镜像</span><br><span class="line">docker pull registry</span><br><span class="line">创建容器并启动</span><br><span class="line">docker run -id --name registry -p 5000:5000 registry</span><br></pre></td></tr></table></figure>
+
+<p>访问<code>http://私库ip地址:5000/v2</code>出现<code>{}</code>说明运行正常</p>
+<p>上传</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标记镜像</span><br><span class="line">docker tag centos:8 localhost:5000/centos:8</span><br><span class="line"></span><br><span class="line">推送镜像</span><br><span class="line">docker push localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/8.png" alt><br>访问<code>http://私库ip地址:5000/v2/_catalog</code>出现<code>{&quot;repositories&quot;:[&quot;centos&quot;]}</code>说明上传成功</p>
+<p>拉取</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">拉取镜像</span><br><span class="line">docker pull localhost:5000/centos:8</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20200318/9.png" alt><br>这里因为是本机，需要先删除才能拉取下来。</p>
+<p>Docker官方提供的私有仓库registry虽然简单但在管理上存在不足。可以通过<a href="https://github.com/goharbor/harbor" target="_blank" rel="noopener">Harbor</a>来弥补以上不足（这里只提一下）。</p>
+]]></content>
+      <tags>
+        <tag>Docker</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GitHub Pages绑定域名</title>
+    <url>/2019/11/08/GitHub-Pages%E7%BB%91%E5%AE%9A%E5%9F%9F%E5%90%8D/</url>
+    <content><![CDATA[<h1 id="GitHub-Pages绑定域名"><a href="#GitHub-Pages绑定域名" class="headerlink" title="GitHub Pages绑定域名"></a>GitHub Pages绑定域名</h1><blockquote>
+<h4 id="准备-申请域名"><a href="#准备-申请域名" class="headerlink" title="准备 申请域名"></a>准备 申请域名</h4></blockquote>
+<p>老早就想申请一个域名了，和GitHub的用户名一样，可选的也不是很多。个人用的话推荐.top顶级域名，便宜（万网相对便宜吧，续费每年26￥）。<br>然后我是新用户，首年1元就可以（有的首次开通便宜，可以多买几年）。<br>大部分顶级域名国内都需要实名认证，一般2到3个工作日审核。我早上申请的，过了一会域名就实名通过了，可以进行解析了。</p>
+<blockquote>
+<h4 id="GitHub仓库配置"><a href="#GitHub仓库配置" class="headerlink" title="GitHub仓库配置"></a>GitHub仓库配置</h4></blockquote>
+<p>xxx.github.io仓库 &gt; Settings &gt; Custom domain中写入申请的域名 &gt; Save<br><a href="https://help.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site" target="_blank" rel="noopener">官方文档</a></p>
+<blockquote>
+<h4 id="添加域名解析"><a href="#添加域名解析" class="headerlink" title="添加域名解析"></a>添加域名解析</h4></blockquote>
+<ul>
+<li><p>获取GitHub Pages域名：ping自己的地址xxx.github.io，获取到ip</p>
+</li>
+<li><p>添加域名解析：可以加两条A类型的，一条www，一条@。</p>
+</li>
+</ul>
+<p>过一段时间就能访问了</p>
+<blockquote>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4></blockquote>
+<p>以下主题限定<br>从 xxx.github.io 到新域名，需要更改Hexo的url配置，这样对应的主页地址才能更改。<br>Gitalk的Homepage URL和Authorization callback URL也要修改。<br>顺便删掉了部分代码，去掉谷歌403错误（疑似广告）<br>音乐本地话，去除”A cookie associated with a cross-site resourced……”警告</p>
+<p>p.s：新建这篇文章发现，名字中如果有空格需要加引号，不然空格前面的就会忽略掉（即《Pages绑定域名》）。加上引号，生成的文件名空格会被-替代。</p>
+]]></content>
+      <tags>
+        <tag>博客</tag>
+        <tag>GitHub Pages</tag>
+        <tag>域名</tag>
       </tags>
   </entry>
   <entry>
@@ -352,296 +352,6 @@
       <tags>
         <tag>JavaScript</tag>
         <tag>二维码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MySQL EXPLAIN 简单了解</title>
-    <url>/2021/08/13/MySQL%20EXPLAIN%20%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/</url>
-    <content><![CDATA[<p><em>帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_size的大小，然并卵；用SQL_BIG_RESULT强制跑，结果把C盘100多G的空间干满了，No space left on device；最后用了EXPLAIN分析SQL语句的执行计划信息，来去除临时表，然后问题解决。了解到了以前不了解的知识，比如最左(前缀)匹配原则。为了以后不在踩坑，这里简单写一以下EXPLAIN的信息以备后用。</em></p>
-<h3 id="EXPLAIN简介"><a href="#EXPLAIN简介" class="headerlink" title="EXPLAIN简介"></a>EXPLAIN简介</h3><p><code>EXPLAIN</code>可以获取SQL语句的执行计划信息，可用于<code>SELECT</code>，<code>DELETE</code>，<code>INSERT</code>，<code>REPLACE</code>，和<code>UPDATE</code>语句，用来分析优化SQL以及表结构。执行（<code>EXPLAIN</code> + SQL语句）效果如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysql&gt; explain select 1 from dual;</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra          |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">|  1 | SIMPLE      | NULL  | NULL       | NULL | NULL          | NULL | NULL    | NULL | NULL |     NULL | No tables used |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
-
-<h3 id="EXPLAIN列信息"><a href="#EXPLAIN列信息" class="headerlink" title="EXPLAIN列信息"></a>EXPLAIN列信息</h3><ul>
-<li><p>id<br>SELECT的标识符，按照SELECT出现顺序增长，UNION查询id为NULL。</p>
-</li>
-<li><p>select_type<br>SELECT的类型</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th align="center">值</th>
-<th align="left">意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">SIMPLE</td>
-<td align="left">简单查询（不使用UNION和子查询）</td>
-</tr>
-<tr>
-<td align="center">PRIMARY</td>
-<td align="left">复杂查询最外层的SELECT</td>
-</tr>
-<tr>
-<td align="center">UNION</td>
-<td align="left">UNION中第二个或以后的SELECT</td>
-</tr>
-<tr>
-<td align="center">DEPENDENT UNION</td>
-<td align="left">UNION中第二个或以后的SELECT（依赖于外部查询）</td>
-</tr>
-<tr>
-<td align="center">UNION RESULT</td>
-<td align="left">UNION的结果</td>
-</tr>
-<tr>
-<td align="center">SUBQUERY</td>
-<td align="left">子查询第一个SELECT</td>
-</tr>
-<tr>
-<td align="center">DEPENDENT SUBQUERY</td>
-<td align="left">子查询第一个SELECT（依赖于外部查询）</td>
-</tr>
-<tr>
-<td align="center">DERIVED</td>
-<td align="left">派生表</td>
-</tr>
-<tr>
-<td align="center">MATERIALIZED</td>
-<td align="left">物化子查询</td>
-</tr>
-<tr>
-<td align="center">UNCACHEABLE SUBQUERY</td>
-<td align="left">子查询无法被物化，每次都需要重新评估</td>
-</tr>
-<tr>
-<td align="center">UNCACHEABLE UNION</td>
-<td align="left">UNION中第二个或以后的无法被物化的SELECT（类似UNCACHEABLE SUBQUERY）</td>
-</tr>
-</tbody></table>
-<ul>
-<li>table<br>输出行所引用表名，或者以下值：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th align="center">值</th>
-<th align="left">意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">&lt;unionM,N&gt;</td>
-<td align="left">id为M和N行的并集</td>
-</tr>
-<tr>
-<td align="center">&lt;derivedN&gt;</td>
-<td align="left">id为N行的派生表结果</td>
-</tr>
-<tr>
-<td align="center">&lt;subqueryN&gt;</td>
-<td align="left">id为N行的物化子查询结果</td>
-</tr>
-</tbody></table>
-<ul>
-<li><p>partitions<br>匹配记录所在的分区（非分区表该值为NULL）</p>
-</li>
-<li><p>type<br>连接类型，效率从高到低排列为：</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th align="center">值</th>
-<th align="left">意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">system</td>
-<td align="left">表只有一行（类似系统表，const连接类型的一个特例）</td>
-</tr>
-<tr>
-<td align="center">const</td>
-<td align="left">该表最多有一个匹配行，该列的值可以被优化器的其余部分视为常量</td>
-</tr>
-<tr>
-<td align="center">eq_ref</td>
-<td align="left">从该表中读取一行与前一张表的所有行组合（使用主键索引或唯一非空索引）</td>
-</tr>
-<tr>
-<td align="center">ref</td>
-<td align="left">从该表中读取具有匹配索引值的所有行与前一张表的所有行的组合（不使用唯一索引，使用普通索引或唯一性索引的部分前缀）</td>
-</tr>
-<tr>
-<td align="center">fulltext</td>
-<td align="left">使用全文索引</td>
-</tr>
-<tr>
-<td align="center">ref_or_null</td>
-<td align="left">类似ref，但是需要额外搜索NULL</td>
-</tr>
-<tr>
-<td align="center">index_merge</td>
-<td align="left">使用索引合并的优化方法</td>
-</tr>
-<tr>
-<td align="center">unique_subquery</td>
-<td align="left">替代了 value IN (SELECT primary_key FROM single_table WHERE some_expr) 形式的eq_ref一些IN子查询</td>
-</tr>
-<tr>
-<td align="center">index_subquery</td>
-<td align="left">类似unique_subquery，替代了IN子查询，适用于 value IN (SELECT key_column FROM single_table WHERE some_expr) 形式的子查询中的非唯一索引</td>
-</tr>
-<tr>
-<td align="center">range</td>
-<td align="left">使用索引来检索给定范围的行</td>
-</tr>
-<tr>
-<td align="center">index</td>
-<td align="left">与ALL一样，但是扫描索引树（全索引扫描）</td>
-</tr>
-<tr>
-<td align="center">ALL</td>
-<td align="left">全表扫描</td>
-</tr>
-</tbody></table>
-<ul>
-<li><p>possible_keys<br>该表中可以使用哪个索引去查找行</p>
-</li>
-<li><p>key<br>该表中实际使用索引去查找行</p>
-</li>
-<li><p>key_len<br>该表中实际使用索引长度（可以推断使用组合索引中的多少）</p>
-</li>
-<li><p>ref<br>key列记录的索引中，表查找值所用到的列，常量（const）或函数（func）</p>
-</li>
-<li><p>rows<br>读取并检测的行数</p>
-</li>
-<li><p>filtered<br>按表条件过滤的行的估计百分比，最大值为100（没有发生行过滤）</p>
-</li>
-<li><p>Extra<br>附加信息，比较常见重要的如下</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th align="center">值</th>
-<th align="left">意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">Using index</td>
-<td align="left">使用索引树中的信息从表中检索列信息</td>
-</tr>
-<tr>
-<td align="center">Using where</td>
-<td align="left">使用WHERE限制返回的行</td>
-</tr>
-<tr>
-<td align="center">Using temporary</td>
-<td align="left">需要创建一个临时表来保存结果（比如GROUP BY和ORDER BY会出现，需要优化，一般用添加索引来优化）</td>
-</tr>
-<tr>
-<td align="center">Using filesort</td>
-<td align="left">对结果使用一个外部索引排序，而不是按索引次序从表里读取行（需要优化，一般用索引来优化）</td>
-</tr>
-</tbody></table>
-]]></content>
-      <tags>
-        <tag>MySQL</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Markdown参考</title>
-    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
-    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-
-<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
-
-<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
-
-<hr>
-<hr>
-<hr>
-<hr>
-<hr>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
-<p>第一层嵌套</p>
-<blockquote>
-<ul>
-<li>第二层嵌套1（无序列表）</li>
-<li>第二层嵌套2（无序列表）</li>
-</ul>
-</blockquote>
-</blockquote>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>无序列表一</li>
-<li>无序列表二<ul>
-<li>无序嵌套列表二-1</li>
-<li>无序嵌套列表二-2</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li>有序列表一</li>
-<li>有序列表二</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
-
-<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>默认</th>
-<th align="left">左对齐</th>
-<th align="center">居中</th>
-<th align="right">右对齐</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>单元格</td>
-<td align="left">单元格</td>
-<td align="center"><code>单元格</code></td>
-<td align="right">单元格</td>
-</tr>
-</tbody></table>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
-
-<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
-<pre><code>console.log(&quot;Hello world 空格&quot;)
-console.log(&quot;Hello world 空格&quot;)
-
-console.log(&quot;Hello world Tab&quot;)
-console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>Markdown</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IP地址分布分析(国内)·续</title>
-    <url>/2020/04/17/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90-%E5%9B%BD%E5%86%85-%C2%B7%E7%BB%AD/</url>
-    <content><![CDATA[<h2 id="IP地址分布分析-国内-·续"><a href="#IP地址分布分析-国内-·续" class="headerlink" title="IP地址分布分析(国内)·续"></a>IP地址分布分析(国内)·续</h2><p><em>今天和同事探讨了准确性的问题，觉得地图工具的IP地址判断最为准确，于是改写了原来的程序。因为是调用API，效率大幅提升，工作可用</em></p>
-<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为之前写<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">足迹</a>用的百度地图，最开始考虑用百度地图的普通ip定位，但是免费的配合太少，每天只有1K，10QPS，秒秒钟用完。不过百度地图对于之前通过Jsoup请求的，通过GeoIP来判断的也能识别，但是对港澳台的ip地址判断不是很好，缺失太严重。后来改用高德地图的ip定位，个人用户每天30W，200QPS，够用。但是通过GeoIP来判断的识别不了，偶尔请求超时。</p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>基本和原来一样，只是把通过Jsoup获取页面内容改成调用API获取Json内容，（渣）代码如下。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.io.InputStream;</span><br><span class="line">import java.io.InputStreamReader;</span><br><span class="line">import java.io.OutputStream;</span><br><span class="line">import java.net.ConnectException;</span><br><span class="line">import java.net.HttpURLConnection;</span><br><span class="line">import java.net.URL;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import com.alibaba.fastjson.JSONObject;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreaterByMap &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line"></span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// JSONObject jsonObject = httpRequest(</span><br><span class="line">				// &quot;http://api.map.baidu.com/location/ip?ak=百度key&amp;ip=&quot; + ips[i], &quot;GET&quot;,</span><br><span class="line">				// null);</span><br><span class="line">				// if (&quot;0&quot;.equals(jsonObject.getString(&quot;status&quot;))) &#123;</span><br><span class="line">				// System.out.println(jsonObject.getJSONObject(&quot;content&quot;).getJSONObject(&quot;address_detail&quot;).getString(&quot;province&quot;));</span><br><span class="line">				// &#125; else &#123;</span><br><span class="line">				// System.out.println(&quot;error:&quot; + ips[i]);</span><br><span class="line">				// &#125;</span><br><span class="line">				JSONObject jsonObject = httpRequest(</span><br><span class="line">						&quot;http://restapi.amap.com/v3/ip?key=高德key&amp;ip=&quot; + ips[i], &quot;GET&quot;, null);</span><br><span class="line">				String province = &quot;&quot;;</span><br><span class="line">				if (&quot;1&quot;.equals(jsonObject.getString(&quot;status&quot;))) &#123;</span><br><span class="line">					province = jsonObject.getString(&quot;province&quot;).substring(0, 2);</span><br><span class="line">					if (&quot;[]&quot;.equals(province)) &#123;</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceMap.put(province, provinceMap.get(province) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				System.out.println(i + &quot;\t&quot; + province);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			provinceMap.put(&quot;黑龙江&quot;, provinceMap.get(&quot;黑龙&quot;));</span><br><span class="line">			provinceMap.remove(&quot;黑龙&quot;);</span><br><span class="line">			provinceMap.put(&quot;内蒙古&quot;, provinceMap.get(&quot;内蒙&quot;));</span><br><span class="line">			provinceMap.remove(&quot;内蒙&quot;);</span><br><span class="line">			StringBuffer result = new StringBuffer();</span><br><span class="line">			provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">				result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">			&#125;);</span><br><span class="line">			System.out.println(result.toString());</span><br><span class="line">			System.out.println(other);</span><br><span class="line">			try &#123;</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">				// TODO Auto-generated catch block</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125; catch (IOException e) &#123;</span><br><span class="line">				// TODO Auto-generated catch block</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 发起http请求并获取结果</span><br><span class="line">	 * </span><br><span class="line">	 * @param requestUrl    请求地址</span><br><span class="line">	 * @param requestMethod 请求方式（GET、POST）</span><br><span class="line">	 * @param outputStr     提交的数据</span><br><span class="line">	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)</span><br><span class="line">	 */</span><br><span class="line">	public static JSONObject httpRequest(String requestUrl, String requestMethod, String outputStr) &#123;</span><br><span class="line">		JSONObject jsonObject = null;</span><br><span class="line">		StringBuffer buffer = new StringBuffer();</span><br><span class="line">		InputStream inputStream = null;</span><br><span class="line">		try &#123;</span><br><span class="line">			URL url = new URL(requestUrl);</span><br><span class="line">			HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();</span><br><span class="line">			httpUrlConn.setDoOutput(true);</span><br><span class="line">			httpUrlConn.setDoInput(true);</span><br><span class="line">			httpUrlConn.setUseCaches(false);</span><br><span class="line">			// 设置请求方式（GET/POST）</span><br><span class="line">			httpUrlConn.setRequestMethod(requestMethod);</span><br><span class="line">			if (&quot;GET&quot;.equalsIgnoreCase(requestMethod))</span><br><span class="line">				httpUrlConn.connect();</span><br><span class="line"></span><br><span class="line">			// 当有数据需要提交时</span><br><span class="line">			if (null != outputStr) &#123;</span><br><span class="line">				OutputStream outputStream = httpUrlConn.getOutputStream();</span><br><span class="line">				// 注意编码格式，防止中文乱码</span><br><span class="line">				outputStream.write(outputStr.getBytes(&quot;UTF-8&quot;));</span><br><span class="line">				outputStream.close();</span><br><span class="line">			&#125;</span><br><span class="line">			// 将返回的输入流转换成字符串</span><br><span class="line">			inputStream = httpUrlConn.getInputStream();</span><br><span class="line">			InputStreamReader inputStreamReader = new InputStreamReader(inputStream, &quot;utf-8&quot;);</span><br><span class="line">			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);</span><br><span class="line"></span><br><span class="line">			String str = null;</span><br><span class="line">			while ((str = bufferedReader.readLine()) != null) &#123;</span><br><span class="line">				buffer.append(str);</span><br><span class="line">			&#125;</span><br><span class="line">			bufferedReader.close();</span><br><span class="line">			inputStreamReader.close();</span><br><span class="line">			// 释放资源</span><br><span class="line">			inputStream.close();</span><br><span class="line">			inputStream = null;</span><br><span class="line">			httpUrlConn.disconnect();</span><br><span class="line">			jsonObject = JSONObject.parseObject(buffer.toString());</span><br><span class="line">		&#125; catch (ConnectException ce) &#123;</span><br><span class="line">			ce.printStackTrace();</span><br><span class="line">			System.out.println(&quot;server connection timed out&quot;);</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">			System.out.println(&quot;http request error:&#123;&#125;&quot;);</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				if (inputStream != null) &#123;</span><br><span class="line">					inputStream.close();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; catch (IOException e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		return jsonObject;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据生成的文本替换Echart的数据，这里没有全部跑完所以没做展示，可以参考之前的文章-<a href="https://xuchunlei.top/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/">IP地址分布分析(国内)</a></p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-        <tag>IP</tag>
-        <tag>Echarts</tag>
       </tags>
   </entry>
   <entry>
@@ -866,26 +576,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 ]]></content>
       <tags>
         <tag>MySQL</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>不吐不快-Win10更新后锁屏界面花屏</title>
-    <url>/2022/03/31/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-Win10%E6%9B%B4%E6%96%B0%E5%90%8E%E9%94%81%E5%B1%8F%E7%95%8C%E9%9D%A2%E8%8A%B1%E5%B1%8F/</url>
-    <content><![CDATA[<h2 id="不吐不快-Win10更新后锁屏界面花屏"><a href="#不吐不快-Win10更新后锁屏界面花屏" class="headerlink" title="不吐不快-Win10更新后锁屏界面花屏"></a>不吐不快-Win10更新后锁屏界面花屏</h2><p><em>吐槽专用，本以为眼不见为净就行，结果发现治标不治本</em></p>
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>今天win10不知道自己更新了啥，只知道通知中提示了和显示相关的信息，让我重启电脑生效。因为在工作中没有在意，就关掉继续工作了。后来重启后发现电脑，锁屏界面输入密码时就花屏了，每次都出现不同的效果，效果如下：<br><img src="/img/20220331/1.jpg" alt></p>
-<h2 id="排查"><a href="#排查" class="headerlink" title="排查"></a>排查</h2><p>首先用笔记本连接显示器，显示正常，排除显示器和连接线的问题。<br>更换显示器，更换接口(typec dp hdmi1 hdmi2)，更换连接线问题依旧存在，基本确定是我电脑自身的问题了。<br>首先想到的是显卡驱动，下了 360驱动 来查看驱动情况，显示显卡驱动是最新的(软件用完即卸)。 打开<code>设备管理器</code>查看显卡驱动程序，并没有发现什么端倪。<br><img src="/img/20220331/2.jpg" alt></p>
-<p>不过事件选项卡里有错误信息，还是当天的，不过<code>事件查看器里</code>也没看出什么端倪(毕竟不懂)。<br><img src="/img/20220331/3.png" alt></p>
-<p>查看Windows更新历史记录也没看出啥异常来。<br><img src="/img/20220331/4.jpg" alt></p>
-<p>然后想知道当时通知的情况，打开<code>可靠性监视程序</code>查看系统通知发现确实更新了显卡驱动，基本确定了原因。</p>
-<blockquote>
-<p>win10系统通知历史查看方法：win+R快捷键打开运行，输入<code>control</code>打开控制面板。依次点击 系统和安全 安全和维护，左边栏点击 查看存档的消息 打开 可靠性监视程序。并不能记录所有，但可以参考一下。</p>
-</blockquote>
-<p><img src="/img/20220331/5.jpg" alt></p>
-<h2 id="修缮"><a href="#修缮" class="headerlink" title="修缮"></a>修缮</h2><p>知道原因，但是除了锁屏界面貌似没有啥问题。刚开始就通过<code>组策略编辑器</code>把锁屏界面的模糊特效去除了，效果不错，没有花屏了。<br><img src="/img/20220331/6.jpg" alt><br>但是，在弄博客的时候发现，还是有花屏的地方，治标不治本啊。<br><img src="/img/20220331/7.jpg" alt></p>
-<p>最终只能还原驱动了。<code>设备管理器</code>中的显卡驱动程序 回退驱动程序 按键不可用，这要就需要自己手动下载了。<br>这里是inter的核显，可以参考官方文档<a href="https://www.intel.cn/content/www/cn/zh/support/articles/000008628/graphics.html" target="_blank" rel="noopener">如何在 Windows® 10 和 Windows 11* 中将驱动程序回滚到之前的版本</a>）。在<a href="https://www.intel.cn/content/www/cn/zh/download-center/home.html" target="_blank" rel="noopener">下载中心</a>搜索栏中输入我的处理器编号 i5-8259U ，搜索驱动程序，找到对应我系统内部版本号 21H2 的显卡驱动程序（下载安装[英特尔® 驱动程序和支持助理]自动识别不出显卡驱动来，放弃）下载下来安装重启完成。锁屏页面和博客页面均显示正常。<br><img src="/img/20220331/8.jpg" alt></p>
-]]></content>
-      <tags>
-        <tag>吐槽</tag>
       </tags>
   </entry>
   <entry>
@@ -1140,6 +830,296 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
+    <title>IP地址分布分析(国内)·续</title>
+    <url>/2020/04/17/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90-%E5%9B%BD%E5%86%85-%C2%B7%E7%BB%AD/</url>
+    <content><![CDATA[<h2 id="IP地址分布分析-国内-·续"><a href="#IP地址分布分析-国内-·续" class="headerlink" title="IP地址分布分析(国内)·续"></a>IP地址分布分析(国内)·续</h2><p><em>今天和同事探讨了准确性的问题，觉得地图工具的IP地址判断最为准确，于是改写了原来的程序。因为是调用API，效率大幅提升，工作可用</em></p>
+<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为之前写<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">足迹</a>用的百度地图，最开始考虑用百度地图的普通ip定位，但是免费的配合太少，每天只有1K，10QPS，秒秒钟用完。不过百度地图对于之前通过Jsoup请求的，通过GeoIP来判断的也能识别，但是对港澳台的ip地址判断不是很好，缺失太严重。后来改用高德地图的ip定位，个人用户每天30W，200QPS，够用。但是通过GeoIP来判断的识别不了，偶尔请求超时。</p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>基本和原来一样，只是把通过Jsoup获取页面内容改成调用API获取Json内容，（渣）代码如下。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.io.InputStream;</span><br><span class="line">import java.io.InputStreamReader;</span><br><span class="line">import java.io.OutputStream;</span><br><span class="line">import java.net.ConnectException;</span><br><span class="line">import java.net.HttpURLConnection;</span><br><span class="line">import java.net.URL;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import com.alibaba.fastjson.JSONObject;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreaterByMap &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line"></span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// JSONObject jsonObject = httpRequest(</span><br><span class="line">				// &quot;http://api.map.baidu.com/location/ip?ak=百度key&amp;ip=&quot; + ips[i], &quot;GET&quot;,</span><br><span class="line">				// null);</span><br><span class="line">				// if (&quot;0&quot;.equals(jsonObject.getString(&quot;status&quot;))) &#123;</span><br><span class="line">				// System.out.println(jsonObject.getJSONObject(&quot;content&quot;).getJSONObject(&quot;address_detail&quot;).getString(&quot;province&quot;));</span><br><span class="line">				// &#125; else &#123;</span><br><span class="line">				// System.out.println(&quot;error:&quot; + ips[i]);</span><br><span class="line">				// &#125;</span><br><span class="line">				JSONObject jsonObject = httpRequest(</span><br><span class="line">						&quot;http://restapi.amap.com/v3/ip?key=高德key&amp;ip=&quot; + ips[i], &quot;GET&quot;, null);</span><br><span class="line">				String province = &quot;&quot;;</span><br><span class="line">				if (&quot;1&quot;.equals(jsonObject.getString(&quot;status&quot;))) &#123;</span><br><span class="line">					province = jsonObject.getString(&quot;province&quot;).substring(0, 2);</span><br><span class="line">					if (&quot;[]&quot;.equals(province)) &#123;</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceMap.put(province, provinceMap.get(province) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				System.out.println(i + &quot;\t&quot; + province);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			provinceMap.put(&quot;黑龙江&quot;, provinceMap.get(&quot;黑龙&quot;));</span><br><span class="line">			provinceMap.remove(&quot;黑龙&quot;);</span><br><span class="line">			provinceMap.put(&quot;内蒙古&quot;, provinceMap.get(&quot;内蒙&quot;));</span><br><span class="line">			provinceMap.remove(&quot;内蒙&quot;);</span><br><span class="line">			StringBuffer result = new StringBuffer();</span><br><span class="line">			provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">				result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">			&#125;);</span><br><span class="line">			System.out.println(result.toString());</span><br><span class="line">			System.out.println(other);</span><br><span class="line">			try &#123;</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">				// TODO Auto-generated catch block</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125; catch (IOException e) &#123;</span><br><span class="line">				// TODO Auto-generated catch block</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 发起http请求并获取结果</span><br><span class="line">	 * </span><br><span class="line">	 * @param requestUrl    请求地址</span><br><span class="line">	 * @param requestMethod 请求方式（GET、POST）</span><br><span class="line">	 * @param outputStr     提交的数据</span><br><span class="line">	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)</span><br><span class="line">	 */</span><br><span class="line">	public static JSONObject httpRequest(String requestUrl, String requestMethod, String outputStr) &#123;</span><br><span class="line">		JSONObject jsonObject = null;</span><br><span class="line">		StringBuffer buffer = new StringBuffer();</span><br><span class="line">		InputStream inputStream = null;</span><br><span class="line">		try &#123;</span><br><span class="line">			URL url = new URL(requestUrl);</span><br><span class="line">			HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();</span><br><span class="line">			httpUrlConn.setDoOutput(true);</span><br><span class="line">			httpUrlConn.setDoInput(true);</span><br><span class="line">			httpUrlConn.setUseCaches(false);</span><br><span class="line">			// 设置请求方式（GET/POST）</span><br><span class="line">			httpUrlConn.setRequestMethod(requestMethod);</span><br><span class="line">			if (&quot;GET&quot;.equalsIgnoreCase(requestMethod))</span><br><span class="line">				httpUrlConn.connect();</span><br><span class="line"></span><br><span class="line">			// 当有数据需要提交时</span><br><span class="line">			if (null != outputStr) &#123;</span><br><span class="line">				OutputStream outputStream = httpUrlConn.getOutputStream();</span><br><span class="line">				// 注意编码格式，防止中文乱码</span><br><span class="line">				outputStream.write(outputStr.getBytes(&quot;UTF-8&quot;));</span><br><span class="line">				outputStream.close();</span><br><span class="line">			&#125;</span><br><span class="line">			// 将返回的输入流转换成字符串</span><br><span class="line">			inputStream = httpUrlConn.getInputStream();</span><br><span class="line">			InputStreamReader inputStreamReader = new InputStreamReader(inputStream, &quot;utf-8&quot;);</span><br><span class="line">			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);</span><br><span class="line"></span><br><span class="line">			String str = null;</span><br><span class="line">			while ((str = bufferedReader.readLine()) != null) &#123;</span><br><span class="line">				buffer.append(str);</span><br><span class="line">			&#125;</span><br><span class="line">			bufferedReader.close();</span><br><span class="line">			inputStreamReader.close();</span><br><span class="line">			// 释放资源</span><br><span class="line">			inputStream.close();</span><br><span class="line">			inputStream = null;</span><br><span class="line">			httpUrlConn.disconnect();</span><br><span class="line">			jsonObject = JSONObject.parseObject(buffer.toString());</span><br><span class="line">		&#125; catch (ConnectException ce) &#123;</span><br><span class="line">			ce.printStackTrace();</span><br><span class="line">			System.out.println(&quot;server connection timed out&quot;);</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">			System.out.println(&quot;http request error:&#123;&#125;&quot;);</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				if (inputStream != null) &#123;</span><br><span class="line">					inputStream.close();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; catch (IOException e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		return jsonObject;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据生成的文本替换Echart的数据，这里没有全部跑完所以没做展示，可以参考之前的文章-<a href="https://xuchunlei.top/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/">IP地址分布分析(国内)</a></p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>IP</tag>
+        <tag>Echarts</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown参考</title>
+    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
+    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
+
+<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
+
+<hr>
+<hr>
+<hr>
+<hr>
+<hr>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
+<p>第一层嵌套</p>
+<blockquote>
+<ul>
+<li>第二层嵌套1（无序列表）</li>
+<li>第二层嵌套2（无序列表）</li>
+</ul>
+</blockquote>
+</blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>无序列表一</li>
+<li>无序列表二<ul>
+<li>无序嵌套列表二-1</li>
+<li>无序嵌套列表二-2</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>有序列表一</li>
+<li>有序列表二</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>默认</th>
+<th align="left">左对齐</th>
+<th align="center">居中</th>
+<th align="right">右对齐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单元格</td>
+<td align="left">单元格</td>
+<td align="center"><code>单元格</code></td>
+<td align="right">单元格</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
+<pre><code>console.log(&quot;Hello world 空格&quot;)
+console.log(&quot;Hello world 空格&quot;)
+
+console.log(&quot;Hello world Tab&quot;)
+console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>Markdown</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL EXPLAIN 简单了解</title>
+    <url>/2021/08/13/MySQL%20EXPLAIN%20%E7%AE%80%E5%8D%95%E4%BA%86%E8%A7%A3/</url>
+    <content><![CDATA[<p><em>帮朋友解决了一个查询问题(查询报错The table ‘C:\Windows\TEMP#sqlxxxxxx’ is full)。试过增加tmp_table_size和max_heap_table_size的大小，然并卵；用SQL_BIG_RESULT强制跑，结果把C盘100多G的空间干满了，No space left on device；最后用了EXPLAIN分析SQL语句的执行计划信息，来去除临时表，然后问题解决。了解到了以前不了解的知识，比如最左(前缀)匹配原则。为了以后不在踩坑，这里简单写一以下EXPLAIN的信息以备后用。</em></p>
+<h3 id="EXPLAIN简介"><a href="#EXPLAIN简介" class="headerlink" title="EXPLAIN简介"></a>EXPLAIN简介</h3><p><code>EXPLAIN</code>可以获取SQL语句的执行计划信息，可用于<code>SELECT</code>，<code>DELETE</code>，<code>INSERT</code>，<code>REPLACE</code>，和<code>UPDATE</code>语句，用来分析优化SQL以及表结构。执行（<code>EXPLAIN</code> + SQL语句）效果如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysql&gt; explain select 1 from dual;</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra          |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">|  1 | SIMPLE      | NULL  | NULL       | NULL | NULL          | NULL | NULL    | NULL | NULL |     NULL | No tables used |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<h3 id="EXPLAIN列信息"><a href="#EXPLAIN列信息" class="headerlink" title="EXPLAIN列信息"></a>EXPLAIN列信息</h3><ul>
+<li><p>id<br>SELECT的标识符，按照SELECT出现顺序增长，UNION查询id为NULL。</p>
+</li>
+<li><p>select_type<br>SELECT的类型</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">SIMPLE</td>
+<td align="left">简单查询（不使用UNION和子查询）</td>
+</tr>
+<tr>
+<td align="center">PRIMARY</td>
+<td align="left">复杂查询最外层的SELECT</td>
+</tr>
+<tr>
+<td align="center">UNION</td>
+<td align="left">UNION中第二个或以后的SELECT</td>
+</tr>
+<tr>
+<td align="center">DEPENDENT UNION</td>
+<td align="left">UNION中第二个或以后的SELECT（依赖于外部查询）</td>
+</tr>
+<tr>
+<td align="center">UNION RESULT</td>
+<td align="left">UNION的结果</td>
+</tr>
+<tr>
+<td align="center">SUBQUERY</td>
+<td align="left">子查询第一个SELECT</td>
+</tr>
+<tr>
+<td align="center">DEPENDENT SUBQUERY</td>
+<td align="left">子查询第一个SELECT（依赖于外部查询）</td>
+</tr>
+<tr>
+<td align="center">DERIVED</td>
+<td align="left">派生表</td>
+</tr>
+<tr>
+<td align="center">MATERIALIZED</td>
+<td align="left">物化子查询</td>
+</tr>
+<tr>
+<td align="center">UNCACHEABLE SUBQUERY</td>
+<td align="left">子查询无法被物化，每次都需要重新评估</td>
+</tr>
+<tr>
+<td align="center">UNCACHEABLE UNION</td>
+<td align="left">UNION中第二个或以后的无法被物化的SELECT（类似UNCACHEABLE SUBQUERY）</td>
+</tr>
+</tbody></table>
+<ul>
+<li>table<br>输出行所引用表名，或者以下值：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">&lt;unionM,N&gt;</td>
+<td align="left">id为M和N行的并集</td>
+</tr>
+<tr>
+<td align="center">&lt;derivedN&gt;</td>
+<td align="left">id为N行的派生表结果</td>
+</tr>
+<tr>
+<td align="center">&lt;subqueryN&gt;</td>
+<td align="left">id为N行的物化子查询结果</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>partitions<br>匹配记录所在的分区（非分区表该值为NULL）</p>
+</li>
+<li><p>type<br>连接类型，效率从高到低排列为：</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">system</td>
+<td align="left">表只有一行（类似系统表，const连接类型的一个特例）</td>
+</tr>
+<tr>
+<td align="center">const</td>
+<td align="left">该表最多有一个匹配行，该列的值可以被优化器的其余部分视为常量</td>
+</tr>
+<tr>
+<td align="center">eq_ref</td>
+<td align="left">从该表中读取一行与前一张表的所有行组合（使用主键索引或唯一非空索引）</td>
+</tr>
+<tr>
+<td align="center">ref</td>
+<td align="left">从该表中读取具有匹配索引值的所有行与前一张表的所有行的组合（不使用唯一索引，使用普通索引或唯一性索引的部分前缀）</td>
+</tr>
+<tr>
+<td align="center">fulltext</td>
+<td align="left">使用全文索引</td>
+</tr>
+<tr>
+<td align="center">ref_or_null</td>
+<td align="left">类似ref，但是需要额外搜索NULL</td>
+</tr>
+<tr>
+<td align="center">index_merge</td>
+<td align="left">使用索引合并的优化方法</td>
+</tr>
+<tr>
+<td align="center">unique_subquery</td>
+<td align="left">替代了 value IN (SELECT primary_key FROM single_table WHERE some_expr) 形式的eq_ref一些IN子查询</td>
+</tr>
+<tr>
+<td align="center">index_subquery</td>
+<td align="left">类似unique_subquery，替代了IN子查询，适用于 value IN (SELECT key_column FROM single_table WHERE some_expr) 形式的子查询中的非唯一索引</td>
+</tr>
+<tr>
+<td align="center">range</td>
+<td align="left">使用索引来检索给定范围的行</td>
+</tr>
+<tr>
+<td align="center">index</td>
+<td align="left">与ALL一样，但是扫描索引树（全索引扫描）</td>
+</tr>
+<tr>
+<td align="center">ALL</td>
+<td align="left">全表扫描</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>possible_keys<br>该表中可以使用哪个索引去查找行</p>
+</li>
+<li><p>key<br>该表中实际使用索引去查找行</p>
+</li>
+<li><p>key_len<br>该表中实际使用索引长度（可以推断使用组合索引中的多少）</p>
+</li>
+<li><p>ref<br>key列记录的索引中，表查找值所用到的列，常量（const）或函数（func）</p>
+</li>
+<li><p>rows<br>读取并检测的行数</p>
+</li>
+<li><p>filtered<br>按表条件过滤的行的估计百分比，最大值为100（没有发生行过滤）</p>
+</li>
+<li><p>Extra<br>附加信息，比较常见重要的如下</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th align="left">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Using index</td>
+<td align="left">使用索引树中的信息从表中检索列信息</td>
+</tr>
+<tr>
+<td align="center">Using where</td>
+<td align="left">使用WHERE限制返回的行</td>
+</tr>
+<tr>
+<td align="center">Using temporary</td>
+<td align="left">需要创建一个临时表来保存结果（比如GROUP BY和ORDER BY会出现，需要优化，一般用添加索引来优化）</td>
+</tr>
+<tr>
+<td align="center">Using filesort</td>
+<td align="left">对结果使用一个外部索引排序，而不是按索引次序从表里读取行（需要优化，一般用索引来优化）</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SSH远程登录</title>
     <url>/2021/06/25/SSH%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/</url>
     <content><![CDATA[<h1 id="SSH远程登录"><a href="#SSH远程登录" class="headerlink" title="SSH远程登录"></a>SSH远程登录</h1><p><em>起因是服务器在儿童节那天数据库连不上了，原因是中了之前横行的勒索病毒的变种……然后就有了后来的各种加强：windos变更为linux,通过SSH连接等等，这里就简单梳理一下SSH的相关知识</em><br><img src="/img/20210625/1.jpg" alt></p>
@@ -1206,21 +1186,20 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>不吐不快-记录ASM小助手卸载过程</title>
-    <url>/2020/12/09/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95ASM%E5%B0%8F%E5%8A%A9%E6%89%8B%E5%8D%B8%E8%BD%BD%E8%BF%87%E7%A8%8B/</url>
-    <content><![CDATA[<h2 id="不吐不快-记录ASM小助手卸载过程"><a href="#不吐不快-记录ASM小助手卸载过程" class="headerlink" title="不吐不快-记录ASM小助手卸载过程"></a>不吐不快-记录ASM小助手卸载过程</h2><p><em>吐槽专用，图片是卸载的时候弄的，不是很全</em></p>
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>因为去别人的公司出差，需要通过公司Wifi来连接互联网（本来一般都是用自己手机热点的，现在就是后悔，非常后悔），连接上Wifi后输入申请的账号，然后需要下载一个插件来做安全检查。这个插件需要管理员权限来运行，也就是今天的主角-ASM小助手，当时没把它当回事。后来回到自己公司，通过git提交代码时候超时，GitHub无法访问，然后寻找原因就发现了它的存在。</p>
-<div align="center"><img src="/img/20201209/1.png"></div>
-
-<h2 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h2><p>这个插件貌似以前朋友提到过，说无法卸载，大概说的就是这个。网上很多用360文件粉碎的，想了想还要装360就算了吧。<br>刚开始打开win10的应用和功能，发现列表里根本没有这个软件……然后从任务栏图标打开程序选择卸载却发现一点反应没有。通过任务管理器找到软件安装位置，然后惊了，居然装在<code>Windows/SysWOW64</code>下面，<code>System32</code>下居然也有，这可以系统文件夹啊。安装的时候啥也没提示，直接让你用管理员权限安装。经过研究，发现安装和卸载使用的同一个可执行文件IsaSetup.exe，只是传递不同的参数而已。以管理员权限运行命令提示符，通过<code>IsaSetup.exe -Remove</code>来执行卸载，结果需要输入验证码……大概需要通过内部服务器进行申请，也就是说对于脱离了他们公司内网的情况下，要获取验证码是不可能的。<br><img src="/img/20201209/2.png" alt></p>
-<p>然后转换思路，开始进行物理删除。刚开始在任务管理器的用户标签页发现结束进程后，会自己重新启动。刚开始以为是有别的进程唤醒，其实不是，需要在进程标签页结束进程才能彻底结束。因为涉及到系统文件夹，删除要格外小心，我根据名字和时间排序，基本定位了所有文件，但是有部分文件无法删除，还是有进程在占用着。</p>
-<p>在任务管理器的程序标签页显示命令行信息，但是没有找到类似的路径信息。然后打开注册表全局搜索安装目录IsAgent，然后找到了关键信息，原来还有一个服务没有干掉。因为调用的系统镜像加上服务被折叠而没有发现。<br><img src="/img/20201209/3.png" alt><br><img src="/img/20201209/4.png" alt></p>
-<p>然后结束服务，并把注册表里的条目删除，后发现还有一个文件不能被删除，提示我没有管理员权限……</p>
-<div align="center"><img src="/img/20201209/5.png"></div>
-
-<p>打开文件属性，发现安全标签页无法查看，就是没有权限呗。然后打开高级选项把文件所有者改为当前用户，这样还是删除不掉，还需要把显示出来的权限所有拒绝权限条目删除。<br><img src="/img/20201209/6.png" alt></p>
-<p>至此，所有文件都进入回收站了，然后右键清空。<br><img src="/img/20201209/7.png" alt></p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>上次这么搞还是Office365的弹出广告来着，不过那个和这个比起来友好多了。</p>
+    <title>不吐不快-Win10更新后锁屏界面花屏</title>
+    <url>/2022/03/31/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-Win10%E6%9B%B4%E6%96%B0%E5%90%8E%E9%94%81%E5%B1%8F%E7%95%8C%E9%9D%A2%E8%8A%B1%E5%B1%8F/</url>
+    <content><![CDATA[<h2 id="不吐不快-Win10更新后锁屏界面花屏"><a href="#不吐不快-Win10更新后锁屏界面花屏" class="headerlink" title="不吐不快-Win10更新后锁屏界面花屏"></a>不吐不快-Win10更新后锁屏界面花屏</h2><p><em>吐槽专用，本以为眼不见为净就行，结果发现治标不治本</em></p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>今天win10不知道自己更新了啥，只知道通知中提示了和显示相关的信息，让我重启电脑生效。因为在工作中没有在意，就关掉继续工作了。后来重启后发现电脑，锁屏界面输入密码时就花屏了，每次都出现不同的效果，效果如下：<br><img src="/img/20220331/1.jpg" alt></p>
+<h2 id="排查"><a href="#排查" class="headerlink" title="排查"></a>排查</h2><p>首先用笔记本连接显示器，显示正常，排除显示器和连接线的问题。<br>更换显示器，更换接口(typec dp hdmi1 hdmi2)，更换连接线问题依旧存在，基本确定是我电脑自身的问题了。<br>首先想到的是显卡驱动，下了 360驱动 来查看驱动情况，显示显卡驱动是最新的(软件用完即卸)。 打开<code>设备管理器</code>查看显卡驱动程序，并没有发现什么端倪。<br><img src="/img/20220331/2.jpg" alt></p>
+<p>不过事件选项卡里有错误信息，还是当天的，不过<code>事件查看器里</code>也没看出什么端倪(毕竟不懂)。<br><img src="/img/20220331/3.png" alt></p>
+<p>查看Windows更新历史记录也没看出啥异常来。<br><img src="/img/20220331/4.jpg" alt></p>
+<p>然后想知道当时通知的情况，打开<code>可靠性监视程序</code>查看系统通知发现确实更新了显卡驱动，基本确定了原因。</p>
+<blockquote>
+<p>win10系统通知历史查看方法：win+R快捷键打开运行，输入<code>control</code>打开控制面板。依次点击 系统和安全 安全和维护，左边栏点击 查看存档的消息 打开 可靠性监视程序。并不能记录所有，但可以参考一下。</p>
+</blockquote>
+<p><img src="/img/20220331/5.jpg" alt></p>
+<h2 id="修缮"><a href="#修缮" class="headerlink" title="修缮"></a>修缮</h2><p>知道原因，但是除了锁屏界面貌似没有啥问题。刚开始就通过<code>组策略编辑器</code>把锁屏界面的模糊特效去除了，效果不错，没有花屏了。<br><img src="/img/20220331/6.jpg" alt><br>但是，在弄博客的时候发现，还是有花屏的地方，治标不治本啊。<br><img src="/img/20220331/7.jpg" alt></p>
+<p>最终只能还原驱动了。<code>设备管理器</code>中的显卡驱动程序 回退驱动程序 按键不可用，这要就需要自己手动下载了。<br>这里是inter的核显，可以参考官方文档<a href="https://www.intel.cn/content/www/cn/zh/support/articles/000008628/graphics.html" target="_blank" rel="noopener">如何在 Windows® 10 和 Windows 11* 中将驱动程序回滚到之前的版本</a>）。在<a href="https://www.intel.cn/content/www/cn/zh/download-center/home.html" target="_blank" rel="noopener">下载中心</a>搜索栏中输入我的处理器编号 i5-8259U ，搜索驱动程序，找到对应我系统内部版本号 21H2 的显卡驱动程序（下载安装[英特尔® 驱动程序和支持助理]自动识别不出显卡驱动来，放弃）下载下来安装重启完成。锁屏页面和博客页面均显示正常。<br><img src="/img/20220331/8.jpg" alt></p>
 ]]></content>
       <tags>
         <tag>吐槽</tag>
@@ -1243,6 +1222,77 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 ]]></content>
       <tags>
         <tag>吐槽</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>不吐不快-记录ASM小助手卸载过程</title>
+    <url>/2020/12/09/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95ASM%E5%B0%8F%E5%8A%A9%E6%89%8B%E5%8D%B8%E8%BD%BD%E8%BF%87%E7%A8%8B/</url>
+    <content><![CDATA[<h2 id="不吐不快-记录ASM小助手卸载过程"><a href="#不吐不快-记录ASM小助手卸载过程" class="headerlink" title="不吐不快-记录ASM小助手卸载过程"></a>不吐不快-记录ASM小助手卸载过程</h2><p><em>吐槽专用，图片是卸载的时候弄的，不是很全</em></p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>因为去别人的公司出差，需要通过公司Wifi来连接互联网（本来一般都是用自己手机热点的，现在就是后悔，非常后悔），连接上Wifi后输入申请的账号，然后需要下载一个插件来做安全检查。这个插件需要管理员权限来运行，也就是今天的主角-ASM小助手，当时没把它当回事。后来回到自己公司，通过git提交代码时候超时，GitHub无法访问，然后寻找原因就发现了它的存在。</p>
+<div align="center"><img src="/img/20201209/1.png"></div>
+
+<h2 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h2><p>这个插件貌似以前朋友提到过，说无法卸载，大概说的就是这个。网上很多用360文件粉碎的，想了想还要装360就算了吧。<br>刚开始打开win10的应用和功能，发现列表里根本没有这个软件……然后从任务栏图标打开程序选择卸载却发现一点反应没有。通过任务管理器找到软件安装位置，然后惊了，居然装在<code>Windows/SysWOW64</code>下面，<code>System32</code>下居然也有，这可以系统文件夹啊。安装的时候啥也没提示，直接让你用管理员权限安装。经过研究，发现安装和卸载使用的同一个可执行文件IsaSetup.exe，只是传递不同的参数而已。以管理员权限运行命令提示符，通过<code>IsaSetup.exe -Remove</code>来执行卸载，结果需要输入验证码……大概需要通过内部服务器进行申请，也就是说对于脱离了他们公司内网的情况下，要获取验证码是不可能的。<br><img src="/img/20201209/2.png" alt></p>
+<p>然后转换思路，开始进行物理删除。刚开始在任务管理器的用户标签页发现结束进程后，会自己重新启动。刚开始以为是有别的进程唤醒，其实不是，需要在进程标签页结束进程才能彻底结束。因为涉及到系统文件夹，删除要格外小心，我根据名字和时间排序，基本定位了所有文件，但是有部分文件无法删除，还是有进程在占用着。</p>
+<p>在任务管理器的程序标签页显示命令行信息，但是没有找到类似的路径信息。然后打开注册表全局搜索安装目录IsAgent，然后找到了关键信息，原来还有一个服务没有干掉。因为调用的系统镜像加上服务被折叠而没有发现。<br><img src="/img/20201209/3.png" alt><br><img src="/img/20201209/4.png" alt></p>
+<p>然后结束服务，并把注册表里的条目删除，后发现还有一个文件不能被删除，提示我没有管理员权限……</p>
+<div align="center"><img src="/img/20201209/5.png"></div>
+
+<p>打开文件属性，发现安全标签页无法查看，就是没有权限呗。然后打开高级选项把文件所有者改为当前用户，这样还是删除不掉，还需要把显示出来的权限所有拒绝权限条目删除。<br><img src="/img/20201209/6.png" alt></p>
+<p>至此，所有文件都进入回收站了，然后右键清空。<br><img src="/img/20201209/7.png" alt></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>上次这么搞还是Office365的弹出广告来着，不过那个和这个比起来友好多了。</p>
+]]></content>
+      <tags>
+        <tag>吐槽</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>初识Flutter-安装和环境配置</title>
+    <url>/2021/09/13/%E5%88%9D%E8%AF%86Flutter-%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<p><em>新项目需要用到Flutter，于是开始学习，先搞下环境，写个Hello World！</em></p>
+<h3 id="Flutter介绍"><a href="#Flutter介绍" class="headerlink" title="Flutter介绍"></a>Flutter介绍</h3><p>Flutter是Google开源的UI工具包，帮助开发者通过一套代码库高效构建多平台精美应用，支持移动、Web、桌面和嵌入式平台。以上摘自<a href="https://flutter.cn/" target="_blank" rel="noopener">Flutter官方</a>。刚开始学习可以参考<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>。</p>
+<h3 id="安装和环境配置-Win10-64位"><a href="#安装和环境配置-Win10-64位" class="headerlink" title="安装和环境配置(Win10 64位)"></a>安装和环境配置(Win10 64位)</h3><p>获取最新的Flutter SDK压缩包，这里版本是2.5.0，要查看其他发行通道和以往的版本，请参阅<a href="https://flutter.cn/docs/development/tools/sdk/releases" target="_blank" rel="noopener">SDK版本列表</a>页面。这里解压到D盘根目录，并配置环境变量path，添加flutter\bin目录。命令提示符窗口运行<code>flutter doctor</code>检测运行环境（这里出错了一次，不过不影响结果，两次都是）提示缺少Android SDK。<img src="/img/20210913/1.png" alt></p>
+<h4 id="配置Android开发环境"><a href="#配置Android开发环境" class="headerlink" title="配置Android开发环境"></a>配置Android开发环境</h4><p>现在<a href="https://developer.android.google.cn" target="_blank" rel="noopener">Android开发官网</a>里Android SDK集成到Android Studio，直接下载Android Studio即可。之前想单独装Android SDK的，15年开始就没有更新了，结果各种错误，最后放弃。</p>
+<blockquote>
+<p><del>单独装Android SDK失败过程，请忽略<br>这里直接从<a href="https://www.androiddevtools.cn/" target="_blank" rel="noopener">AndroidDevTools</a>单独下载Android SDK压缩包。依旧解压到D盘根目录，文件夹改名为android-sdk。启动SDK Manager.exe，默认选项，直接单击Install XX Packages按钮，弹出框中选中Accept License单选框（每个Packages大项都要点），然后单机Install按钮开始安装，下载需要一段时间。新建环境变量ANDROID_SDK_ROOT到android-sdk目录。配置环境变量path添加%ANDROID_SDK_ROOT%\tools和%ANDROID_SDK_ROOT%\platform-tools两条记录。命令提示符窗口执行<code>adb --version</code>出现版本号表示Android SDK环境安装成功。<br>这里有个问题，就是获取的版本不是最新的，只到29，在SDK Manager.exe貌似没法再提升版本了，开发要用API30和31的，也没有。在<code>sdkmanager --list</code>中是能找到新的版本的，通过<code>sdkmanager --update</code>能把Android SDK Platform-tools 升级到最新的31.0.3。通过<code>sdkmanager &quot;build-tools;30.0.3&quot; &quot;platforms;android-30&quot;</code>和<code>sdkmanager &quot;build-tools;31.0.0&quot; &quot;platforms;android-31&quot;</code>更新编译和开发调试工具。<br>命令提示符窗口运行<code>flutter doctor</code>检测运行环境，新错误cmdline-tools component is missing。命令提示符窗口连接到android-sdk\tools\bin目录，执行<code>sdkmanager &quot;cmdline-tools;latest&quot;</code>安装（Flutter提示多一个–install参数），Accept? (y/N):输入y回车。<br>然后还有一个同意 Android 协议，执行<code>flutter doctor --android-licenses</code>，一路y回车。最后只剩一个[!] Android Studio (not installed)，因为没用Android Studio，忽略。<br>执行AVD Manager.exe创建虚拟设备启动，提示图片没用，明明路径都存在……最后尝试无果，最后放弃，重新去下载了Android Studio</del></p>
+</blockquote>
+<p>安装Android Studio，这里把SDK安装路径改为了D盘<br><img src="/img/20210913/2.png" alt><br>安装完成后通过More Actions-SDK Manager来管理Android SDK。模拟器AVD Manager在下面<br><img src="/img/20210913/3.png" alt><br>新建环境变量ANDROID_SDK_ROOT到android-sdk目录。命令提示符窗口执行<code>flutter doctor</code>检测运行环境，提示cmdline-tools component is missing，安装cmdline-tools<br><img src="/img/20210913/4.png" alt><br>同意Android协议：执行<code>flutter doctor --android-licenses</code>，一路y回车，此时执行<code>flutter doctor</code>检测运行环境，全部通过<br><img src="/img/20210913/5.png" alt><br>配置Android模拟器的时候需要自己按需求下载用到的照片（模拟器是真的大，默认用户文件夹，对应C盘吃紧的我雪上加霜。改路径需要新建环境变量ANDROID_ADV_HOME以及删除默认路径.android后新建）<br><img src="/img/20210913/6.png" alt></p>
+<h4 id="编辑工具设定"><a href="#编辑工具设定" class="headerlink" title="编辑工具设定"></a>编辑工具设定</h4><p>Flutter支持Android Studio、IntelliJ、VS Code以及传说中的编辑器Emacs，这里我用的Visual Studio Code（yyds）<br>打开VS Code，Ctrl+Shift+p打开命令面板，输入install选择Install Extensions，扩展搜索输入框中输入flutter选择Flutter并单击Install按钮（会安装Dart插件）。Enabled&gt;Reload Required重新启动 VS Code。命令面板中输入doctor选择 Flutter: Run Flutter Doctor，输出 (OUTPUT) 面板不报错表示安装完成（就是<code>flutter doctor</code>，只不过多个了参数<code>-v</code>）</p>
+<h3 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h3><p>Ctrl+Shift+p打开命令面板，输入flutter，选择Flutter: New Application Project创建项目文件夹。输入项目名称，确定后在项目目录中就会生成main.dart文件。选择要启动的设备，启动（按F5），就能看到自带的示例程序<br><img src="/img/20210913/7.png" alt><br>这里改为“祖传代码”，用chorme启动，效果如下<br><img src="/img/20210913/8.png" alt><br>开发环境搞完就要开始正式学习了，至此文章就水完了，感觉官方<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>的文档更好，要想入坑可以去看看。</p>
+]]></content>
+      <tags>
+        <tag>Flutter</tag>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>做成我的足迹续</title>
+    <url>/2021/03/25/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9%E7%BB%AD/</url>
+    <content><![CDATA[<h1 id="做成我的足迹续"><a href="#做成我的足迹续" class="headerlink" title="做成我的足迹续"></a>做成我的足迹续</h1><p><em>光阴荏苒，日月如梭，往事随风，飘散而过。</em><br>距离上次写的文章<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">做成我的足迹</a>已经过去490天，期间足迹增加了一点点。最近很忙加上确实没有啥能写的，就鸽了很久（106天）。这周开始才稍微有点时间，想着写点东西，因为手里有一些半成品拿不出手，就想到之前的足迹还有让我pass的地图，然后就开始了XX补全（橙汁）计划<sub>最近EVA新剧场版反响不小啊</sub>。</p>
+<h4 id="谷歌地图"><a href="#谷歌地图" class="headerlink" title="谷歌地图"></a>谷歌地图</h4><p>使用需要结算账号（绑定银行卡），账号劝退！国家地区里没有中国选项（也没有朝鲜），有港澳台地区。这里选的香港，因为要国际通用的银行卡，然而我并没有。<br><img src="/img/20210325/1.png" alt><br>后来发现国家地区选择日本可以使用PayPal，可以绑定银联卡，这里就没有再尝试了。补完失败……<br><img src="/img/20210325/2.png" alt></p>
+<h4 id="高德地图"><a href="#高德地图" class="headerlink" title="高德地图"></a>高德地图</h4><p>高德只能国内用，国外的点只能看看。经纬度数据使用了之前百度地图的，但是因为坐标系不一样，不能直接使用,需要把百度坐标BD-09转成火星坐标GCJ-02。</p>
+<blockquote>
+<p>WGS-84坐标系：地心坐标系，GPS原始坐标体系</p>
+<blockquote>
+<p>国内不允许使用</p>
+</blockquote>
+<p>GCJ-02 坐标系：火星坐标系</p>
+<blockquote>
+<p>国测局02年发布的坐标体系，它是一种对经纬度数据加入随机的偏差的加密算法<br>互联网地图在国内必须至少使用GCJ-02进行首次加密</p>
+</blockquote>
+<p>BD-09坐标系</p>
+<blockquote>
+<p>百度中国地图所采用的坐标系，由GCJ-02进行进一步的偏移算法得到</p>
+</blockquote>
+</blockquote>
+<p>其他功能基本类似，稍微修改一下就能了，直接上<a href="https://xuchunlei.top/myTrailsAMap" target="_blank">展示页面（代码）</a>和效果图。<br><img src="/img/20210325/3.png" alt></p>
+<h4 id="必应地图"><a href="#必应地图" class="headerlink" title="必应地图"></a>必应地图</h4><p>国内国外都能用，经纬度依旧使用百度的，国内的经纬度<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>。重要的事情说三遍，这里坑了一下，以为国内的坐标也要转换成WGS-84GPS原始坐标。其他功能除了行政区划polygon，基本类似。行政区划polygon用的高德地图API获取行经纬度数据，然后用必应地图的polygon描绘。还有必应地图开发中心账号登录的时候需要科学上网一下，其他都不需要。这里列一下用到的网址，然后上<a href="https://xuchunlei.top/myTrailsBingMap" target="_blank">展示页面（代码）</a>和效果图。<br><a href="https://www.bingmapsportal.com/" target="_blank" rel="noopener">必应地图开发中心</a><br><a href="https://cn.bing.com/maps/sdkrelease/mapcontrol/isdk/loadmapasync" target="_blank" rel="noopener">必应地图Demo</a><br><a href="https://docs.microsoft.com/en-us/bingmaps/v8-web-control/map-control-api/" target="_blank" rel="noopener">必应地图API参考</a><br><img src="/img/20210325/4.png" alt></p>
+<h4 id="雅虎地图"><a href="#雅虎地图" class="headerlink" title="雅虎地图"></a>雅虎地图</h4><p>额，API终止服务……<br><img src="/img/20210325/5.png" alt></p>
+<p>只简单修改了一下，样式什么的懒得微调了，毕竟之前的百度地图的样式也不咋地。国内其他的还有腾讯地图，搜狗地图貌似都是自己的坐标系，估计以后也不会再搞了。</p>
+]]></content>
+      <tags>
+        <tag>足迹</tag>
+        <tag>高德地图</tag>
+        <tag>必应地图</tag>
       </tags>
   </entry>
   <entry>
@@ -1269,25 +1319,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       <tags>
         <tag>足迹</tag>
         <tag>百度地图</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>初识Flutter-安装和环境配置</title>
-    <url>/2021/09/13/%E5%88%9D%E8%AF%86Flutter-%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<p><em>新项目需要用到Flutter，于是开始学习，先搞下环境，写个Hello World！</em></p>
-<h3 id="Flutter介绍"><a href="#Flutter介绍" class="headerlink" title="Flutter介绍"></a>Flutter介绍</h3><p>Flutter是Google开源的UI工具包，帮助开发者通过一套代码库高效构建多平台精美应用，支持移动、Web、桌面和嵌入式平台。以上摘自<a href="https://flutter.cn/" target="_blank" rel="noopener">Flutter官方</a>。刚开始学习可以参考<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>。</p>
-<h3 id="安装和环境配置-Win10-64位"><a href="#安装和环境配置-Win10-64位" class="headerlink" title="安装和环境配置(Win10 64位)"></a>安装和环境配置(Win10 64位)</h3><p>获取最新的Flutter SDK压缩包，这里版本是2.5.0，要查看其他发行通道和以往的版本，请参阅<a href="https://flutter.cn/docs/development/tools/sdk/releases" target="_blank" rel="noopener">SDK版本列表</a>页面。这里解压到D盘根目录，并配置环境变量path，添加flutter\bin目录。命令提示符窗口运行<code>flutter doctor</code>检测运行环境（这里出错了一次，不过不影响结果，两次都是）提示缺少Android SDK。<img src="/img/20210913/1.png" alt></p>
-<h4 id="配置Android开发环境"><a href="#配置Android开发环境" class="headerlink" title="配置Android开发环境"></a>配置Android开发环境</h4><p>现在<a href="https://developer.android.google.cn" target="_blank" rel="noopener">Android开发官网</a>里Android SDK集成到Android Studio，直接下载Android Studio即可。之前想单独装Android SDK的，15年开始就没有更新了，结果各种错误，最后放弃。</p>
-<blockquote>
-<p><del>单独装Android SDK失败过程，请忽略<br>这里直接从<a href="https://www.androiddevtools.cn/" target="_blank" rel="noopener">AndroidDevTools</a>单独下载Android SDK压缩包。依旧解压到D盘根目录，文件夹改名为android-sdk。启动SDK Manager.exe，默认选项，直接单击Install XX Packages按钮，弹出框中选中Accept License单选框（每个Packages大项都要点），然后单机Install按钮开始安装，下载需要一段时间。新建环境变量ANDROID_SDK_ROOT到android-sdk目录。配置环境变量path添加%ANDROID_SDK_ROOT%\tools和%ANDROID_SDK_ROOT%\platform-tools两条记录。命令提示符窗口执行<code>adb --version</code>出现版本号表示Android SDK环境安装成功。<br>这里有个问题，就是获取的版本不是最新的，只到29，在SDK Manager.exe貌似没法再提升版本了，开发要用API30和31的，也没有。在<code>sdkmanager --list</code>中是能找到新的版本的，通过<code>sdkmanager --update</code>能把Android SDK Platform-tools 升级到最新的31.0.3。通过<code>sdkmanager &quot;build-tools;30.0.3&quot; &quot;platforms;android-30&quot;</code>和<code>sdkmanager &quot;build-tools;31.0.0&quot; &quot;platforms;android-31&quot;</code>更新编译和开发调试工具。<br>命令提示符窗口运行<code>flutter doctor</code>检测运行环境，新错误cmdline-tools component is missing。命令提示符窗口连接到android-sdk\tools\bin目录，执行<code>sdkmanager &quot;cmdline-tools;latest&quot;</code>安装（Flutter提示多一个–install参数），Accept? (y/N):输入y回车。<br>然后还有一个同意 Android 协议，执行<code>flutter doctor --android-licenses</code>，一路y回车。最后只剩一个[!] Android Studio (not installed)，因为没用Android Studio，忽略。<br>执行AVD Manager.exe创建虚拟设备启动，提示图片没用，明明路径都存在……最后尝试无果，最后放弃，重新去下载了Android Studio</del></p>
-</blockquote>
-<p>安装Android Studio，这里把SDK安装路径改为了D盘<br><img src="/img/20210913/2.png" alt><br>安装完成后通过More Actions-SDK Manager来管理Android SDK。模拟器AVD Manager在下面<br><img src="/img/20210913/3.png" alt><br>新建环境变量ANDROID_SDK_ROOT到android-sdk目录。命令提示符窗口执行<code>flutter doctor</code>检测运行环境，提示cmdline-tools component is missing，安装cmdline-tools<br><img src="/img/20210913/4.png" alt><br>同意Android协议：执行<code>flutter doctor --android-licenses</code>，一路y回车，此时执行<code>flutter doctor</code>检测运行环境，全部通过<br><img src="/img/20210913/5.png" alt><br>配置Android模拟器的时候需要自己按需求下载用到的照片（模拟器是真的大，默认用户文件夹，对应C盘吃紧的我雪上加霜。改路径需要新建环境变量ANDROID_ADV_HOME以及删除默认路径.android后新建）<br><img src="/img/20210913/6.png" alt></p>
-<h4 id="编辑工具设定"><a href="#编辑工具设定" class="headerlink" title="编辑工具设定"></a>编辑工具设定</h4><p>Flutter支持Android Studio、IntelliJ、VS Code以及传说中的编辑器Emacs，这里我用的Visual Studio Code（yyds）<br>打开VS Code，Ctrl+Shift+p打开命令面板，输入install选择Install Extensions，扩展搜索输入框中输入flutter选择Flutter并单击Install按钮（会安装Dart插件）。Enabled&gt;Reload Required重新启动 VS Code。命令面板中输入doctor选择 Flutter: Run Flutter Doctor，输出 (OUTPUT) 面板不报错表示安装完成（就是<code>flutter doctor</code>，只不过多个了参数<code>-v</code>）</p>
-<h3 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h3><p>Ctrl+Shift+p打开命令面板，输入flutter，选择Flutter: New Application Project创建项目文件夹。输入项目名称，确定后在项目目录中就会生成main.dart文件。选择要启动的设备，启动（按F5），就能看到自带的示例程序<br><img src="/img/20210913/7.png" alt><br>这里改为“祖传代码”，用chorme启动，效果如下<br><img src="/img/20210913/8.png" alt><br>开发环境搞完就要开始正式学习了，至此文章就水完了，感觉官方<a href="https://flutter.cn/docs" target="_blank" rel="noopener">Flutter中文教程</a>的文档更好，要想入坑可以去看看。</p>
-]]></content>
-      <tags>
-        <tag>Flutter</tag>
-        <tag>Android</tag>
       </tags>
   </entry>
   <entry>
@@ -1343,6 +1374,21 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
+    <title>博客修改路上的一些事续</title>
+    <url>/2019/11/12/%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%E7%BB%AD/</url>
+    <content><![CDATA[<h1 id="博客修改路上的一些事续"><a href="#博客修改路上的一些事续" class="headerlink" title="博客修改路上的一些事续"></a>博客修改路上的一些事续</h1><p><em>完善了博客的一些基本功能，到这里基本能够见人了吧，手动滑稽。</em><br><em>好久没投入这么多精力搞一件事情了，果然写代码（bug）是件很快乐的事情。</em></p>
+<p>最近一直在想怎么完善自己的第一个博客网站（伪，实际上就是一个域名），然后更改了以下方面。</p>
+<h4 id="http-→-https"><a href="#http-→-https" class="headerlink" title="http → https"></a>http → https</h4><p>这个很好弄，本来还从阿里云申请了一个免费的SSH证书，发现完全用不上。GitHub Pages可以直接设置https加载。<br>Settings &gt; Options &gt; GitHub Pages 中勾选Enforce HTTPS选项<br><img src="/img/20191112/1.png" alt><br>（还有一个方法是通过Cloudflare（后面会介绍）来控制，Page Rule中设置）</p>
+<h4 id="添加访问统计"><a href="#添加访问统计" class="headerlink" title="添加访问统计"></a>添加访问统计</h4><p>插件是<a href="http://busuanzi.ibruce.info/" target="_blank" rel="noopener">不蒜子</a>,基本没有碰壁，就是文章的阅读数不好加，因为有的连接过去页面没有刷新，计数不增加。暂时没加（以后也可能不加）。<br>反而朋友添加的时候遇到了<a href="http://waygc.net/blog/read/1573545160250" target="_blank" rel="noopener">问题</a>，最后也只能添加主页的访问统计。</p>
+<h4 id="添加音乐列表"><a href="#添加音乐列表" class="headerlink" title="添加音乐列表"></a>添加音乐列表</h4><p>插件是<a href="http://jplayer.org/" target="_blank" rel="noopener">jPlayer</a>,找了一些，有列表的好像不多，最后选了这个。通过<a href="https://link.hhtjim.com/" target="_blank" rel="noopener">外链转换工具</a>转成mp3的地址，但是有些收费的歌曲有时可能会失效。改写了jPlayer的sample文件，然后改写到md文件中。页面写死，没嵌入到主题中，不能通过配置文件更改。<br>插曲，为了适配手机端，改写了它的css文件，然而不知道啥原因，GitHub Pages编译不通过或不反映更改。最后用行内样式解决的。<br><img src="/img/20191112/2.png" alt></p>
+<h4 id="修改DNS提高访问速度"><a href="#修改DNS提高访问速度" class="headerlink" title="修改DNS提高访问速度"></a>修改DNS提高访问速度</h4><p>因为GitHub Pages是国外的，访问速度是真的头疼。压缩了图片的大小，效果依然很差（20到30s，或者以上）。然后想起朋友之前写的文章<a href="https://rudymemo.com/2019/09/26/GitHub-DNS/" target="_blank" rel="noopener">GitHub个人网站修改DNS，解决国内访问慢的问题</a>,然后试着做了，效果拔群。基本五六秒加载完。<br><a href="https://www.cloudflare.com/" target="_blank" rel="noopener">Cloudflare</a>还是很不错的，有免费的dns（收费版更强大）。CDN加速，ip随机，请求分析……<br><img src="/img/20191112/3.png" alt></p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><p>上次说的背景音乐问题，最后只能禁用自动播放了。算是解决，可喜可贺。<br>另外这篇文章不是直接发出的。因为自己的失误，GitHub上代码没提交全，只能branch新分支，明天merge发布了（开发和静态文件生成还是有差距的）。又正式体验了一下git的功能。</p>
+]]></content>
+      <tags>
+        <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>博客修改路上的一些事</title>
     <url>/2019/11/10/%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B/</url>
     <content><![CDATA[<h1 id="博客修改路上的一些事"><a href="#博客修改路上的一些事" class="headerlink" title="博客修改路上的一些事"></a>博客修改路上的一些事</h1><p><em>有些事情去搞了才发现坎坷不断，但是不去做的话不管好的还是坏的都没有。</em></p>
@@ -1359,34 +1405,39 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>做成我的足迹续</title>
-    <url>/2021/03/25/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9%E7%BB%AD/</url>
-    <content><![CDATA[<h1 id="做成我的足迹续"><a href="#做成我的足迹续" class="headerlink" title="做成我的足迹续"></a>做成我的足迹续</h1><p><em>光阴荏苒，日月如梭，往事随风，飘散而过。</em><br>距离上次写的文章<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">做成我的足迹</a>已经过去490天，期间足迹增加了一点点。最近很忙加上确实没有啥能写的，就鸽了很久（106天）。这周开始才稍微有点时间，想着写点东西，因为手里有一些半成品拿不出手，就想到之前的足迹还有让我pass的地图，然后就开始了XX补全（橙汁）计划<sub>最近EVA新剧场版反响不小啊</sub>。</p>
-<h4 id="谷歌地图"><a href="#谷歌地图" class="headerlink" title="谷歌地图"></a>谷歌地图</h4><p>使用需要结算账号（绑定银行卡），账号劝退！国家地区里没有中国选项（也没有朝鲜），有港澳台地区。这里选的香港，因为要国际通用的银行卡，然而我并没有。<br><img src="/img/20210325/1.png" alt><br>后来发现国家地区选择日本可以使用PayPal，可以绑定银联卡，这里就没有再尝试了。补完失败……<br><img src="/img/20210325/2.png" alt></p>
-<h4 id="高德地图"><a href="#高德地图" class="headerlink" title="高德地图"></a>高德地图</h4><p>高德只能国内用，国外的点只能看看。经纬度数据使用了之前百度地图的，但是因为坐标系不一样，不能直接使用,需要把百度坐标BD-09转成火星坐标GCJ-02。</p>
-<blockquote>
-<p>WGS-84坐标系：地心坐标系，GPS原始坐标体系</p>
-<blockquote>
-<p>国内不允许使用</p>
-</blockquote>
-<p>GCJ-02 坐标系：火星坐标系</p>
-<blockquote>
-<p>国测局02年发布的坐标体系，它是一种对经纬度数据加入随机的偏差的加密算法<br>互联网地图在国内必须至少使用GCJ-02进行首次加密</p>
-</blockquote>
-<p>BD-09坐标系</p>
-<blockquote>
-<p>百度中国地图所采用的坐标系，由GCJ-02进行进一步的偏移算法得到</p>
-</blockquote>
-</blockquote>
-<p>其他功能基本类似，稍微修改一下就能了，直接上<a href="https://xuchunlei.top/myTrailsAMap" target="_blank">展示页面（代码）</a>和效果图。<br><img src="/img/20210325/3.png" alt></p>
-<h4 id="必应地图"><a href="#必应地图" class="headerlink" title="必应地图"></a>必应地图</h4><p>国内国外都能用，经纬度依旧使用百度的，国内的经纬度<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>。重要的事情说三遍，这里坑了一下，以为国内的坐标也要转换成WGS-84GPS原始坐标。其他功能除了行政区划polygon，基本类似。行政区划polygon用的高德地图API获取行经纬度数据，然后用必应地图的polygon描绘。还有必应地图开发中心账号登录的时候需要科学上网一下，其他都不需要。这里列一下用到的网址，然后上<a href="https://xuchunlei.top/myTrailsBingMap" target="_blank">展示页面（代码）</a>和效果图。<br><a href="https://www.bingmapsportal.com/" target="_blank" rel="noopener">必应地图开发中心</a><br><a href="https://cn.bing.com/maps/sdkrelease/mapcontrol/isdk/loadmapasync" target="_blank" rel="noopener">必应地图Demo</a><br><a href="https://docs.microsoft.com/en-us/bingmaps/v8-web-control/map-control-api/" target="_blank" rel="noopener">必应地图API参考</a><br><img src="/img/20210325/4.png" alt></p>
-<h4 id="雅虎地图"><a href="#雅虎地图" class="headerlink" title="雅虎地图"></a>雅虎地图</h4><p>额，API终止服务……<br><img src="/img/20210325/5.png" alt></p>
-<p>只简单修改了一下，样式什么的懒得微调了，毕竟之前的百度地图的样式也不咋地。国内其他的还有腾讯地图，搜狗地图貌似都是自己的坐标系，估计以后也不会再搞了。</p>
+    <title>工作笔记-Echarts多X轴标签柱状图</title>
+    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Echarts%E5%A4%9AX%E6%88%96Y%E8%BD%B4%E6%A0%87%E7%AD%BE%E6%9F%B1%E7%8A%B6%E5%9B%BE/</url>
+    <content><![CDATA[<h2 id="工作笔记-Echarts多X或Y轴标签柱状图"><a href="#工作笔记-Echarts多X或Y轴标签柱状图" class="headerlink" title="工作笔记-Echarts多X或Y轴标签柱状图"></a>工作笔记-Echarts多X或Y轴标签柱状图</h2><p><em>虽然不是第一次写比较复杂的Echarts，记录一下，以备后用</em></p>
+<h3 id="参考源"><a href="#参考源" class="headerlink" title="参考源"></a>参考源</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xBk7TY_hWx" target="_blank" rel="noopener">Simulate Hierarchy Axis</a><br>有三列，最后一列数据必须要平分，不然行对不齐。</p>
+<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xQPnOKwjkx" target="_blank" rel="noopener">Simulate Hierarchy Axis改</a><br>主要增加了了一个markPoint来表示数量，因为参考的例子中第三列标签为label。<br>实际开发主要是对数据的操作，具体看业务逻辑了。我写的数据逻辑操作如下<br><img src="/img/20200601/1.png" alt><br>项目最后演示的demo如下<br><img src="/img/20200601/2.png" alt></p>
+<p>最后吐槽一下IOS，Echarts渲染的Canvas高度超过4300左右就不显示了。IOS使用谷歌浏览器效果一样，MacOS、Android能够显示，但是数据过多会导致Android浏览器崩溃（还是我手机该换了）。</p>
 ]]></content>
       <tags>
-        <tag>足迹</tag>
-        <tag>高德地图</tag>
-        <tag>必应地图</tag>
+        <tag>Echarts</tag>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>改造日记-系统从机械硬盘迁移升级到固态硬盘</title>
+    <url>/2021/09/06/%E6%94%B9%E9%80%A0%E6%97%A5%E8%AE%B0-%E7%B3%BB%E7%BB%9F%E4%BB%8E%E6%9C%BA%E6%A2%B0%E7%A1%AC%E7%9B%98%E8%BF%81%E7%A7%BB%E5%8D%87%E7%BA%A7%E5%88%B0%E5%9B%BA%E6%80%81%E7%A1%AC%E7%9B%98/</url>
+    <content><![CDATA[<p><em>家人嫌弃家里电脑太慢了，发现瓶颈来自硬盘，于是乎就开始改造计划</em></p>
+<h3 id="硬盘选用"><a href="#硬盘选用" class="headerlink" title="硬盘选用"></a>硬盘选用</h3><p>老电脑是联想的品牌机（具体型号大概是天逸510S，没看机身标签。大概的生产时间为2019年到2020年，也不老啊）。CPU为i3-9100，内存4代8G，win10家庭版。硬盘为希捷ST1000DM003，1T容量，7200转，SATA3接口。电脑运行时，硬盘活动时间几乎一直在100%。考虑到成本，最有效的手段就是把机械硬盘替换为固态硬盘。预算200多，最后选用了SATA3的最多的SSD（某宝某东搜索固态硬盘出来一堆）——金士顿A400。本来打算选180￥左右的120G当系统盘的，后来考虑到230￥左右的240G比较划算点，再往上的容量因超预算不考虑。经过几天的等待，硬盘到货了，通过CrystalDiskInfo读取了硬盘信息如下：<br><img src="/img/20210906/1.jpg" alt><br>吐槽一下硬盘信息检测工具CrystalDiskInfo，官方老二次元了！下面是官网下载界面<br><img src="/img/20210906/2.jpg" alt></p>
+<h3 id="开始迁移"><a href="#开始迁移" class="headerlink" title="开始迁移"></a>开始迁移</h3><p>早上不到5点起床，开始往店里迁移……打开方式不对，重来一遍。拆开机箱，开始迁移升级工作。一上来就给我一个惊喜，品牌机就是品牌机，“物尽其用”，居然只有一根电源线……看来不能挂两块硬盘了，有点庆幸买了240G的了。看来不能直接接在主板上进行系统迁移了，还好带了硬盘盒子，接好电源和USB数据线，正式开始迁移升级。<br><img src="/img/20210906/3.jpg" alt></p>
+<ol>
+<li><p>准备DiskGenius数据恢复及分区管理软件<br>从DiskGenius官网下载对应系统位数的软件，这里是64位的，免费版功能足够。绿色版，可以直接运行。<br><img src="/img/20210906/4.jpg" alt></p>
+</li>
+<li><p>系统迁移<br>选择菜单：工具-系统迁移，打开系统迁移设置对话框<br><img src="/img/20210906/5.jpg" alt><br>选择目标磁盘（这里是新硬盘，目标硬盘大于原盘容量已用容量才行），然后确定<br><img src="/img/20210906/6.jpg" alt><br>DiskGenius会自动设置，包括隐藏分区，这里有4个分区。因为是USB挂载的硬盘，SATA连接的时候这里选项应该不同，比如设置电脑启动顺序啥的。点击开始<br><img src="/img/20210906/7.jpg" alt><br>选择迁移模式，这里选择热迁移，有数据的话在这之前还会警告你会覆盖数据<br><img src="/img/20210906/8.jpg" alt><br>开始迁移，时间为预估，不是很准确<br><img src="/img/20210906/9.jpg" alt><br>迁移完成提示，如果是SATA挂在的话，会提示让你进BIOS更改启动顺序。点击确定<br><img src="/img/20210906/10.jpg" alt><br>至此系统迁移完成，结构与原来一致。点击完成，关闭对话框<br><img src="/img/20210906/11.jpg" alt></p>
+</li>
+<li><p>非系统盘迁移<br>还好老电脑只有两个分区，并且使用容量并不是很多。系统分区迁移完，还有一个D盘，于是一块迁了。<br>把新硬盘剩下的空间建一个新的分区，新硬盘右键-建立新分区，打开调整分区容量对话框<br><img src="/img/20210906/12.jpg" alt><br>默认全部分配，点击开始<br><img src="/img/20210906/13.jpg" alt><br>警告提示，确认无误后选择是<br><img src="/img/20210906/14.jpg" alt><br>建立新分区完成，点击完成，关闭对话框<br><img src="/img/20210906/15.jpg" alt><br>选择要克隆的分区，右键-克隆分区，打开克隆分区(卷)和选择目标分区(卷)对话框<br><img src="/img/20210906/16.jpg" alt><br>选择新建好的分区，点击确定<br><img src="/img/20210906/17.jpg" alt><br>三种克隆方式，这里两个分区的大小不同，只能选择按文件复制。点击开始<br><img src="/img/20210906/18.jpg" alt><br>覆盖警告，确认无误后点击确定<br><img src="/img/20210906/19.jpg" alt><br>选择迁移模式，这里依旧选择热迁移<br><img src="/img/20210906/20.jpg" alt><br>克隆完成。点击完成，关闭对话框<br><img src="/img/20210906/21.jpg" alt></p>
+</li>
+<li><p>硬盘替换<br>因为没有多余的电源线，不能挂两个硬盘了。把原来的机械硬盘拆卸下来，换上固态硬盘（使用了硬盘支架，2.5寸直接固定太难了）<br><img src="/img/20210906/22.jpg" alt></p>
+</li>
+</ol>
+<h3 id="开机测试"><a href="#开机测试" class="headerlink" title="开机测试"></a>开机测试</h3><p>开机正常，开机时间从原来的30s左右提升到十几秒，最快到10s左右，开机速度提升2到3倍。硬盘活动时间明显改善，打开软件也比原来丝滑了。电脑除了硬盘容量外，其余都和原来一样。<br><img src="/img/20210906/23.jpg" alt><br>因为换固态了，所以停掉了碎片整理<br><img src="/img/20210906/24.jpg" alt><br>最后GET到了一块1T机械硬盘。<br><img src="/img/20210906/25.jpg" alt><br>发现现在联想还在卖这个系列的电脑，好像除了CPU升级为10代外，其他没有太大变化，呵呵……</p>
+]]></content>
+      <tags>
+        <tag>硬盘</tag>
+        <tag>改造</tag>
       </tags>
   </entry>
   <entry>
@@ -1490,57 +1541,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>工作笔记-Echarts多X轴标签柱状图</title>
-    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Echarts%E5%A4%9AX%E6%88%96Y%E8%BD%B4%E6%A0%87%E7%AD%BE%E6%9F%B1%E7%8A%B6%E5%9B%BE/</url>
-    <content><![CDATA[<h2 id="工作笔记-Echarts多X或Y轴标签柱状图"><a href="#工作笔记-Echarts多X或Y轴标签柱状图" class="headerlink" title="工作笔记-Echarts多X或Y轴标签柱状图"></a>工作笔记-Echarts多X或Y轴标签柱状图</h2><p><em>虽然不是第一次写比较复杂的Echarts，记录一下，以备后用</em></p>
-<h3 id="参考源"><a href="#参考源" class="headerlink" title="参考源"></a>参考源</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xBk7TY_hWx" target="_blank" rel="noopener">Simulate Hierarchy Axis</a><br>有三列，最后一列数据必须要平分，不然行对不齐。</p>
-<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><p><a href="https://gallery.echartsjs.com/editor.html?c=xQPnOKwjkx" target="_blank" rel="noopener">Simulate Hierarchy Axis改</a><br>主要增加了了一个markPoint来表示数量，因为参考的例子中第三列标签为label。<br>实际开发主要是对数据的操作，具体看业务逻辑了。我写的数据逻辑操作如下<br><img src="/img/20200601/1.png" alt><br>项目最后演示的demo如下<br><img src="/img/20200601/2.png" alt></p>
-<p>最后吐槽一下IOS，Echarts渲染的Canvas高度超过4300左右就不显示了。IOS使用谷歌浏览器效果一样，MacOS、Android能够显示，但是数据过多会导致Android浏览器崩溃（还是我手机该换了）。</p>
-]]></content>
-      <tags>
-        <tag>Echarts</tag>
-        <tag>笔记</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>博客修改路上的一些事续</title>
-    <url>/2019/11/12/%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%E7%BB%AD/</url>
-    <content><![CDATA[<h1 id="博客修改路上的一些事续"><a href="#博客修改路上的一些事续" class="headerlink" title="博客修改路上的一些事续"></a>博客修改路上的一些事续</h1><p><em>完善了博客的一些基本功能，到这里基本能够见人了吧，手动滑稽。</em><br><em>好久没投入这么多精力搞一件事情了，果然写代码（bug）是件很快乐的事情。</em></p>
-<p>最近一直在想怎么完善自己的第一个博客网站（伪，实际上就是一个域名），然后更改了以下方面。</p>
-<h4 id="http-→-https"><a href="#http-→-https" class="headerlink" title="http → https"></a>http → https</h4><p>这个很好弄，本来还从阿里云申请了一个免费的SSH证书，发现完全用不上。GitHub Pages可以直接设置https加载。<br>Settings &gt; Options &gt; GitHub Pages 中勾选Enforce HTTPS选项<br><img src="/img/20191112/1.png" alt><br>（还有一个方法是通过Cloudflare（后面会介绍）来控制，Page Rule中设置）</p>
-<h4 id="添加访问统计"><a href="#添加访问统计" class="headerlink" title="添加访问统计"></a>添加访问统计</h4><p>插件是<a href="http://busuanzi.ibruce.info/" target="_blank" rel="noopener">不蒜子</a>,基本没有碰壁，就是文章的阅读数不好加，因为有的连接过去页面没有刷新，计数不增加。暂时没加（以后也可能不加）。<br>反而朋友添加的时候遇到了<a href="http://waygc.net/blog/read/1573545160250" target="_blank" rel="noopener">问题</a>，最后也只能添加主页的访问统计。</p>
-<h4 id="添加音乐列表"><a href="#添加音乐列表" class="headerlink" title="添加音乐列表"></a>添加音乐列表</h4><p>插件是<a href="http://jplayer.org/" target="_blank" rel="noopener">jPlayer</a>,找了一些，有列表的好像不多，最后选了这个。通过<a href="https://link.hhtjim.com/" target="_blank" rel="noopener">外链转换工具</a>转成mp3的地址，但是有些收费的歌曲有时可能会失效。改写了jPlayer的sample文件，然后改写到md文件中。页面写死，没嵌入到主题中，不能通过配置文件更改。<br>插曲，为了适配手机端，改写了它的css文件，然而不知道啥原因，GitHub Pages编译不通过或不反映更改。最后用行内样式解决的。<br><img src="/img/20191112/2.png" alt></p>
-<h4 id="修改DNS提高访问速度"><a href="#修改DNS提高访问速度" class="headerlink" title="修改DNS提高访问速度"></a>修改DNS提高访问速度</h4><p>因为GitHub Pages是国外的，访问速度是真的头疼。压缩了图片的大小，效果依然很差（20到30s，或者以上）。然后想起朋友之前写的文章<a href="https://rudymemo.com/2019/09/26/GitHub-DNS/" target="_blank" rel="noopener">GitHub个人网站修改DNS，解决国内访问慢的问题</a>,然后试着做了，效果拔群。基本五六秒加载完。<br><a href="https://www.cloudflare.com/" target="_blank" rel="noopener">Cloudflare</a>还是很不错的，有免费的dns（收费版更强大）。CDN加速，ip随机，请求分析……<br><img src="/img/20191112/3.png" alt></p>
-<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><p>上次说的背景音乐问题，最后只能禁用自动播放了。算是解决，可喜可贺。<br>另外这篇文章不是直接发出的。因为自己的失误，GitHub上代码没提交全，只能branch新分支，明天merge发布了（开发和静态文件生成还是有差距的）。又正式体验了一下git的功能。</p>
-]]></content>
-      <tags>
-        <tag>博客</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>改造日记-系统从机械硬盘迁移升级到固态硬盘</title>
-    <url>/2021/09/06/%E6%94%B9%E9%80%A0%E6%97%A5%E8%AE%B0-%E7%B3%BB%E7%BB%9F%E4%BB%8E%E6%9C%BA%E6%A2%B0%E7%A1%AC%E7%9B%98%E8%BF%81%E7%A7%BB%E5%8D%87%E7%BA%A7%E5%88%B0%E5%9B%BA%E6%80%81%E7%A1%AC%E7%9B%98/</url>
-    <content><![CDATA[<p><em>家人嫌弃家里电脑太慢了，发现瓶颈来自硬盘，于是乎就开始改造计划</em></p>
-<h3 id="硬盘选用"><a href="#硬盘选用" class="headerlink" title="硬盘选用"></a>硬盘选用</h3><p>老电脑是联想的品牌机（具体型号大概是天逸510S，没看机身标签。大概的生产时间为2019年到2020年，也不老啊）。CPU为i3-9100，内存4代8G，win10家庭版。硬盘为希捷ST1000DM003，1T容量，7200转，SATA3接口。电脑运行时，硬盘活动时间几乎一直在100%。考虑到成本，最有效的手段就是把机械硬盘替换为固态硬盘。预算200多，最后选用了SATA3的最多的SSD（某宝某东搜索固态硬盘出来一堆）——金士顿A400。本来打算选180￥左右的120G当系统盘的，后来考虑到230￥左右的240G比较划算点，再往上的容量因超预算不考虑。经过几天的等待，硬盘到货了，通过CrystalDiskInfo读取了硬盘信息如下：<br><img src="/img/20210906/1.jpg" alt><br>吐槽一下硬盘信息检测工具CrystalDiskInfo，官方老二次元了！下面是官网下载界面<br><img src="/img/20210906/2.jpg" alt></p>
-<h3 id="开始迁移"><a href="#开始迁移" class="headerlink" title="开始迁移"></a>开始迁移</h3><p>早上不到5点起床，开始往店里迁移……打开方式不对，重来一遍。拆开机箱，开始迁移升级工作。一上来就给我一个惊喜，品牌机就是品牌机，“物尽其用”，居然只有一根电源线……看来不能挂两块硬盘了，有点庆幸买了240G的了。看来不能直接接在主板上进行系统迁移了，还好带了硬盘盒子，接好电源和USB数据线，正式开始迁移升级。<br><img src="/img/20210906/3.jpg" alt></p>
-<ol>
-<li><p>准备DiskGenius数据恢复及分区管理软件<br>从DiskGenius官网下载对应系统位数的软件，这里是64位的，免费版功能足够。绿色版，可以直接运行。<br><img src="/img/20210906/4.jpg" alt></p>
-</li>
-<li><p>系统迁移<br>选择菜单：工具-系统迁移，打开系统迁移设置对话框<br><img src="/img/20210906/5.jpg" alt><br>选择目标磁盘（这里是新硬盘，目标硬盘大于原盘容量已用容量才行），然后确定<br><img src="/img/20210906/6.jpg" alt><br>DiskGenius会自动设置，包括隐藏分区，这里有4个分区。因为是USB挂载的硬盘，SATA连接的时候这里选项应该不同，比如设置电脑启动顺序啥的。点击开始<br><img src="/img/20210906/7.jpg" alt><br>选择迁移模式，这里选择热迁移，有数据的话在这之前还会警告你会覆盖数据<br><img src="/img/20210906/8.jpg" alt><br>开始迁移，时间为预估，不是很准确<br><img src="/img/20210906/9.jpg" alt><br>迁移完成提示，如果是SATA挂在的话，会提示让你进BIOS更改启动顺序。点击确定<br><img src="/img/20210906/10.jpg" alt><br>至此系统迁移完成，结构与原来一致。点击完成，关闭对话框<br><img src="/img/20210906/11.jpg" alt></p>
-</li>
-<li><p>非系统盘迁移<br>还好老电脑只有两个分区，并且使用容量并不是很多。系统分区迁移完，还有一个D盘，于是一块迁了。<br>把新硬盘剩下的空间建一个新的分区，新硬盘右键-建立新分区，打开调整分区容量对话框<br><img src="/img/20210906/12.jpg" alt><br>默认全部分配，点击开始<br><img src="/img/20210906/13.jpg" alt><br>警告提示，确认无误后选择是<br><img src="/img/20210906/14.jpg" alt><br>建立新分区完成，点击完成，关闭对话框<br><img src="/img/20210906/15.jpg" alt><br>选择要克隆的分区，右键-克隆分区，打开克隆分区(卷)和选择目标分区(卷)对话框<br><img src="/img/20210906/16.jpg" alt><br>选择新建好的分区，点击确定<br><img src="/img/20210906/17.jpg" alt><br>三种克隆方式，这里两个分区的大小不同，只能选择按文件复制。点击开始<br><img src="/img/20210906/18.jpg" alt><br>覆盖警告，确认无误后点击确定<br><img src="/img/20210906/19.jpg" alt><br>选择迁移模式，这里依旧选择热迁移<br><img src="/img/20210906/20.jpg" alt><br>克隆完成。点击完成，关闭对话框<br><img src="/img/20210906/21.jpg" alt></p>
-</li>
-<li><p>硬盘替换<br>因为没有多余的电源线，不能挂两个硬盘了。把原来的机械硬盘拆卸下来，换上固态硬盘（使用了硬盘支架，2.5寸直接固定太难了）<br><img src="/img/20210906/22.jpg" alt></p>
-</li>
-</ol>
-<h3 id="开机测试"><a href="#开机测试" class="headerlink" title="开机测试"></a>开机测试</h3><p>开机正常，开机时间从原来的30s左右提升到十几秒，最快到10s左右，开机速度提升2到3倍。硬盘活动时间明显改善，打开软件也比原来丝滑了。电脑除了硬盘容量外，其余都和原来一样。<br><img src="/img/20210906/23.jpg" alt><br>因为换固态了，所以停掉了碎片整理<br><img src="/img/20210906/24.jpg" alt><br>最后GET到了一块1T机械硬盘。<br><img src="/img/20210906/25.jpg" alt><br>发现现在联想还在卖这个系列的电脑，好像除了CPU升级为10代外，其他没有太大变化，呵呵……</p>
-]]></content>
-      <tags>
-        <tag>硬盘</tag>
-        <tag>改造</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>如何快速提高打字速度(伪,脚本调用键盘)</title>
     <url>/2020/05/10/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E6%8F%90%E9%AB%98%E6%89%93%E5%AD%97%E9%80%9F%E5%BA%A6-%E4%BC%AA-%E8%84%9A%E6%9C%AC%E8%B0%83%E7%94%A8%E9%94%AE%E7%9B%98/</url>
     <content><![CDATA[<h2 id="如何快速提高打字速度-伪-脚本调用键盘"><a href="#如何快速提高打字速度-伪-脚本调用键盘" class="headerlink" title="如何快速提高打字速度(伪,脚本调用键盘)"></a>如何快速提高打字速度(伪,脚本调用键盘)</h2><p><em>本来想搞一个自动复制代码的脚本，后来发现可以用来打字。但是大部分语言模拟键盘主要为了自动化测试……</em></p>
@@ -1599,9 +1599,21 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 <p>效果如下</p>
 <iframe width="100%" height="500px" src="https://xuchunlei.top/gaodeMap.html"></iframe>]]></content>
       <tags>
-        <tag>Vue.js</tag>
         <tag>高德地图</tag>
+        <tag>Vue.js</tag>
         <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL借助Excel快速区间分段统计（客单价分布 IOS账单分月）</title>
+    <url>/2022/08/27/MySQL%E5%80%9F%E5%8A%A9Excel%E5%BF%AB%E9%80%9F%E5%8C%BA%E9%97%B4%E5%88%86%E6%AE%B5%E7%BB%9F%E8%AE%A1%EF%BC%88%E5%AE%A2%E5%8D%95%E4%BB%B7%E5%88%86%E5%B8%83%20IOS%E8%B4%A6%E5%8D%95%E5%88%86%E6%9C%88%EF%BC%89/</url>
+    <content><![CDATA[<p><em>本来这个是放在代码碎片系列里的（因为很少做开发了，从2020年初到现在才凑齐6个），当时因为按价格分段，奈何分段太多想出的“偷懒”方法，想单独写一篇文章，可惜篇幅不够。因为前一段时间受朋友之托，临危受命，帮忙做IOS的账单分月（当时并不清楚IOS的财年），刚开始以为没有规律可循，但是后来发现月份都是按照35，28，28天这样排列的，也就是都是7的倍数，觉得可以用之前的方法来实现。这里简单介绍下思路，具体操作根据数据来进行微调。</em></p>
+<h3 id="客单价分布"><a href="#客单价分布" class="headerlink" title="客单价分布"></a>客单价分布</h3><p>最初想的写法和“偷懒”后的想法：<br><img src="/img/20220827/1.png" alt><br>因为这里区间是(0, 20]，(20, 40]……思路就是按照需要统计的字段减去最小的单位数字，然后除以分段区间的公约数后向下取整。如图中字段为金额，减去最小数值0.01元，然后除以20后向下取整。如果金额为0，结果就是-1；如果金额为0.01到20，结果就是0；如果金额是20.01到40，结果就是1。<br>下图是Excel的写法，但是和上面的sql不对应，这是后来的了：<br><img src="/img/20220827/2.png" alt><br>Excel的话，就是在MySQL的计算基础上加1，再乘以分段区间的公约数计算出所在区间。继续以上面的例子举例，结果-1的加1后乘以20，结果为0，不做统计；结果0的加1后乘以20，结果为20，区间(0, 20]；结果2的加1后乘以20，结果为40，区间(20, 40]。通过Excel公式SUMIF来判断所处区间，除了开头的两个能直接判断外，中间的需要减去之前的数值。有异常数据的时候需要自己判断了，比如金额为负数的订单。<br>这里做了一个简单的例子，可以参考一下：<br><img src="/img/20220827/3.png" alt><br>这里只是提供一个思路，调整区间只要公约数不变，只需要更改Excel区间条件就行了。</p>
+<h3 id="IOS账单分月"><a href="#IOS账单分月" class="headerlink" title="IOS账单分月"></a>IOS账单分月</h3><p>财年（Fiscal Year，财经年度，财政年度，会计财务年度，会计年度），是指公司或国家每年制定预算或计算收入的统计时间。财季是指某一季度的财务状况，财年是指某一完整四个财季的财务状况。但每个国家或其法例所辖的组织各有不同，大抵分成历年制（历年度制,是指财政年度的起止期与年历始末相同，即公历1月1日起至12月31日止）和跨年制（跨日历年度制，是指财政年度起止期与年历始末不相同）两类。<br>AppStore2020账单日历：<br><img src="/img/20220827/4.png" alt><br>Apple财年由四个财季组成，每个季度分别为35天，28天，28天。苹果的财政年度从10月的财政年度开始，这意味着苹果的2020财年从2019年10月开始（包含9月），周天开始，周六结束，并为第一个季度。（深究的话，苹果财年只有364天，所以每5年必须在12账单月增加一周，这里不讨论）<br><img src="/img/20220827/5.png" alt><br>比如我这里限定区间范围，通过<code>YEARWEEK</code>来区分周（默认周天为每周第一天）。<br><img src="/img/20220827/6.png" alt><br>然后通过excel，分别以每5周，4周，4周进行公式填充。<br>这里只是提供一个思路，请以实际情况自行调整，单独通过MySQL不好实现的时候，可以借助下其他工具软件。</p>
+]]></content>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>Excel</tag>
       </tags>
   </entry>
 </search>
