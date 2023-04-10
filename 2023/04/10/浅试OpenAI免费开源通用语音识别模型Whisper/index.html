@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>浅试OpenAI免费开源通用语音识别模型Whisper - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,"> 
+    <meta name="description" content="一个战五渣的个人博客,今年终于度过了忙碌的时期，可以搞搞自己感兴趣的事情了。最近OpenAI的ChatGPT挺火的，就简单尝试了下这个公司开源的Whisper（偶然看到的）。
+简介Whisper是一个由OpenAI训练并,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">浅试OpenAI免费开源通用语音识别模型Whisper</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">浅试OpenAI免费开源通用语音识别模型Whisper</h1>
+        <div class="stuff">
+            <span>四月 10, 2023</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/AI/">AI</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Whisper/">Whisper</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>今年终于度过了忙碌的时期，可以搞搞自己感兴趣的事情了。最近OpenAI的ChatGPT挺火的，就简单尝试了下这个公司开源的Whisper（偶然看到的）。</em></p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><img src="/img/20230410/1.png" alt><br><a href="https://openai.com/research/whisper" target="_blank" rel="noopener">Whisper</a>是一个由OpenAI训练并开源的神经网络，该神经网络在英语语音识别方面的稳健性和准确性接近人类水平。<br>Whisper是一种自动语音识别(ASR)系统，基于从网络上收集的680000多小时的语言数据进行训练，支持99种不同语言的转录以及将这些语言翻译成英语，能够生成带时间轴的字幕文件。<br>有兴趣的可以看看<a href="https://github.com/openai/whisper" target="_blank" rel="noopener">代码</a>和<a href="https://cdn.openai.com/papers/whisper.pdf" target="_blank" rel="noopener">论文</a>（我是看不懂）。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>Whisper可以离线，本地化部署。以Win10为例，需要电脑有Python环境（直接用安装包安装即可，这里省略）。</p>
+<p>下载并安装（或更新到）最新版本的Whisper<br><code>pip install -U openai-whisper</code><br>或者用以下命令从GitHub中提取并安装最新版的Whisper<br><code>pip install git+https://github.com/openai/whisper.git</code><br><img src="/img/20230410/2.png" alt></p>
+<blockquote>
+<p>ps:用这个安装的话，提示git命令无效的话，用pip安装Git会提示找不到版本，Windows系统建议直接自己下载安装Git就好。或者用<code>choco</code>来装，如果有装的话。<br><img src="/img/20230410/3.png" alt></p>
+</blockquote>
+<p>安装ffmpeg，用于读取音频</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># on Ubuntu or Debian</span><br><span class="line">sudo apt update &amp;&amp; sudo apt install ffmpeg</span><br><span class="line"></span><br><span class="line"># on Arch Linux</span><br><span class="line">sudo pacman -S ffmpeg</span><br><span class="line"></span><br><span class="line"># on MacOS using Homebrew (https://brew.sh/)</span><br><span class="line">brew install ffmpeg</span><br><span class="line"></span><br><span class="line"># on Windows using Chocolatey (https://chocolatey.org/)</span><br><span class="line">choco install ffmpeg</span><br><span class="line"></span><br><span class="line"># on Windows using Scoop (https://scoop.sh/)</span><br><span class="line">scoop install ffmpeg</span><br></pre></td></tr></table></figure>
+
+<p>因为电脑里没有Chocolatey和Scoop，就直接从<a href="https://ffmpeg.org/" target="_blank" rel="noopener">FFmpe官网</a>上直接下载了，然后配置环境变量好了。<br><img src="/img/20230410/4.png" alt></p>
+<p>安装rust，以防tokenizer无法为您的平台提供预构建的轮子<br><code>pip install setuptools-rust</code><br><img src="/img/20230410/5.png" alt></p>
+<h3 id="主要命令参数"><a href="#主要命令参数" class="headerlink" title="主要命令参数"></a>主要命令参数</h3><h4 id="help"><a href="#help" class="headerlink" title="help"></a>help</h4><p><code>whisper --help</code>查看所有可用选项</p>
+<h4 id="task"><a href="#task" class="headerlink" title="task"></a>task</h4><p><code>--task</code>分为<code>transcribe</code>（语音转录，默认）和<code>translate</code>（翻译，只支持英文）</p>
+<h4 id="language"><a href="#language" class="headerlink" title="language"></a>language</h4><p><code>--language</code>设置语音转录的语种（范围详见：<a href="https://github.com/openai/whisper/blob/main/whisper/tokenizer.py" target="_blank" rel="noopener">tokenizer.py</a>，默认截取音频的前30秒来判断语种），如指定日语<code>--language Japanese</code></p>
+<h4 id="model"><a href="#model" class="headerlink" title="model"></a>model</h4><p><code>--model</code>设置转录模型。官方提供5种模型，转录效果为 <code>tiny</code> &lt; <code>base</code> &lt; <code>small</code> &lt; <code>medium</code> &lt; <code>large</code>，转录时间也会变长（英文视频转录则在模型参数上添加后缀<code>.en</code>来提高转录速度，默认使用默认使用small）。</p>
+<table>
+<thead>
+<tr>
+<th align="center">模型</th>
+<th align="center">大小</th>
+<th align="center">单英语模型</th>
+<th align="center">多语言模型</th>
+<th align="center">最低显存</th>
+<th align="center">转录速率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">tiny</td>
+<td align="center">39 M</td>
+<td align="center">tiny.en</td>
+<td align="center">tiny</td>
+<td align="center">~1 GB</td>
+<td align="center">~32x</td>
+</tr>
+<tr>
+<td align="center">base</td>
+<td align="center">74 M</td>
+<td align="center">base.en</td>
+<td align="center">base</td>
+<td align="center">~1 GB</td>
+<td align="center">~16x</td>
+</tr>
+<tr>
+<td align="center">small</td>
+<td align="center">244 M</td>
+<td align="center">small.en</td>
+<td align="center">small</td>
+<td align="center">~2 GB</td>
+<td align="center">~6x</td>
+</tr>
+<tr>
+<td align="center">medium</td>
+<td align="center">769 M</td>
+<td align="center">medium.en</td>
+<td align="center">medium</td>
+<td align="center">~5 GB</td>
+<td align="center">~2x</td>
+</tr>
+<tr>
+<td align="center">large</td>
+<td align="center">1550 M</td>
+<td align="center">N/A</td>
+<td align="center">large</td>
+<td align="center">~10 GB</td>
+<td align="center">1x</td>
+</tr>
+</tbody></table>
+<p>第一次使用会先下载模型，模型默认本地存放路径为<code>C:\Users\&lt;username&gt;\.cache\whisper\&lt;model&gt;</code></p>
+<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>Whisper的表现因语言而异，因为笔记本没有GPU，我只尝试了对日语，tiny和small两个模型，结果如下：</p>
+<p>tiny根据停顿断句，速度快但是准确率堪忧。最后生成<code>.json</code>，<code>.srt</code>，<code>.tsv</code>, <code>.txt</code>, <code>.vtt</code>文件。<br><code>whisper &quot;西川貴教 - Meteor‐ミーティア‐.mp3&quot; --model tiny --language Japanese</code><br><img src="/img/20230410/6.png" alt></p>
+<p>small断句不错，准确率也很高，但是慢点（我用cpu没跑完就停了）。<br><code>whisper &quot;西川貴教 - Meteor‐ミーティア‐.mp3&quot; --model small --language Japanese</code><br><img src="/img/20230410/7.png" alt></p>
+<p>Whisper除了完美的英语转录效果相比，其他语言还有很大的提升空间，但是生成的字幕文件，大大减少了时间轴的调整，以及文案校对的工作量。加上机翻，自己手动做字幕不是梦。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/724495.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='http://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/163/32046426.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/163/413961906.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://link.hhtjim.com/163/536622304.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
