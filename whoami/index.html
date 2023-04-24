@@ -99,7 +99,36 @@
     .heimu {color: #252525; text-shadow: none; background-color: #252525;}
     .heimu:hover {transition: color .13s linear; color: white;}
     .hiden {display: none}
+    select, option {font-weight: bold;border: 0;outline: none;}
 </style>
+<script>
+    function onYearChange(year) {
+        var otakuTr = document.getElementById("otaku").getElementsByTagName("tr");
+        otakuTr[0][0]
+        for (x in otakuTr) {
+            if (x == "length") break;
+            if (year == "all") {
+                // 全部显示，隐藏继续隐藏
+                if (otakuTr[x].getAttribute("name") == "hiden") {
+                    otakuTr[x].classList.add('hiden');
+                    continue;
+                }
+                otakuTr[x].classList.remove('hiden');
+            } else {
+                if(otakuTr[x].cells[0].innerText.substring(0, 4) == year) {
+                    // 按年全部显示，包括隐藏
+                    otakuTr[x].classList.remove('hiden');
+                } else {
+                    if (x > 0 && otakuTr[x].cells[0].innerText.substring(0, 2) != "20" && otakuTr[x - 1].cells[0].innerText.substring(0, 4) == year) {
+                        otakuTr[x].classList.remove('hiden');
+                    } else {
+                        otakuTr[x].classList.add('hiden');
+                    }
+                }
+            }
+        }
+    }
+</script>
 <h4 id="一个不是程序员-兴趣使然的码农"><a href="#一个不是程序员-兴趣使然的码农" class="headerlink" title="一个不是程序员 兴趣使然的码农"></a>一个不是程序员 兴趣使然的码农</h4><h4 id="我的足迹"><a href="#我的足迹" class="headerlink" title="我的足迹"></a><a href="https://trails.xuchunlei.top" target="_blank" rel="noopener">我的足迹</a></h4><div style="position: relative; width:100%; height:0; padding-bottom:100%">
     <iframe src="https://trails.xuchunlei.top" style="position:absolute; width:100%; height:100%; left:0; top:0;" scrolling="no" frameborder="0">
     </iframe>
@@ -177,14 +206,24 @@
 <h4 id="我的部分宅物"><a href="#我的部分宅物" class="headerlink" title="我的部分宅物"></a>我的部分宅物</h4><table style="table-layout: auto;">
     <thead>
         <tr>
-            <th align="center" style="width: 80px;">时间</th>
+            <th align="center" style="width: 80px;">
+                <select id="year" onchange="onYearChange(this.value)">
+                    <option value="all">时间</option>
+                    <option value="2017">2017</option>
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                </select>
+            </th>
             <th align="center">地点</th>
             <th align="center" style="width: 120px;">价格</th>
             <th align="center">物品</th>
             <th align="center">描述</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="otaku">
         <tr>
             <td align="center" rowspan="2">20170429</td>
             <td align="center">BOOKOFF<br>秋葉原駅前店</td>
@@ -212,7 +251,7 @@
             <td align="center">コミック 集英社<br>ワンピース 巻一&amp;巻六一</td>
             <td align="left"><code>第一次</code>买日文漫画，中古，半价，选择了第一卷和两年后的，纪念用</td>
         </tr>
-        <tr class="hiden">
+        <tr name="hiden" class="hiden">
             <td align="center">20171115</td>
             <td align="center">ローソン<br>高岳駅南</td>
             <td align="center"><span title="你知道的太多了" class="heimu"><del>324円(税込)</del> 0円</span></td>
@@ -260,7 +299,7 @@
             <td align="center">カプセル BANDAI<br>MOBILE SUIT ENSEMBLE09弾 ホバートラック</td>
             <td align="left"><code>朋友赠送</code>，从日本带回的扭蛋，抽到一个气垫侦察车(手册上的图都是拼错的……)，没抽到高达</td>
         </tr>
-        <tr class="hiden">
+        <tr name="hiden" class="hiden">
             <td align="center">20190712</td>
             <td align="center">济南万达影城<br>高新店</td>
             <td align="center"><span title="你知道的太多了" class="heimu"><del>50元</del> 0元</span></td>
@@ -466,6 +505,13 @@
             <td align="center"><span title="你知道的太多了" class="heimu">1209元</span></td>
             <td align="center">万代PG15 RX-0<br>独角兽高达</td>
             <td align="left"><code>朋友赠送</code>的生日礼物，<code>第一个</code>PG级别。<span title="有很多磨损">盒子还算完美</span>，定价20000日元，<code>六算多</code></td>
+        </tr>
+        <tr name="hiden" class="hiden">
+            <td align="center">20230420</td>
+            <td align="center">幸福蓝海</td>
+            <td align="center"><span title="你知道的太多了" class="heimu"><del>45.5元</del> 0元</span></td>
+            <td align="center">IMAX 珍藏版海报</td>
+            <td align="left">被我姐拖着去看的，逝去的青春</td>
         </tr>
     </tbody>
 </table>
