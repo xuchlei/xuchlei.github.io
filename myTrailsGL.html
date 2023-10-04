@@ -9,7 +9,7 @@ html{height:100%}
 body{height:100%;margin:0px;padding:0px}
 #container{height:100%}
 </style>
-<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=AA4uqECjDYfZUk9vSVMNR5bPdFEtw6GU">
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=QpETkN7q770mIkKy7LCTxuoQdt0nsIQ9">
 </script>
 <script type="text/javascript" src="data.js"></script>
 </head>
@@ -46,7 +46,7 @@ function getDistrictLayer(){
 		var dist = new BMapGL.DistrictLayer({
 			name: '(' + areas[i] + ')',
 			fillColor: 'red',
-			fillOpacity: 0.1,
+			fillOpacity: 0.3,
 			strokeColor: "#ff0000"
 		});
 		map.addDistrictLayer(dist);
