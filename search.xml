@@ -1719,4 +1719,23 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
         <tag>Linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Python程序使用Pyinstaller打包成exe可执行文件</title>
+    <url>/2023/10/23/Python%E7%A8%8B%E5%BA%8F%E4%BD%BF%E7%94%A8Pyinstaller%E6%89%93%E5%8C%85%E6%88%90exe%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<h2 id="Python程序使用Pyinstaller打包成exe可执行文件"><a href="#Python程序使用Pyinstaller打包成exe可执行文件" class="headerlink" title="Python程序使用Pyinstaller打包成exe可执行文件"></a>Python程序使用Pyinstaller打包成exe可执行文件</h2><p><em>给朋友写过几个工具，VBA和Python都有，不过朋友更喜欢Python，于是又出了一个Python版。为了方便对方运行，就又打包成exe可执行文件</em></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>为什么要打包成exe可执行文件，主要是为了在没有装Python的电脑上运行，以及方便不懂编程的小伙伴运行。打包成exe可执行文件的话，Windows平台差不多都能运行，只发一个exe文件就好（前提是打包成一个exe，而不是文件夹）。<br>Pyinstaller的详细介绍可以去<a href="https://pyinstaller.org/en/stable/" target="_blank" rel="noopener"><code>Pyinstaller官网</code></a>查看，这里只是简单介绍一下Pyinstaller，实际使用上基本用几个参数就好。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>Windows直接在cmd中用pip安装就好，如果安装较慢可以切换国内源试试。<br><code>pip install pyinstaller</code></p>
+<p>我这里以前安装过了，当然也可用用<code>pip install --upgrade pyinstaller</code>更新一下版本。下面就是一个简单的打包操做，打包过程时间稍微有点长<br><img src="/img/20231023/1.png" alt></p>
+<h3 id="主要命令参数"><a href="#主要命令参数" class="headerlink" title="主要命令参数"></a>主要命令参数</h3><p>Pyinstaller使用的时候注意参数大小写，一般有两种参数写法，比如查看版本可以使用<code>-v</code>或者<code>--version</code>。<br><code>-h</code>或者<code>--help</code>查看Pyinstaller的帮助信息，我为了方便（偷懒），全部使用简写的参数形式<br><img src="/img/20231023/2.png" alt></p>
+<p><code>-F</code> 创建一个可执行文件，写小工具的时候推荐<br>执行<code>pyinstaller -F pyReadEx.py</code>后效果如下，会成成build，dist文件夹以及扩展名为spec的文件，exe可执行文件会在dist目录下<br><img src="/img/20231023/3.png" alt><br><code>-D</code> 默认参数，创建一个文件夹包含可执行文件<br><img src="/img/20231023/4.png" alt></p>
+<p><code>-i</code> 设置icon图标</p>
+<p><code>-n</code> 设置名字，省略的话直接使用第一个py脚本文件名<br><img src="/img/20231023/5.png" alt></p>
+<p><code>-w</code> 使用窗口执行，不会打开控制台（Windows专用）。比如我的脚本有个print提示，使用此参数后就看不到了<br><code>-c</code> 默认参数，使用控制台执行（Windows专用）</p>
+<h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h3><p>只是写小工具的话，上面的参数够用了。不过有时打包成exe的话，文件会很大，貌似Pyinstaller打包的时候很多不必要的库也会打包进去，可以考虑弄一个纯净的Python环境打包。现在Windows系统基本都是64位，Python也是64位的，基本不考虑32位系统，如果需要32位的exe的话，可以用32的Python进行打包。</p>
+]]></content>
+      <tags>
+        <tag>Python</tag>
+        <tag>Pyinstaller</tag>
+      </tags>
+  </entry>
 </search>
