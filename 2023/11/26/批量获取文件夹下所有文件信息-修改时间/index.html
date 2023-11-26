@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>批量获取文件夹下所有文件信息(修改时间) - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,Python,VBA,VBS"> 
+    <meta name="description" content="一个战五渣的个人博客,批量获取文件夹下所有文件信息(修改时间)依旧是给朋友写的小工具，在原来写的几个小工具上改的，写成Python版本后，又写了VBA版（个人还是喜欢VBA）和VBS版，其他版本暂时不想搞了，意义不大
+思,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">批量获取文件夹下所有文件信息(修改时间)</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">批量获取文件夹下所有文件信息(修改时间)</h1>
+        <div class="stuff">
+            <span>十一月 26, 2023</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Python/">Python</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/VBA/">VBA</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/VBS/">VBS</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h2 id="批量获取文件夹下所有文件信息-修改时间"><a href="#批量获取文件夹下所有文件信息-修改时间" class="headerlink" title="批量获取文件夹下所有文件信息(修改时间)"></a>批量获取文件夹下所有文件信息(修改时间)</h2><p><em>依旧是给朋友写的小工具，在原来写的几个小工具上改的，写成Python版本后，又写了VBA版（个人还是喜欢VBA）和VBS版，其他版本暂时不想搞了，意义不大</em></p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><ol>
+<li>打开一个文件对话框，用于选择文件夹</li>
+<li>便利文件夹下所有文件，包含子文件夹下文件，但不包含子文件夹本身</li>
+<li>获取文件信息，并写入Excel文件中</li>
+</ol>
+<p>这里只获取了文件创建时间，修改时间。其他文件属性根据实际情况自行添加</p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>直接上代码</p>
+<h4 id="1-Python"><a href="#1-Python" class="headerlink" title="1 Python"></a>1 Python</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line"></span><br><span class="line">import tkinter as tk</span><br><span class="line">from tkinter import filedialog</span><br><span class="line">from tkinter import messagebox</span><br><span class="line"></span><br><span class="line">import xlwings as xw</span><br><span class="line"></span><br><span class="line">import time</span><br><span class="line">import datetime</span><br><span class="line"></span><br><span class="line">import sys</span><br><span class="line"></span><br><span class="line">print(&quot;请选择要读取的文件夹&quot;)</span><br><span class="line">foldr_patch = filedialog.askdirectory() # 选择文件夹</span><br><span class="line"></span><br><span class="line"># 遍历文件夹及其子文件夹中的文件，并存储在一个列表中</span><br><span class="line"># 输入文件夹路径、空文件列表[]</span><br><span class="line"># 返回 文件列表Filelist,包含文件名（完整路径）</span><br><span class="line">def get_filelist(dir, FileList):</span><br><span class="line">	newDir = dir</span><br><span class="line">	# 判断文件</span><br><span class="line">	if os.path.isfile(dir):</span><br><span class="line">		FileList.append(dir)</span><br><span class="line">	elif os.path.isdir(dir):</span><br><span class="line">		for s in os.listdir(dir):</span><br><span class="line">			newDir = os.path.join(dir, s)</span><br><span class="line">			get_filelist(newDir, FileList)</span><br><span class="line">	return FileList</span><br><span class="line"></span><br><span class="line">if foldr_patch == &apos;&apos;:</span><br><span class="line">	exit() #未选择文件夹时退出</span><br><span class="line"></span><br><span class="line">items = get_filelist(foldr_patch, [])</span><br><span class="line"></span><br><span class="line"># 打开Excel程序，默认设置：程序可见，只打开不新建工作薄，屏幕更新关闭</span><br><span class="line">app = xw.App(visible = True, add_book = False)</span><br><span class="line">app.display_alerts = False</span><br><span class="line">app.screen_updating = False</span><br><span class="line">#新建工作簿</span><br><span class="line">newWb = app.books.add()</span><br><span class="line">newWb.sheets.active.range(&apos;A1&apos;).value = &apos;文件名&apos;</span><br><span class="line">newWb.sheets.active.range(&apos;A1&apos;).column_width = 45.5</span><br><span class="line">newWb.sheets.active.range(&apos;B1&apos;).value = &apos;创建时间&apos;</span><br><span class="line">newWb.sheets.active.range(&apos;B1&apos;).column_width = 15.88</span><br><span class="line">newWb.sheets.active.range(&apos;C1&apos;).value = &apos;最近修改时间&apos;</span><br><span class="line">newWb.sheets.active.range(&apos;C1&apos;).column_width = 15.88</span><br><span class="line">newWb.sheets.active.range(&apos;A1:C1&apos;).api.Font.Bold = True #粗体</span><br><span class="line">newWb.sheets.active.range(&apos;A1:C1&apos;).api.HorizontalAlignment = -4108 # -4108 水平居中</span><br><span class="line">newWb.sheets.active.range(&apos;A1:C1&apos;).api.Borders(9).LineStyle = 1 # Borders(9) 底部边框，LineStyle = 1 直线</span><br><span class="line">newWb.sheets.active.range(&apos;A1:C1&apos;).api.Borders(7).LineStyle = 1 # Borders(7) 左边框</span><br><span class="line">newWb.sheets.active.range(&apos;A1:C1&apos;).api.Borders(8).LineStyle = 1 # Borders(8) 顶部框</span><br><span class="line">newWb.sheets.active.range(&apos;A1:C1&apos;).api.Borders(10).LineStyle = 1 # Borders(10) 右边框</span><br><span class="line">newWb.sheets.active.range(&apos;A1&apos;).api.Borders(10).LineStyle = 1</span><br><span class="line">newWb.sheets.active.range(&apos;B1&apos;).api.Borders(10).LineStyle = 1</span><br><span class="line">newWb.sheets.active.range(&apos;C1&apos;).api.Borders(10).LineStyle = 1</span><br><span class="line"></span><br><span class="line">rowNum = 2</span><br><span class="line"></span><br><span class="line">for item in items:</span><br><span class="line"></span><br><span class="line">	print(rowNum - 1)</span><br><span class="line">	print(os.path.basename(item))</span><br><span class="line">	newWb.sheets.active.range(&apos;A&apos; + str(rowNum)).value = os.path.basename(item)</span><br><span class="line">	newWb.sheets.active.range(&apos;B&apos; + str(rowNum)).value = time.strftime(&quot;%Y-%m-%d %H:%M:%S&quot;, time.localtime(os.path.getctime(item)))</span><br><span class="line">	newWb.sheets.active.range(&apos;C&apos; + str(rowNum)).value = datetime.datetime.fromtimestamp(os.path.getmtime(item))</span><br><span class="line"></span><br><span class="line">	rowNum += 1</span><br><span class="line"></span><br><span class="line">newWb.sheets.active.range(&apos;A2:K&apos; + str(rowNum)).api.WrapText = True #自动换行</span><br><span class="line"></span><br><span class="line">#两种当前路径保存方法</span><br><span class="line">#①</span><br><span class="line"># 脚本直接运行与打包成exe运行获取路径有所不同</span><br><span class="line">#if getattr(sys, &apos;frozen&apos;, False):</span><br><span class="line">#    application_path = os.path.dirname(sys.executable)</span><br><span class="line">#elif __file__:</span><br><span class="line">#    application_path = os.path.dirname(__file__)</span><br><span class="line">#newWb.save(application_path + &quot;\\result.xlsx&quot;)</span><br><span class="line">#②</span><br><span class="line">newWb.save(&quot;./result.xlsx&quot;)</span><br><span class="line"></span><br><span class="line">newWb.close()</span><br><span class="line"></span><br><span class="line">app.quit()</span><br><span class="line"></span><br><span class="line">messagebox.showinfo(&quot;提示&quot;,&quot;程序执行完成&quot;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-VBA"><a href="#2-VBA" class="headerlink" title="2 VBA"></a>2 VBA</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">Public rowNum%</span><br><span class="line"></span><br><span class="line">Sub getExcel()</span><br><span class="line"></span><br><span class="line">    Dim wk As Excel.Workbook</span><br><span class="line"></span><br><span class="line">    Dim filePath$</span><br><span class="line">    filePath = getFile()</span><br><span class="line">    If filePath = &quot;&quot; Then</span><br><span class="line">        Exit Sub</span><br><span class="line">    End If</span><br><span class="line">    </span><br><span class="line">    Dim FSO As FileSystemObject</span><br><span class="line">    Dim fld As Folder</span><br><span class="line">    </span><br><span class="line">    Dim Fl  As file</span><br><span class="line">    Set FSO = CreateObject(&quot;Scripting.FileSystemObject&quot;)</span><br><span class="line">    Set fld = FSO.GetFolder(filePath)</span><br><span class="line">    </span><br><span class="line">    rowNum = 2</span><br><span class="line">    Call FolderTraversalInfo(fld)</span><br><span class="line">    </span><br><span class="line">    &apos;Workbooks(1).Sheets(&quot;数据收集&quot;).Activate</span><br><span class="line">    MsgBox &quot;获取完成&quot;</span><br><span class="line"></span><br><span class="line">End Sub</span><br><span class="line"></span><br><span class="line">&apos;获取目标文件夹</span><br><span class="line">Function getFile() As String</span><br><span class="line">    Dim sFile As String</span><br><span class="line">    With Application.FileDialog(msoFileDialogFolderPicker)</span><br><span class="line">        If .Show = -1 Then sFile = .SelectedItems(1)</span><br><span class="line">    End With</span><br><span class="line">    getFile = sFile</span><br><span class="line">End Function</span><br><span class="line"></span><br><span class="line">&apos;获取内容</span><br><span class="line">Sub getInfo(filePath As String, fileName As String)</span><br><span class="line">    Set fs = CreateObject(&quot;Scripting.FileSystemObject&quot;)</span><br><span class="line">    Set file = fs.getFile(filePath)</span><br><span class="line">    Worksheets(&quot;数据收集&quot;).Cells(rowNum, 1) = fileName</span><br><span class="line">    Worksheets(&quot;数据收集&quot;).Cells(rowNum, 2) = file.DateCreated</span><br><span class="line">    Worksheets(&quot;数据收集&quot;).Cells(rowNum, 3) = file.DateLastModified</span><br><span class="line">    </span><br><span class="line">    rowNum = rowNum + 1</span><br><span class="line">End Sub</span><br><span class="line"></span><br><span class="line">&apos;遍历文件夹以及子文件夹（文件信息获取用）</span><br><span class="line">Sub FolderTraversalInfo(rootfld As Object)</span><br><span class="line">    Dim file As Object</span><br><span class="line">    Dim fld As Object</span><br><span class="line">    </span><br><span class="line">    For Each file In rootfld.Files</span><br><span class="line">        Call getInfo(file.Path, file.Name)</span><br><span class="line">    Next</span><br><span class="line">    </span><br><span class="line">    If rootfld.SubFolders.Count = 0 Then</span><br><span class="line">        Exit Sub</span><br><span class="line">    Else</span><br><span class="line">        For Each fld In rootfld.SubFolders</span><br><span class="line">            Call FolderTraversalInfo(fld)</span><br><span class="line">        Next</span><br><span class="line">    End If</span><br><span class="line">End Sub</span><br></pre></td></tr></table></figure>
+
+<p>文件格式以及执行结果展示<br><img src="/img/20231126/1.png" alt></p>
+<h4 id="2-VBS"><a href="#2-VBS" class="headerlink" title="2 VBS"></a>2 VBS</h4><p>注意编码格式，因为代码中包含中文，需要以ANSI格式保存，不然会报错。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">Set oExcel = CreateObject(&quot;Excel.Application&quot;)</span><br><span class="line">Set fso = CreateObject(&quot;Scripting.FileSystemObject&quot;)</span><br><span class="line">Set myList = CreateObject(&quot;System.Collections.ArrayList&quot;)</span><br><span class="line"></span><br><span class="line">currentpath = fso.GetFolder(&quot;.&quot;).Path</span><br><span class="line"></span><br><span class="line">FilesTree(BrowseForFile)</span><br><span class="line"></span><br><span class="line">&apos;显示当前窗口 </span><br><span class="line">oExcel.Visible = True</span><br><span class="line">&apos;新建</span><br><span class="line">oExcel.WorkBooks.Add</span><br><span class="line"></span><br><span class="line">oExcel.Cells(1, 1).Value = &quot;文件名&quot;</span><br><span class="line">oExcel.Cells(1, 2).Value = &quot;创建时间&quot;</span><br><span class="line">oExcel.Cells(1, 3).Value = &quot;最近修改时间&quot;</span><br><span class="line"></span><br><span class="line">For i = 0 to myList.count - 1</span><br><span class="line">    Set fn = fso.GetFile(myList.Item(i))</span><br><span class="line">    oExcel.Cells(i + 2, 1).Value = fn.Name</span><br><span class="line">    oExcel.Cells(i + 2, 2).Value = fn.DateCreated</span><br><span class="line">    oExcel.Cells(i + 2, 3).Value = fn.DateLastModified</span><br><span class="line">    &apos;MsgBox fn.Name &amp; vblf &amp; fn.DateCreated &amp; vblf &amp; fn.DateLastModified</span><br><span class="line">Next</span><br><span class="line"></span><br><span class="line">&apos;自动调整宽度（指定宽度一直出错，放弃）</span><br><span class="line">oExcel.Sheets(&quot;Sheet1&quot;).columns(1).AutoFit()</span><br><span class="line">oExcel.activeSheet.columns(2).AutoFit()</span><br><span class="line">oExcel.activeSheet.columns(3).AutoFit()</span><br><span class="line"></span><br><span class="line">&apos;另存为</span><br><span class="line">oExcel.activeWorkBook.SaveAs(currentpath &amp; &quot;\result.xlsx&quot;)</span><br><span class="line"></span><br><span class="line">&apos;选择文件夹</span><br><span class="line">Function BrowseForFile()</span><br><span class="line">    &apos;通过Excel实现文件选择</span><br><span class="line">    Set FileDialog = oExcel.FileDialog(4) &apos;4 选择文件夹</span><br><span class="line">    FileDialog.show()</span><br><span class="line">    BrowseForFile = FileDialog.SelectedItems(1)</span><br><span class="line">End Function</span><br><span class="line"></span><br><span class="line">&apos;遍历文件夹</span><br><span class="line">Function FilesTree(sPath)</span><br><span class="line">&apos;遍历一个文件夹下的所有文件夹文件夹</span><br><span class="line">    Set oFso = CreateObject(&quot;Scripting.FileSystemObject&quot;)</span><br><span class="line">    Set oFolder = oFso.GetFolder(sPath)</span><br><span class="line">    Set oSubFolders = oFolder.SubFolders</span><br><span class="line">    </span><br><span class="line">    Set oFiles = oFolder.Files</span><br><span class="line">    For Each oFile In oFiles</span><br><span class="line">        myList.add(oFile.Path)</span><br><span class="line">    Next</span><br><span class="line">    </span><br><span class="line">    For Each oSubFolder In oSubFolders</span><br><span class="line">        FilesTree(oSubFolder.Path)&apos;递归</span><br><span class="line">    Next</span><br><span class="line">    </span><br><span class="line">    Set oFolder = Nothing</span><br><span class="line">    Set oSubFolders = Nothing</span><br><span class="line">    Set oFso = Nothing</span><br><span class="line">End Function</span><br></pre></td></tr></table></figure>
+
+<p>尝试过文件数量超过2万+的文件的读取，VBA的效率最高，推荐使用<br><img src="/img/20231126/2.png" alt></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/724495.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='http://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/163/32046426.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/163/413961906.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://link.hhtjim.com/163/536622304.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
