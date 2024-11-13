@@ -104,6 +104,8 @@
 <script>
     function onYearChange(year) {
         var otakuTr = document.getElementById("otaku").getElementsByTagName("tr");
+        // 花费
+        var otakuCost = "";
         for (x in otakuTr) {
             if (x == "length") break;
             if (year == "all") {
@@ -113,10 +115,12 @@
                     continue;
                 }
                 otakuTr[x].classList.remove('hiden');
+                otakuCost = otakuTr[x].getElementsByTagName("span")[0].innerText + ", " + otakuCost
             } else {
                 if(otakuTr[x].cells[0].innerText.substring(0, 4) == year) {
                     // 按年全部显示，包括隐藏
                     otakuTr[x].classList.remove('hiden');
+                    otakuCost = otakuTr[x].getElementsByTagName("span")[0].innerText + ", " + otakuCost
                 } else {
                     // 同一时间节点，合并行显示/隐藏
                     if (x > 0 && otakuTr[x].cells[0].innerText.substring(0, 2) != "20") {
@@ -125,6 +129,7 @@
                             if (otakuTr[j].cells[0].innerText.substring(0, 4) == year) {
                                 // 同一年显示
                                 otakuTr[x].classList.remove('hiden');
+                                otakuCost = otakuTr[x].getElementsByTagName("span")[0].innerText + ", " + otakuCost
                             } else {
                                 // 隐藏其他年份合并行
                                 otakuTr[x].classList.add('hiden');
@@ -137,6 +142,19 @@
                     }
                 }
             }
+        }
+        // 花费统计
+        // 匹配已【元】结尾的正常金额（含有计算的不统计）
+        var otakuCostAry = otakuCost.match(/(\d*[.]?\d*)元/g)
+        // 匹配已【元】结尾的正常金额（含计算）
+        //var otakuCostAry = otakuCost.match(/(\d*[.]?\d*)[+-]?(\d*[.]?\d*)元/g)
+        if (otakuCostAry) {
+            var otakuCostSum = 0;
+            for (i = 0; i < otakuCostAry.length; i++) {
+                otakuCostSum = otakuCostSum + Number(otakuCostAry[i].replace(" ", "").replace("元", ""));
+            }
+            console.log("页面显示的毛爷爷(大概)花费" + year + ":");
+            console.log(otakuCostSum);
         }
     }
 </script>
@@ -338,7 +356,7 @@
         <tr name="hiden" class="hiden">
             <td align="center">20190712</td>
             <td align="center">济南万达影城<br>高新店</td>
-            <td align="center"><span title="你知道的太多了" class="heimu"><del>50元</del> 0元</span></td>
+            <td align="center"><span title="你知道的太多了" class="heimu"><del>50</del> 0元</span></td>
             <td align="center">限量色纸<br>黑樱</td>
             <td align="left">B站<code>免费</code>抢的《命运之夜——天之杯II：迷失之蝶》的电影票兑换码，首映观影(赏花翻译成看烟花……偏离主题，后面听说改了)，万达影城每张票可以<code>免费</code>领取色纸一张，一共两种(Saber Alter和黑樱)先到先得，我选的黑樱的</td>
         </tr>
@@ -579,7 +597,7 @@
             <td align="left"><span title="没有贴中文标识和放中文组装说明">八角尖尖</span>，定价2800日元，优惠后四算内</td>
         </tr>
         <tr name="hiden" class="hiden">
-            <td align="center"><span>20240622</span></td>
+            <td align="center">20240622</td>
             <td align="center" title="4D模型广州体验店">拼多多</td>
             <td align="center"><span title="店铺优惠，平台优惠" class="heimu"><del>27.7</del> 22.7元</span></td>
             <td align="center">4D拼装1/72坦克模型<br>第二弹8款</td>
@@ -607,7 +625,7 @@
             <td align="left"><span title="中文组装说明变成扫码了">有挤压</span>，定价2400日元，优惠后四算内。HG这么多贴纸也是简直了</td>
         </tr>
         <tr name="hiden" class="hiden">
-            <td align="center"><span>20240718</span></td>
+            <td align="center">20240718</td>
             <td align="center" title="模型玩具小店铺">拼多多</td>
             <td align="center"><span title="平台优惠" class="heimu"><del>12.99</del> 9.99元</span></td>
             <td align="center">高高SDEX<br>Hello Kitty/RX-78-2 高达</td>
