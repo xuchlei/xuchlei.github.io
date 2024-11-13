@@ -104,7 +104,6 @@
 <script>
     function onYearChange(year) {
         var otakuTr = document.getElementById("otaku").getElementsByTagName("tr");
-        otakuTr[0][0]
         for (x in otakuTr) {
             if (x == "length") break;
             if (year == "all") {
@@ -119,8 +118,20 @@
                     // 按年全部显示，包括隐藏
                     otakuTr[x].classList.remove('hiden');
                 } else {
-                    if (x > 0 && otakuTr[x].cells[0].innerText.substring(0, 2) != "20" && otakuTr[x - 1].cells[0].innerText.substring(0, 4) == year) {
-                        otakuTr[x].classList.remove('hiden');
+                    // 同一时间节点，合并行显示/隐藏
+                    if (x > 0 && otakuTr[x].cells[0].innerText.substring(0, 2) != "20") {
+                        // 向上遍历
+                        for (j = x - 1; ; j--) {
+                            if (otakuTr[j].cells[0].innerText.substring(0, 4) == year) {
+                                // 同一年显示
+                                otakuTr[x].classList.remove('hiden');
+                            } else {
+                                // 隐藏其他年份合并行
+                                otakuTr[x].classList.add('hiden');
+                            }
+                            // 遍历到有时间行退出
+                            if (otakuTr[j].cells[0].innerText.substring(0, 2) == "20") break;
+                        }
                     } else {
                         otakuTr[x].classList.add('hiden');
                     }
