@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>新瓶装旧酒-MySQL数据库表结构文档生成工具分享 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,MySQL,工具"> 
+    <meta name="description" content="一个战五渣的个人博客,主要就是分享一下自己以前写的工具，可以直接跳转到最后链接获取
+翻开博客，发现已经快一年没有写新博客了，因为不做开发很多年了，又没有去接触新技术的想法，也就没有遇到什么要解决的问题，帮朋友做的小工具还,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">新瓶装旧酒-MySQL数据库表结构文档生成工具分享</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">新瓶装旧酒-MySQL数据库表结构文档生成工具分享</h1>
+        <div class="stuff">
+            <span>十一月 15, 2024</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/MySQL/">MySQL</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/工具/">工具</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>主要就是分享一下自己以前写的工具，可以直接跳转到最后链接获取</em></p>
+<p><em>翻开博客，发现已经快一年没有写新博客了，因为不做开发很多年了，又没有去接触新技术的想法，也就没有遇到什么要解决的问题，帮朋友做的小工具还不足以发篇博客（水是能水出来的，又不是没水过）。最近尝试修改下博客，发现一个if判断都要想半天，不加注释，自己写的都得理解半天。有时候觉得以前的自己真的很强，真的喜欢编程，把兴趣变成工作，现在不写代码多年，已经跟不上时代的步伐。以前做微信公众号的时候也是兴趣使然，看看以前写的文章是真能码字，现在没了当初的热情。一看阅读量个位数，还是朋友和自己看的吧。年底了，最近也有点自己的时间，看看以前写的文章，以前写的代码，了解一下过去的自己。对自己好点吧，自己才能好一点。</em></p>
+<p>第一次发表于2018年7月的文章-<a href="https://mp.weixin.qq.com/s/pFTuW7iR8Ex4k2WtkSPaEQ" target="_blank" rel="noopener">MySQL数据库表结构文档生成工具随笔</a>，当时正是工具第一版写出来的时候。感兴趣可以去阅读一下，挽救下个位数的阅读量。废话有点多，就基本逻辑那能看一下，直接摘抄下来。</p>
+<blockquote>
+<p>起因是想理解一下数据库结构，但是没有相应的文档，就打算边看边写。但是数据库有接近180的表，就有了写工具的想法。文档的话，首选VBA。源文件是基于Navicat for &gt;MySQL抽出的数据库结构文件。生成的结构是desc 表返回的结果去掉Extra列。<br>主要是晚上在公司写的，花费了4晚上，白天有一段时间在测试。本身难度不大，就是MySQL接触太少，有些地方需求不明确，没法实现。问朋友，也没有太明白的。本来打算实践的，不过查阅了一些资料，有了新的&gt;理解。主要有两个地方，一个是key值的设定。一个是数据类型的覆盖。</p>
+<p>Key，网上解释的都大同小异。最后从官网看的文档。MySQL官网对key的解释，版本是8.0，看了一下7.5的解释，都是一样的。链接内容如下；</p>
+<blockquote>
+<p><a href="https://dev.mysql.com/doc/refman/8.0/en/show-columns.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/8.0/en/show-columns.html</a></p>
+</blockquote>
+<blockquote>
+<p>Key</p>
+<p>Whether the column is indexed:</p>
+<p>•If Key is empty, the column either is not indexed or is indexed onlyas a secondary column in a multiple-column, nonunique index.</p>
+<p>•If Key is PRI, the column is a PRIMARY KEY or is one of the columnsin a multiple-column PRIMARY KEY.</p>
+<p>•If Key is UNI, the column is the first column of a UNIQUE index. (AUNIQUE index permits multiple NULL values, but you can tell whether the columnpermits NULL by &gt;checking the Null field.)</p>
+<p>•If Key is MUL, the column is the first column of a nonunique indexin which multiple occurrences of a given value are permitted within the column.</p>
+<p>If more than one of the Key values appliesto a given column of a table, Key displays the one with the highest priority,in the order PRI, UNI, MUL.</p>
+<p>A UNIQUE index may be displayed as PRI ifit cannot contain NULL values and there is no PRIMARY KEY in the table. AUNIQUE index may display as MUL if several columns &gt;form a composite UNIQUEindex; although the combination of the columns is unique, each column can stillhold multiple occurrences of a given value.</p>
+</blockquote>
+<blockquote>
+<p>列中可能存在的索引：</p>
+<p>•如果键是空的, 则该列没有索引或是非唯一索引的非第一行。</p>
+<p>•如果键是PRI，则列是主键或多列主键中的列之一。</p>
+<p>•如果键是UNI，则该列是唯一索引的第一列。(唯一索引允许多个空值，但可以通过检查Null字段来判断该列是否允许空。)</p>
+<p>•如果键为MUL，则该列是非唯一索引的第一列，其中允许在列中多次出现给定值。</p>
+<p>如果不止一个键值应用于表的给定列，则键以优先级PRI、UNI、MUL的顺序显示优先级最高的一个。</p>
+<p>如果不能包含空值且表中没有主键，则可以显示唯一索引作为PRI。如果多个列形成复合唯一索引，则唯一索引可以显示为MUL；尽管列的组合是唯一的，但每个列仍然可以保持给定值的多次出现。</p>
+</blockquote>
+<p>我的理解，也是按照下边逻辑写的，没有主键有唯一的情况未考虑：</p>
+<blockquote>
+<p>只要是主键就表示PRI。</p>
+<p>只要是单列唯一索引就表示UNI。</p>
+<p>多列组合唯一索引第一列，非唯一索引第一列表示MUL。</p>
+<p>唯一索引的非第一行，不表示。</p>
+</blockquote>
+</blockquote>
+<p>后来有几次bug修改，以及一些功能优化，添加，更新记录如下：<br><img src="/img/20241115/1.png" alt><br>1.4.0的时候出了一个插曲，完成删库成就，具体可以看下这篇文章-<a href="https://mp.weixin.qq.com/s/_WQxH-DDec8Sov5MPPPiaQ" target="_blank" rel="noopener">某码农的代码碎片5-删库跑路</a><br>最后一版还是B站go语言源代码泄露的时候改的，手动滑稽</p>
+<p>操做页面里有写，根据需要勾选选项，点按钮，选择对应的sql结构文件就行。<br><img src="/img/20241115/2.png" alt></p>
+<p>生成表结构的效果图<br><img src="/img/20241115/3.png" alt></p>
+<p>最后工具获取链接：<br><a href="https://xuchunlei.top/MySQL数据库表结构文档生成工具V1.5.0.xlsm">MySQL数据库表结构文档生成工具V1.5.0.xlsm</a></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/724495.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='http://link.hhtjim.com/163/22677584.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://link.hhtjim.com/163/32046426.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://link.hhtjim.com/163/413961906.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://link.hhtjim.com/163/536622304.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
