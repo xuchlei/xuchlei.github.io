@@ -32,7 +32,7 @@ var district = new AMap.DistrictSearch({
 
 for (var i = 0; i < areasAMap.length; i++) {
 	//高德行政区查询
-	getDistrict(district, areasAMap[i], i);
+	getDistrict(district, map, areasAMap[i], i);
 }
 
 				//points.forEach(function(marker) { // 使用forEach的话，点击标记pushpin，之前的Infobox不会消失
@@ -110,7 +110,7 @@ for (var i = 0; i < areasAMap.length; i++) {
 				//});
 
             }
-function getDistrict(district, city, second) {
+function getDistrict(district, map, city, second) {
 	setTimeout(function(){
 		district.search(city, function(status, result) {
 			var bounds = result.districtList[0].boundaries;
