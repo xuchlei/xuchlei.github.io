@@ -30,24 +30,26 @@ var district = new AMap.DistrictSearch({
 		level: 'city'  //查询行政级别为 市
 	});
 
-for (var i = 0; i < areas.length; i++) {
+for (var i = 0; i < areasAMap.length; i++) {
 	//高德行政区查询
-	district.search(areas[i], function(status, result) {
-		polygons = [];
-		var bounds = result.districtList[0].boundaries;
-		if (bounds) {
-			for (var i = 0; i < bounds.length; i++) {
-				var locations = [];
-				for (var m = 0; m < bounds[i].length; m++) {
-					var location = new Microsoft.Maps.Location(bounds[i][m].lat, bounds[i][m].lng);
-					locations.push(location);
+	setTimeout(function(){
+		district.search(areasAMap[i], function(status, result) {
+			polygons = [];
+			var bounds = result.districtList[0].boundaries;
+			if (bounds) {
+				for (var i = 0; i < bounds.length; i++) {
+					var locations = [];
+					for (var m = 0; m < bounds[i].length; m++) {
+						var location = new Microsoft.Maps.Location(bounds[i][m].lat, bounds[i][m].lng);
+						locations.push(location);
+					}
+					//必应生成行政区划polygon
+					var polygon = new Microsoft.Maps.Polygon(locations, null);
+					map.entities.push(polygon);
 				}
-				//必应生成行政区划polygon
-				var polygon = new Microsoft.Maps.Polygon(locations, null);
-				map.entities.push(polygon);
 			}
-		}
-	});
+		});
+	}, 400 * i); // 设置延时，降低api请求qps（上限3）
 }
 
 				//points.forEach(function(marker) { // 使用forEach的话，点击标记pushpin，之前的Infobox不会消失
