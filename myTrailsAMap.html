@@ -36,14 +36,20 @@ function drawBounds(areas) {
 		var opts = {
 			subdistrict: 0,   //获取边界不需要返回下级行政区
 			extensions: 'all',  //返回行政区边界坐标组等具体信息
-			level: 'district'  //查询行政级别为 市
+			level: 'district'  //查询行政级别为 区
 		};
 		district = new AMap.DistrictSearch(opts);
 	}
 	//行政区查询
 	district.setLevel("city")
 	for (var i = 0; i < areas.length; i++) {
-		district.search(areas[i], function(status, result) {
+		getDistrict(areas[i], i);
+		console.log(areas[i]);
+	}
+}
+function getDistrict(city, second) {
+	setTimeout(function(){
+		district.search(city, function(status, result) {
 			//map.remove(polygons)//清除上次结果
 			polygons = [];
 			var bounds = result.districtList[0].boundaries;
@@ -63,9 +69,9 @@ function drawBounds(areas) {
 			map.add(polygons)
 			//map.setFitView(polygons);//视口自适应
 		});
-	}
+	}, 400 * second); // 设置延时，降低api请求qps（上限3）
 }
-drawBounds(areas);
+drawBounds(areasAMap);
 
 // 标记点
 points.forEach(function(marker) {
