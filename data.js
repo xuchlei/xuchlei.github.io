@@ -323,6 +323,7 @@ var points = [
 	{"flag":"1", "date":"20180512", "lng":117.02370503911331,"lat":36.68099481171207,"title":" ","content":"", "img":"img/map/dmhhjsfj.jpg"},
 	{"flag":"1", "date":"20180512", "lng":117.02341308982257,"lat":36.67958744512695,"title":" ","content":"", "img":"img/map/dmhbwfj.jpg"},
 	{"flag":"1", "date":"20180512", "lng":117.02299537776042,"lat":36.67868657216226,"title":"大明湖","content":"5A景区-天下第一泉风景区的核心组成部分之一。最开始的时候收费，只是外围转了下。免费开放的时候进去溜达过几次", "img":"img/map/dmhxnm.jpg"},
+	{"flag":"1", "date":"20170824", "lng":117.10603859958229,"lat":36.685691774605665,"title":" ","content":"", "img":"img/map/djz.jpg"},
 	{"flag":"1", "date":"20120225", "lng":117.00818932444967,"lat":36.648495185349994,"title":"英雄山 革命烈士纪念塔","content":"", "img":"img/map/yxs-gmlsjnt.jpg"},
 	{"flag":"1", "date":"20120225", "lng":117.01484576827862,"lat":36.64675060647081,"title":"英雄山 迎旭亭","content":"", "img":"img/map/yxs-yxt.jpg"},
 	{"flag":"1", "date":"20110501", "lng":117.0296812837759,"lat":36.67105891418392,"title":"芙蓉街","content":"", "img":"img/map/flj.jpg"},
