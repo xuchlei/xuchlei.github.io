@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Windows命令提示符（cmd）入门与常用命令 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,cmd,命令提示符"> 
+    <meta name="description" content="一个战五渣的个人博客,很早就想整理一下cmd命令了，但是一直拖着，虽然平时用的只有那么几个。用过微机的同学应该知道，以前是没有鼠标，输入完全靠键盘，那时应该是DOS系统吧，有些图形用户界面。欲买桂花同载酒，终不似，少年游,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?aa62861fd73e49c9dda3e2a2f5b6db5d";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Windows命令提示符（cmd）入门与常用命令</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Windows命令提示符（cmd）入门与常用命令</h1>
+        <div class="stuff">
+            <span>一月 02, 2025</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/cmd/">cmd</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/windows/">windows</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>很早就想整理一下cmd命令了，但是一直拖着，虽然平时用的只有那么几个。用过微机的同学应该知道，以前是没有鼠标，输入完全靠键盘，那时应该是DOS系统吧，有些图形用户界面。<br>欲买桂花同载酒，终不似，少年游。</em></p>
+<p>先贴一下官方文档<a href="https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/windows-commands" target="_blank" rel="noopener">Windows 命令</a>，应该是所有的命令了吧。</p>
+<h4 id="命令行语法的表示法："><a href="#命令行语法的表示法：" class="headerlink" title="命令行语法的表示法："></a>命令行语法的表示法：</h4><table>
+<thead>
+<tr>
+<th align="center">表示法</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">不含方括号或大括号的文本</td>
+<td align="center">必须按所显示键入的项。</td>
+</tr>
+<tr>
+<td align="center">&lt;Text inside angle brackets&gt;</td>
+<td align="center">必须为其提供值的占位符。</td>
+</tr>
+<tr>
+<td align="center">[Text inside square brackets]</td>
+<td align="center">可选项。</td>
+</tr>
+<tr>
+<td align="center">{Text inside braces}</td>
+<td align="center">一组必需的项。 你必须选择一个。</td>
+</tr>
+<tr>
+<td align="center">竖线 (|)</td>
+<td align="center">互斥项的分隔符。 你必须选择一个。</td>
+</tr>
+<tr>
+<td align="center">省略号 (…)</td>
+<td align="center">可重复使用多次的项。</td>
+</tr>
+</tbody></table>
+<h4 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h4><p>我通常使用Win+R打开运行，输入<code>cmd</code>回车打开。要想以管理员身份运行可以按Win键输入<code>cmd</code>然后在命令提示符上右键以管理员权限运行<br><img src="/img/20250102/1.png" alt><br>如果想定位到某个文件夹，可以直接在对应文件夹的地址栏中输入<code>cmd</code>回车（不能有同名文件夹，有的话，会打开对应的文件夹，并且文件夹锁定，无法进行重命名），想以管理员身份运行的话只能自己打地址了。<br><img src="/img/20250102/2.png" alt></p>
+<h4 id="HELP-提供-Windows-命令的帮助信息"><a href="#HELP-提供-Windows-命令的帮助信息" class="headerlink" title="HELP 提供 Windows 命令的帮助信息"></a>HELP 提供 Windows 命令的帮助信息</h4><p>单独使用可以显示部分命令<br><img src="/img/20250102/3.png" alt><br>后面跟命令可以显示该命令的帮助信息，可以同过<code>[command] /?</code>实现同样的效果<br><img src="/img/20250102/4.png" alt><br>以下列出命令可以使用help来查看帮助信息</p>
+<h4 id="快速访问"><a href="#快速访问" class="headerlink" title="快速访问"></a>快速访问</h4><p>cmd可以和<code>win+r</code>运行一样，可以直接打开对应的程序，不过用运行更快。<br><img src="/img/20250102/5.png" alt></p>
+<p>这里列一些能打开的程序</p>
+<ul>
+<li>winver windows版本信息</li>
+<li>mstsct 远程桌面连结</li>
+<li>explorer 文件资源管理器</li>
+<li>control folders 文件夹选项</li>
+<li>control printers 打印机和扫描仪设置</li>
+<li>notepad 记事本</li>
+<li>calc 计算器</li>
+<li>mspaint 画图</li>
+<li>write 写字板</li>
+<li>osk 屏幕键盘</li>
+<li>magnify 放大镜</li>
+<li>narrator 讲述人</li>
+<li>msconfig 系统配置</li>
+<li>compmgmt.msc 计算机管理</li>
+<li>diskmgmt.msc 磁盘管理</li>
+<li>devmgmt.msc 设备管理器</li>
+<li>services.msc 服务管理</li>
+<li>lusrmgr.msc 本机用户和组管理</li>
+<li>perfmon.msc 性能监视器</li>
+<li>secpol.msc 本地安全策略</li>
+<li>certmgr.msc 证书管理</li>
+<li>fsmgmt.msc 共享文件夹管理器</li>
+<li>rsop.msc 组策略结果集</li>
+<li>taskmgr 任务管理器</li>
+<li>gpedit 组策略编辑器</li>
+<li>cleanmgr 磁盘清理</li>
+<li>regedit 注册表编辑器</li>
+<li>eventvwr 事件查看器</li>
+<li>wscript Windows脚本宿主设置</li>
+<li>charmap 字符映射表</li>
+<li>dcomcnfg 组件服务</li>
+<li>dxdiag DirectX诊断工具</li>
+<li>eudcedit 造字程序</li>
+<li>iexpress 创建自解压缩的可执行文件exe</li>
+<li>mmc 控制台</li>
+<li>sigverif 文件签名验证</li>
+</ul>
+<h4 id="cd-显示当前目录和改变目录"><a href="#cd-显示当前目录和改变目录" class="headerlink" title="cd 显示当前目录和改变目录"></a>cd 显示当前目录和改变目录</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">跳转到根目录</span><br><span class="line">cd \</span><br><span class="line"></span><br><span class="line">跳转到下级目录</span><br><span class="line">cd Users\xuchl</span><br><span class="line">cd desktop</span><br><span class="line"></span><br><span class="line">回到上级目录</span><br><span class="line">cd ..</span><br><span class="line"></span><br><span class="line">跳转到指定目录</span><br><span class="line">cd C:\Users\xuchl\Desktop</span><br><span class="line"></span><br><span class="line">跳转到D盘</span><br><span class="line">d:</span><br><span class="line">跳回C盘桌面(加参数d可以直接跳回)</span><br><span class="line">D:\&gt;cd C:\Users\xuchl\Desktop</span><br><span class="line">D:\&gt;c:</span><br><span class="line">C:\Users\xuchl\Desktop&gt;</span><br><span class="line"></span><br><span class="line">D:\&gt;cd /d C:\Users\xuchl\Desktop</span><br><span class="line">C:\Users\xuchl\Desktop&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="dir-显示目录中的文件和子目录列表"><a href="#dir-显示目录中的文件和子目录列表" class="headerlink" title="dir 显示目录中的文件和子目录列表"></a>dir 显示目录中的文件和子目录列表</h4><h4 id="md-创建目录"><a href="#md-创建目录" class="headerlink" title="md 创建目录"></a>md 创建目录</h4><h4 id="rd-删除目录（永久删除）"><a href="#rd-删除目录（永久删除）" class="headerlink" title="rd 删除目录（永久删除）"></a>rd 删除目录（永久删除）</h4><h4 id="copy-将一份或多份文件复制到另一个位置"><a href="#copy-将一份或多份文件复制到另一个位置" class="headerlink" title="copy 将一份或多份文件复制到另一个位置"></a>copy 将一份或多份文件复制到另一个位置</h4><h4 id="move-移动文件并重命名文件和目录"><a href="#move-移动文件并重命名文件和目录" class="headerlink" title="move 移动文件并重命名文件和目录"></a>move 移动文件并重命名文件和目录</h4><h4 id="del-删除一个或多个文件"><a href="#del-删除一个或多个文件" class="headerlink" title="del 删除一个或多个文件"></a>del 删除一个或多个文件</h4><h4 id="type-显示文本文件的内容"><a href="#type-显示文本文件的内容" class="headerlink" title="type 显示文本文件的内容"></a>type 显示文本文件的内容</h4><h4 id="color-设置默认的控制台前景和背景颜色"><a href="#color-设置默认的控制台前景和背景颜色" class="headerlink" title="color 设置默认的控制台前景和背景颜色"></a>color 设置默认的控制台前景和背景颜色</h4><p>个人喜欢0a（背景黑色，文字淡绿色绿色），写批处理的时候基本用这个</p>
+<h4 id="cls-清除屏幕"><a href="#cls-清除屏幕" class="headerlink" title="cls 清除屏幕"></a>cls 清除屏幕</h4><h4 id="find-在文件中搜索字符串-必须加双引号"><a href="#find-在文件中搜索字符串-必须加双引号" class="headerlink" title="find 在文件中搜索字符串 必须加双引号"></a>find 在文件中搜索字符串 必须加双引号</h4><h4 id="findstr-在文件中寻找字符串"><a href="#findstr-在文件中寻找字符串" class="headerlink" title="findstr 在文件中寻找字符串"></a>findstr 在文件中寻找字符串</h4><h4 id="tasklist-显示在本地或远程机器上当前运行的进程列表"><a href="#tasklist-显示在本地或远程机器上当前运行的进程列表" class="headerlink" title="tasklist 显示在本地或远程机器上当前运行的进程列表"></a>tasklist 显示在本地或远程机器上当前运行的进程列表</h4><h4 id="taskkill-按照进程-ID-PID-或映像名称终止任务"><a href="#taskkill-按照进程-ID-PID-或映像名称终止任务" class="headerlink" title="taskkill 按照进程 ID (PID) 或映像名称终止任务"></a>taskkill 按照进程 ID (PID) 或映像名称终止任务</h4><p>tasklist一般配合查找命令findstr使用来限定返回结果<br><img src="/img/20250102/6.png" alt></p>
+<h4 id="ping-用来测试网络是否畅通"><a href="#ping-用来测试网络是否畅通" class="headerlink" title="ping 用来测试网络是否畅通"></a>ping 用来测试网络是否畅通</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">默认进行4次ping操做</span><br><span class="line">ping baidu.com</span><br><span class="line">ping 39.156.66.10</span><br><span class="line"></span><br><span class="line">进行10次ping操做</span><br><span class="line">ping 39.156.66.10 -n 10</span><br><span class="line"></span><br><span class="line">一直ping，直到手动停止（ctrl+c键）</span><br><span class="line">ping 39.156.66.10 -t</span><br></pre></td></tr></table></figure>
+
+<h4 id="tracert-路由跟踪-用于确定访问目标时所选择的路径"><a href="#tracert-路由跟踪-用于确定访问目标时所选择的路径" class="headerlink" title="tracert 路由跟踪 用于确定访问目标时所选择的路径"></a>tracert 路由跟踪 用于确定访问目标时所选择的路径</h4><h4 id="ipconfig-查看本机ip信息"><a href="#ipconfig-查看本机ip信息" class="headerlink" title="ipconfig 查看本机ip信息"></a>ipconfig 查看本机ip信息</h4><h4 id="netstat-显示协议统计信息和当前-TCP-IP-网络连接"><a href="#netstat-显示协议统计信息和当前-TCP-IP-网络连接" class="headerlink" title="netstat 显示协议统计信息和当前 TCP/IP 网络连接"></a>netstat 显示协议统计信息和当前 TCP/IP 网络连接</h4><h4 id="netsh-显示或修改当前正在运行的计算机的网络配置"><a href="#netsh-显示或修改当前正在运行的计算机的网络配置" class="headerlink" title="netsh 显示或修改当前正在运行的计算机的网络配置"></a>netsh 显示或修改当前正在运行的计算机的网络配置</h4><p>曾经使用过的WiFi连接<br><code>netsh wlan show profiles</code><br>查询某个WiFi密码<br><code>netsh wlan show profile name=&quot;连接名&quot; key=clear</code></p>
+<h4 id="certutil-证书服务的一部分安装的命令行工具"><a href="#certutil-证书服务的一部分安装的命令行工具" class="headerlink" title="certutil 证书服务的一部分安装的命令行工具"></a>certutil 证书服务的一部分安装的命令行工具</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">文件校验 默认输出sha1，用于对比</span><br><span class="line">certutil -hashfile 文件名1</span><br><span class="line">certutil -hashfile 文件名2</span><br></pre></td></tr></table></figure>
+
+<h4 id="windows标识查询"><a href="#windows标识查询" class="headerlink" title="windows标识查询"></a>windows标识查询</h4><p>获取CPUID (非唯一)<br><code>wmic cpu get processorid</code><br>获取主板唯一识别码 (推荐)<br><code>wmic csproduct get uuid</code><br>获取硬盘序列号<br><code>wmic diskdrive get serialnumber</code><br>获取主板序列号<br><code>wmic baseboard get serialnumber</code><br>获取BIOS序列号 (电脑的序列号)<br><code>wmic bios get serialnumber</code><br>从注册表获取MachineGuid (系统安装过程中生成)<br><code>reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography /v MachineGuid</code><br>获取MAC地址<br><code>getmac</code></p>
+<h4 id="慎用命令"><a href="#慎用命令" class="headerlink" title="慎用命令"></a>慎用命令</h4><ul>
+<li>logoff 注销</li>
+<li>shutdown 关机</li>
+</ul>
+<h4 id="gt-新建-覆盖文件"><a href="#gt-新建-覆盖文件" class="headerlink" title="&gt; 新建/覆盖文件"></a>&gt; 新建/覆盖文件</h4><h4 id="gt-gt-写入文件末尾"><a href="#gt-gt-写入文件末尾" class="headerlink" title="&gt;&gt; 写入文件末尾"></a>&gt;&gt; 写入文件末尾</h4><p>个人很喜欢用<code>tree</code>来生成文件树，如果用&gt;写入文件会包含写入文件本身。<br><img src="/img/20250102/7.png" alt></p>
+<h4 id="技巧"><a href="#技巧" class="headerlink" title="技巧"></a>技巧</h4><ul>
+<li>终止运行命令 <code>ctrl+c</code>键</li>
+<li>重复历史命令 方向上键<code>↑</code>，可重复按</li>
+<li>文件名补全 <code>tab</code>键，可重复按</li>
+</ul>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://xuchunlei.top/music/1.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://xuchunlei.top/music/2.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://xuchunlei.top/music/3.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://xuchunlei.top/music/4.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://xuchunlei.top/music/5.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: 0; bottom: 0; display: block; user-select: none;">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+</body>
+</html>
