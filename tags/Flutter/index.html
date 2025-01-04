@@ -175,5 +175,29 @@ Flutter介绍Flutt...</p>
 <script src="../../../../js/particlejs.min.js" charset="UTF-8"></script>
 <script src="../../../../js/mouseparticle.js" charset="UTF-8"></script>
 
+<script>
+window.onload= function() {
+Promise.all([
+  new Promise((resolve, reject) => {
+    let tag;
+    let url = "live2d-widget/bundle.js"
+    tag = document.createElement("script");
+    tag.src = url;
+    tag.onload = () => resolve(url);
+    tag.onerror = () => reject(url);
+    document.head.appendChild(tag);
+
+    document.body.insertAdjacentHTML("afterend", '<canvas id="live2dcanvas" width="300" height="400"></canvas>');
+    var style = document.createElement("style");
+    style.innerHTML = "#live2dcanvas {bottom: -50px;left: -40px;position: fixed;}";
+    document.head.appendChild(style);
+  })
+]).then(() => {
+  var modelUrl="live2d-widget/assets/kesyoban/kesyoban.model.json";
+  loadlive2d("live2dcanvas", modelUrl);
+});
+}
+</script>
+
 </body>
 </html>
