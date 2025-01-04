@@ -271,7 +271,7 @@ window.onload= function() {
 Promise.all([
   new Promise((resolve, reject) => {
     let tag;
-    let url = "live2d-widget/bundle.js"
+    let url = "https://xuchunlei.top/live2d-widget/bundle.js"
     tag = document.createElement("script");
     tag.src = url;
     tag.onload = () => resolve(url);
@@ -284,7 +284,7 @@ Promise.all([
     document.head.appendChild(style);
   })
 ]).then(() => {
-  var modelUrl="live2d-widget/assets/kesyoban/kesyoban.model.json";
+  var modelUrl="https://xuchunlei.top/live2d-widget/assets/kesyoban/kesyoban.model.json";
   loadlive2d("live2dcanvas", modelUrl);
 });
 }
