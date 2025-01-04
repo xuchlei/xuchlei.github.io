@@ -1,8 +1,10 @@
 body, div {
 	margin: 0px; padding: 0px;
+	cursor: url(../img/cursor_fouB.png), auto;
 }
 a {
 	color: rgb(61, 101, 141); text-decoration: none;
+	cursor: url(../img/cursor_fouC.png), auto;
 }
 a img:hover {
 	background: 0px; border: 0px currentColor; border-image: none;

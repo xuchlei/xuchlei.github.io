@@ -370,7 +370,7 @@ a {
 a img {
   cursor: url(/img/cursor_fouC.png), auto;
 }
-p img {
+.article, .search {
   position: sticky;
   z-index: 3;
 }
