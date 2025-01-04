@@ -166,7 +166,7 @@ else {
     );
 
     // フレームレートの設定
-    createjs.Ticker.framerate = 100;
+    createjs.Ticker.framerate = 50;
     // requestAnimationFrameに従った呼び出し
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     // 定期的に呼ばれる関数を登録
