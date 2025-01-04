@@ -364,7 +364,33 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 }
 a {
   cursor: url(/img/cursor_fouC.png), auto;
+  position: sticky;
+  z-index: 3;
 }
 a img {
   cursor: url(/img/cursor_fouC.png), auto;
+}
+p img {
+  position: sticky;
+  z-index: 3;
+}
+.gt-header {
+  z-index: 3;
+}
+#canvas {
+  position: fixed;
+}
+@media only screen and (min-width: 769px) {
+  #canvas {
+    top: 0;
+    left: 0;
+  }
+}
+@media only screen and (max-width: 768px) {
+  #canvas {
+    width: 1500px !important;
+    /*height: 1500px !important;*/
+    top: -160px;
+    left: 0;
+  }
 }
