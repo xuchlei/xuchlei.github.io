@@ -263,24 +263,24 @@ var points = [
 	{"flag":"1", "lng":113.11986780157748,"lat":23.041119034510952,"title":"","content":""},
 	{"flag":"1", "lng":112.98395660338757,"lat":22.93167135936873,"title":"西樵山风景名胜区","content":"5A景区，走了十几公里，只逛了下南边的景点，作为自然景点还所可以吧"},
 	// 青岛 悲伤的故事
-	{"flag":"1", "lng":120.31641657521578,"lat":36.268621194023865,"title":"","content":""}, // 20240814青岛第一站，请我吃午饭，后来20240818还请我吃晚饭
-	{"flag":"1", "lng":120.34730728051653,"lat":36.255906927635586,"title":"","content":""}, // 去看思思，我没去成
-	{"flag":"1", "lng":120.29470902256716,"lat":36.270207060992,"title":"","content":""}, // 附近找了公园坐坐，用狗尾巴草制作了花环
-	{"flag":"1", "lng":120.25434366447631,"lat":36.2735205451284,"title":"","content":""}, // 高实合苑 青岛住的地方，梦开始的地方，第一次去接送当天就回来了，搬家前20240818住过几晚，去过附近超市购物
-	{"flag":"1", "lng":120.33324305013011,"lat":36.289054057390246,"title":" ","content":"", "img":"img/map/xyhfbq.jpg"}, // 星雨华府北区 20240818第一次找房子，最终选中，20240824搬家，住过一段时间，梦延续的地方 也是梦结束的地方
-	{"flag":"1", "lng":120.31305363379336,"lat":36.29431936572242,"title":"","content":""}, // 看房子之一，刚开始找错了小区
-	{"flag":"1", "lng":120.29561541282675,"lat":36.26244447718907,"title":"","content":""}, // 20240825营业厅退宽带，居然不退款，失误，应该拉到星雨华府就对了，没想到那边信号这么差
-	{"flag":"1", "lng":120.30814439418133,"lat":36.28886496506443,"title":"","content":""}, // 20240826充燃气，卡充上了，表最后还是没充上，后来换的表
-	{"flag":"1", "lng":120.40147627056535,"lat":36.23755594830023,"title":"","content":""}, // 20240914去姨父那
-	{"flag":"1", "lng":120.30867354327619,"lat":36.28603535964256,"title":"","content":""}, // 20240920百果园，去买榴莲，以后榴莲供应地
-	{"flag":"1", "lng":120.42796851500127,"lat":36.31204670840243,"title":"","content":""}, // 20240922家家悦，去看小姑
-	{"flag":"1", "lng":120.39781689055886,"lat":36.30129636339674,"title":"","content":""}, // 去看小姑
-	{"flag":"1", "lng":120.31664600467725,"lat":36.278176422721025,"title":"","content":""}, // 20240929洗车，不能洗
-	{"flag":"1", "lng":120.31588244499376,"lat":36.28423889377843,"title":"","content":""}, // 洗车，洗了
-	{"flag":"1", "lng":120.33812898094837,"lat":36.29897304538611,"title":"","content":""}, // 加油
-	{"flag":"1", "lng":120.36430551144436,"lat":36.23430493249445,"title":"","content":""}, // 途经公交站
+	{"flag":"1", "lng":120.31641657521578,"lat":36.268621194023865,"title":"","content":""}, // MjAyNDA4MTTpnZLlspvnrKzkuIDnq5nvvIzor7fmiJHlkIPljYjppa3vvIzlkI7mnaUyMDI0MDgxOOi/mOivt+aIkeWQg+aZmumlrQ==
+	{"flag":"1", "lng":120.34730728051653,"lat":36.255906927635586,"title":"","content":""}, // 5Y6755yL5oCd5oCd77yM5oiR5rKh5Y675oiQ
+	{"flag":"1", "lng":120.29470902256716,"lat":36.270207060992,"title":"","content":""}, // 6ZmE6L+R5om+5LqG5YWs5Zut5Z2Q5Z2Q77yM55So54uX5bC+5be06I2J5Yi25L2c5LqG6Iqx546v
+	{"flag":"1", "lng":120.25434366447631,"lat":36.2735205451284,"title":"","content":""}, // 6auY5a6e5ZCI6IuRIOmdkuWym+S9j+eahOWcsOaWue+8jOaipuW8gOWni+eahOWcsOaWue+8jOesrOS4gOasoeWOu+aOpemAgeW9k+WkqeWwseWbnuadpeS6hu+8jOaQrOWutuWJjTIwMjQwODE45L2P6L+H5Yeg5pma77yM5Y676L+H6ZmE6L+R6LaF5biC6LSt54mp
+	{"flag":"1", "lng":120.33324305013011,"lat":36.289054057390246,"title":" ","content":"", "img":"img/map/xyhfbq.jpg"}, // 5pif6Zuo5Y2O5bqc5YyX5Yy6IDIwMjQwODE456ys5LiA5qyh5om+5oi/5a2Q77yM5pyA57uI6YCJ5Lit77yMMjAyNDA4MjTmkKzlrrbvvIzkvY/ov4fkuIDmrrXml7bpl7TvvIzmoqblu7bnu63nmoTlnLDmlrkg5Lmf5piv5qKm57uT5p2f55qE5Zyw5pa5
+	{"flag":"1", "lng":120.31305363379336,"lat":36.29431936572242,"title":"","content":""}, // 55yL5oi/5a2Q5LmL5LiA77yM5Yia5byA5aeL5om+6ZSZ5LqG5bCP5Yy6
+	{"flag":"1", "lng":120.29561541282675,"lat":36.26244447718907,"title":"","content":""}, // MjAyNDA4MjXokKXkuJrljoXpgIDlrr3luKbvvIzlsYXnhLbkuI3pgIDmrL7vvIzlpLHor6/vvIzlupTor6Xmi4nliLDmmJ/pm6jljY7lupzlsLHlr7nkuobvvIzmsqHmg7PliLDpgqPovrnkv6Hlj7fov5nkuYjlt64=
+	{"flag":"1", "lng":120.30814439418133,"lat":36.28886496506443,"title":"","content":""}, // MjAyNDA4MjblhYXnh4PmsJTvvIzljaHlhYXkuIrkuobvvIzooajmnIDlkI7ov5jmmK/msqHlhYXkuIrvvIzlkI7mnaXmjaLnmoTooag=
+	{"flag":"1", "lng":120.40147627056535,"lat":36.23755594830023,"title":"","content":""}, // MjAyNDA5MTTljrvlp6jniLbpgqM=
+	{"flag":"1", "lng":120.30867354327619,"lat":36.28603535964256,"title":"","content":""}, // MjAyNDA5MjDnmb7mnpzlm63vvIzljrvkubDmprTojrLvvIzku6XlkI7mprTojrLkvpvlupTlnLA=
+	{"flag":"1", "lng":120.42796851500127,"lat":36.31204670840243,"title":"","content":""}, // MjAyNDA5MjLlrrblrrbmgqbvvIzljrvnnIvlsI/lp5E=
+	{"flag":"1", "lng":120.39781689055886,"lat":36.30129636339674,"title":"","content":""}, // 5Y6755yL5bCP5aeR
+	{"flag":"1", "lng":120.31664600467725,"lat":36.278176422721025,"title":"","content":""}, // MjAyNDA5MjnmtJfovabvvIzkuI3og73mtJc=
+	{"flag":"1", "lng":120.31588244499376,"lat":36.28423889377843,"title":"","content":""}, // 5rSX6L2m77yM5rSX5LqG
+	{"flag":"1", "lng":120.33812898094837,"lat":36.29897304538611,"title":"","content":""}, // 5Yqg5rK5
+	{"flag":"1", "lng":120.36430551144436,"lat":36.23430493249445,"title":"","content":""}, // 5Y675LqU5Zub5bm/5Zy66YCU57uP5YWs5Lqk56uZ
 	{"flag":"1", "lng":120.39187536093581,"lat":36.06724884499414,"title":"五四广场","content":"只是去看了下五四的风，做公交去的，手机还没电了，只溜达了一会", "img":"img/map/wsdf.jpg"},
-	{"flag":"1", "lng":120.3859817154649,"lat":36.311934013859464,"title":"","content":""}, // 20240930接小姑
+	{"flag":"1", "lng":120.3859817154649,"lat":36.311934013859464,"title":"","content":""}, // MjAyNDA5MzDmjqXlsI/lp5E=
 	// 菏泽
 	{"flag":"1", "date":"20241206", "lng":115.51155144194702,"lat":35.236189038702896,"title":"","content":""},
 	{"flag":"1", "date":"20241206", "lng":115.52639144897186,"lat":35.2282911140469,"title":"","content":""},
