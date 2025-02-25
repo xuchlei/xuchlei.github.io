@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>简单使用Tesseract提取视频字幕 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,"> 
+    <meta name="description" content="一个战五渣的个人博客,帮朋友提取视频里的字幕，不管用语音转文字，还是OCR识别，准确率都不是很高……用Tesseract提取纯色图片还好，视频那种斑驳背景的准确率不高，英文还好，中文更是一言难尽
+简介Tesseract是,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?aa62861fd73e49c9dda3e2a2f5b6db5d";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">简单使用Tesseract提取视频字幕</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">简单使用Tesseract提取视频字幕</h1>
+        <div class="stuff">
+            <span>二月 25, 2025</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/AI/">AI</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/OCR/">OCR</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Tesseract/">Tesseract</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>帮朋友提取视频里的字幕，不管用语音转文字，还是OCR识别，准确率都不是很高……用Tesseract提取纯色图片还好，视频那种斑驳背景的准确率不高，英文还好，中文更是一言难尽</em></p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><a href="https://tesseract-ocr.cn/" target="_blank" rel="noopener">Tesseract</a>是一个开源的 文本识别 (OCR <code>Optical Character Recognition，光学字符识别</code>) 引擎。Tesseract可以通过命令行直接使用，或者使用API从图像中提取打印文本。它支持各种语言并且免费。</p>
+<blockquote>
+<p>官方文档：<a href="https://tesseract-ocr.cn/" target="_blank" rel="noopener">https://tesseract-ocr.cn/</a><br>GitHub地址：<a href="https://github.com/tesseract-ocr/tesseract" target="_blank" rel="noopener">https://github.com/tesseract-ocr/tesseract</a></p>
+</blockquote>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>下载地址可以参考<a href="https://tesseract-ocr.cn/tessdoc/Downloads.html" target="_blank" rel="noopener">官方文档</a>，这里从官方提供的第三方下载Windows安装包，安装时Additional language data勾选了简体中文Chinese(Simplified)和Chinese(Simplified vertical)。<br><img src="/img/20250225/1.png" alt><br>将安装路径配置到环境变量Path<br><img src="/img/20250225/2.png" alt><br>命令提示符执行<code>tesseract -v</code>查看Tesseract版本信息<br><img src="/img/20250225/3.png" alt></p>
+<h3 id="简单命令行使用"><a href="#简单命令行使用" class="headerlink" title="简单命令行使用"></a>简单命令行使用</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">最简单的 OCR 图像调用 tesseract + 图片 + 输出txt文件名 默认英语</span><br><span class="line">tesseract imagename outputbase</span><br><span class="line"></span><br><span class="line">-l LANG[+LANG] 指定语言</span><br><span class="line">英语</span><br><span class="line">tesseract imagename outputbase -l eng</span><br><span class="line">英语+简体中文</span><br><span class="line">tesseract imagename outputbase -l eng+chi_sim</span><br></pre></td></tr></table></figure>
+
+<p>图片英文测试<br><img src="/img/20250225/4.png" alt><br><img src="/img/20250225/5.png" alt><br>图片中文测试<br><img src="/img/20250225/6.png" alt><br><img src="/img/20250225/7.png" alt></p>
+<h3 id="视频字幕提取"><a href="#视频字幕提取" class="headerlink" title="视频字幕提取"></a>视频字幕提取</h3><p>这里使用Python，需要安装的依赖<br>OpenCV（open source computer vision library）是一个基于BSD许可（开源）发行的跨平台计算机视觉库<br><code>pip install opencv-python pytesseract difflib</code><br>我这里很久没用了，根据提示先更新了pip，然后装了opencv-python和pytesseract。difflib之前应该装过了<br><img src="/img/20250225/8.png" alt></p>
+<p>直接把视频剪辑成光剩字幕，简单写个代码测试下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">import cv2, pytesseract</span><br><span class="line">video = cv2.VideoCapture(&quot;test.mp4&quot;)</span><br><span class="line">success, image = video.read()</span><br><span class="line">while success:</span><br><span class="line">    text = pytesseract.image_to_string(image, lang=&apos;chi_sim&apos;)  # 中文识别</span><br><span class="line">    print(text)</span><br><span class="line">    success, image = video.read()</span><br></pre></td></tr></table></figure>
+
+<p>结果就是识别的很差，一个“大家好”都不能准确识别<br><img src="/img/20250225/9.png" alt></p>
+<p>然后录制了一个双语视频，并优化了下代码：<br>限定字幕区域，指定字幕位置（需根据视频调整坐标），避免全帧识别，提升速度和准确率。也可以动态检测字幕区域。<br>图像预处理，将字幕区域转为灰度图并二值化，增强文字对比度。<br>减少重复字幕，计算当前文本与上一帧文本的相似度，若高于阈值，视为重复内容，跳过写入。控制处理频率（如每5帧处理1帧），减少冗余计算。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">import cv2</span><br><span class="line">import pytesseract</span><br><span class="line">from difflib import SequenceMatcher</span><br><span class="line"></span><br><span class="line"># 视频路径和输出文件路径</span><br><span class="line">video_path = &quot;input_video.wmv&quot;</span><br><span class="line">output_file = &quot;extracted_text.txt&quot;</span><br><span class="line"></span><br><span class="line"># 定义字幕区域（根据视频分辨率调整：x, y, width, height）</span><br><span class="line">#subtitle_area = (50, 900, 1800, 100)  # 示例：底部居中区域</span><br><span class="line">subtitle_area = (0, 0, 1512, 124) #我所选择视频因为截取了，就选择了整个视频大小</span><br><span class="line"></span><br><span class="line"># 初始化</span><br><span class="line">video = cv2.VideoCapture(video_path)</span><br><span class="line">prev_text = &quot;&quot;</span><br><span class="line">similarity_threshold = 0.8  # 文本相似度阈值（高于此值视为重复）</span><br><span class="line">frame_skip = 5  # 跳帧数（每隔几帧处理一帧，平衡速度与准确性）</span><br><span class="line"></span><br><span class="line">with open(output_file, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">    frame_count = 0</span><br><span class="line">    while True:</span><br><span class="line">        success, frame = video.read()</span><br><span class="line">        if not success:</span><br><span class="line">            break</span><br><span class="line">        </span><br><span class="line">        frame_count += 1</span><br><span class="line">        if frame_count % frame_skip != 0:</span><br><span class="line">            continue  # 跳帧处理</span><br><span class="line">        </span><br><span class="line">        # 截取字幕区域</span><br><span class="line">        x, y, w, h = subtitle_area</span><br><span class="line">        roi = frame[y:y+h, x:x+w]</span><br><span class="line">        </span><br><span class="line">        # 图像预处理（提高OCR精度）</span><br><span class="line">        gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)</span><br><span class="line">        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)</span><br><span class="line">        </span><br><span class="line">        # OCR识别</span><br><span class="line">        text = pytesseract.image_to_string(thresh, lang=&apos;chi_sim+eng&apos;)  # 中英文混合</span><br><span class="line">        </span><br><span class="line">        # 去空格和换行</span><br><span class="line">        text = text.strip().replace(&quot;\n&quot;, &quot; &quot;)</span><br><span class="line">        </span><br><span class="line">        # 跳过空文本</span><br><span class="line">        if not text:</span><br><span class="line">            continue</span><br><span class="line">        </span><br><span class="line">        # 计算与上一帧文本的相似度</span><br><span class="line">        similarity = SequenceMatcher(None, prev_text, text).ratio()</span><br><span class="line">        if similarity &lt; similarity_threshold:</span><br><span class="line">            f.write(f&quot;&#123;text&#125;\n&quot;)</span><br><span class="line">            prev_text = text  # 更新前一次文本</span><br><span class="line"></span><br><span class="line">video.release()</span><br><span class="line">print(f&quot;文字已提取到 &#123;output_file&#125;&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>最终效果如下，中文依旧不尽人意，英语准确率很高<br><img src="/img/20250225/10.png" alt><br>这里只是简单尝试，如何提高准确率，可以根据视频情况，调整图像处理方式，以及增加纠错处理等等。或者更换OCR引擎，听说PaddleOCR对中文支持更好。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://xuchunlei.top/music/1.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://xuchunlei.top/music/2.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://xuchunlei.top/music/3.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://xuchunlei.top/music/4.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://xuchunlei.top/music/5.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: -25px; bottom: -10px; display: block; user-select: none; transform: scale(0.5);">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+
+<canvas id="canvas"></canvas>
+<script src="../../../../js/createjs.min.js"></script>
+<script src="../../../../js/particlejs.min.js" charset="UTF-8"></script>
+<script src="../../../../js/mouseparticle.js" charset="UTF-8"></script>
+</body>
+</html>
