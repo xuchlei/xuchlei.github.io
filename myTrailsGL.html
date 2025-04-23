@@ -8,14 +8,21 @@
 html{height:100%}
 body{height:100%;margin:0px;padding:0px}
 #container{height:100%}
+.normal {position:absolute;top:0;padding:2px 5px;color:black;background:#00adff;z-index:100;}
 </style>
-<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=QpETkN7q770mIkKy7LCTxuoQdt0nsIQ9">
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=AA4uqECjDYfZUk9vSVMNR5bPdFEtw6GU">
 </script>
 <script type="text/javascript" src="data.js"></script>
 </head>
 
 <body>
-<div id="container"></div>
+	<div class="normal" style="right:0;">
+		年度(部分)
+		<select style="color:red; text-align:center; right:0;" id="year" name="year" onchange="getCurrentYearPoint();">
+			<option value selected disabled>    </option>
+		</select>
+	</div>
+	<div id="container"></div>
 <script type="text/javascript">
 var map = new BMapGL.Map("container", {enableMapClick: false}); // enableMapClick: false禁用点击弹出详细信息窗口
 var point = new BMapGL.Point(123.678995,33.632182);
@@ -95,6 +102,63 @@ function addMarker(point){
 
 for (var i = 0; i < points.length; i++) {
 	addMarker(points[i]);
+}
+
+// 年度功能
+document.addEventListener('DOMContentLoaded', function() {
+	var yearList = new Set([]);
+	var yearFirstDropdown = document.getElementById('year');
+
+	var yearList = new Set([]);
+	for (var i = 0; i < points.length; i++) {
+		if (points[i].date) {
+			yearList.add(points[i].date.slice(0, 4))
+		}
+	}
+
+	var optionAry = [...yearList].sort();
+
+	optionAry.forEach(item => {
+		var option = document.createElement('option');
+		option.value = item;
+		option.textContent = item;
+		yearFirstDropdown.appendChild(option);
+	});
+});
+
+function getCurrentYearPoint() {
+	var year = document.getElementsByName('year')[0].value;
+	map.clearOverlays();
+	for (var i = 0; i < points.length; i++) {
+		if (points[i].date && points[i].date.slice(0, 4) === year) {
+			addMarker2(points[i]);
+		}
+	}
+}
+
+function addMarker2(point){
+	var curpoint = new BMapGL.Point(point.lng, point.lat);
+	var myIcon = new BMapGL.Icon("img/map/marker_blue.png", new BMapGL.Size(23, 25), {anchor: new BMapGL.Size(8, 25)}); // 自定义标记图片，设置anchor使图片位置和默认标记位置一致
+	var marker = new BMapGL.Marker(curpoint); // 自定义标记图片，直接使用参数{icon: myIcon}会丢失自动添加的阴影
+	map.addOverlay(marker);
+	if (point.title !== "") {
+		var opts = {
+			width : 300,     // 信息窗口宽度
+			height: 130,     // 信息窗口高度
+			title : point.title,
+			offset: new BMapGL.Size(0, -25) // 自定义标记图片，设置offset使信息窗口位置和默认信息窗口位置一致
+		}
+		marker.setIcon(myIcon); // 自定义标记图片，使用marker.setIcon()会自动添加阴影
+		var infoWindow = new BMapGL.InfoWindow(point.content, opts); // 创建信息窗口对象
+		marker.addEventListener("click", function(){
+			this.openInfoWindow(infoWindow);
+			// 移动显示
+			map.panTo(point);
+			// if (map.getZoom() < 12) {
+			// 	map.setZoom(12);
+			// }
+		});
+	}
 }
 </script>
 </body>
