@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>初识Anaconda - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,"> 
+    <meta name="description" content="一个战五渣的个人博客,接受朋友建议，开始学习AI相关的东西，简单记录下
+简介Anaconda一个Python类库集成安装包，几乎包含了所有数据分析，人工智能的相关类库。Anaconda有两个版本
+
+Anaconda Di,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?aa62861fd73e49c9dda3e2a2f5b6db5d";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">初识Anaconda</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">初识Anaconda</h1>
+        <div class="stuff">
+            <span>四月 28, 2025</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/AI/">AI</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Anaconda/">Anaconda</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>接受朋友建议，开始学习AI相关的东西，简单记录下</em></p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><a href="https://www.anaconda.com/" target="_blank" rel="noopener">Anaconda</a>一个Python类库集成安装包，几乎包含了所有数据分析，人工智能的相关类库。<br>Anaconda有两个版本<br><img src="/img/20250428_2/3.png" alt></p>
+<ol>
+<li>Anaconda Distribution：会自动安装其中的300多个标准数据科学和机器学习包，自带图像用户界面Anaconda Navigator（基于conda构建的桌面应用程序）。</li>
+<li>Miniconda：是一个更轻量级的发行版，仅包含conda、python、它们的依赖项和少量其他包。</li>
+</ol>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p><a href="https://www.anaconda.com/download" target="_blank" rel="noopener">官方下载</a>，选择跳过注册<br><img src="/img/20250428_2/1.png" alt></p>
+<p>选择对应的版本，我这里下载了Miniconda的Windows版本<br><img src="/img/20250428_2/2.png" alt></p>
+<p>打开下载的安装包，直接下一步<br><img src="/img/20250428_2/4.png" alt></p>
+<p>同意服务条款<br><img src="/img/20250428_2/5.png" alt></p>
+<p>这里我选择 仅我（推荐）- 为当前用户帐户安装 Miniconda 然后下一步<br>另一个选项 所有用户 - 为计算机上的所有用户帐户安装 Miniconda（需要 Windows 管理员权限）。<br><img src="/img/20250428_2/6.png" alt></p>
+<p>将路径改为D盘，然后下一步，这样包pkgs和环境envs安装路径也就变成D盘了<br><img src="/img/20250428_2/7.png" alt></p>
+<p>这里安装选项什么都不选，然后安装</p>
+<ul>
+<li>创建快捷方式 - 默认选中。为 Anaconda Prompt 包创建“开始”菜单快捷方式。取消选择此选项会跳过创建这些快捷方式。</li>
+<li>将 Miniconda3 添加到我的 PATH 环境变量 - 将包含 conda 二进制文件的路径添加到您的 PATH 环境变量。<br>Anaconda 不建议选择此选项。conda 二进制文件路径包含其他软件包二进制文件，即使当前没有激活任何 conda 环境，这些文件也会永久添加到您的 PATH 环境变量中。这使得其他软件可以使用这些软件包文件，这可能会导致错误。</li>
+<li>将 Miniconda3 注册为我的默认 Python 3.12。将此安装中的 Python 包注册为 VSCode、PyCharm 等程序的默认 Python。</li>
+<li>完成后清除包缓存 - 在安装完成后运行 conda clean –all –force-pkgs-dirs。<br><img src="/img/20250428_2/8.png" alt></li>
+</ul>
+<p>安装完成后，然后下一步<br><img src="/img/20250428_2/9.png" alt></p>
+<p>取消勾选，然后下一步，安装完成<br><img src="/img/20250428_2/10.png" alt></p>
+<p>因为没有配置环境变量，直接在安装路径Scripts中打开命令提示符才能执行<code>conda</code>命令<br>可以执行以下操做查看是否安装成功</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#查看conda版本</span><br><span class="line">conda --version</span><br><span class="line">conda -V</span><br><span class="line">#查看conda信息</span><br><span class="line">conda info</span><br><span class="line">#查看conda所有包</span><br><span class="line">conda list</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20250428_2/11.png" alt></p>
+<h3 id="更换Anaconda下载源"><a href="#更换Anaconda下载源" class="headerlink" title="更换Anaconda下载源"></a>更换Anaconda下载源</h3><p>为了提高下载速度，这里选择清华大学镜像源<br>Windows需要执行<code>conda config --set show_channel_urls yes</code>生成<code>.condarc</code>文件进行修改，Win+R运行中输入<code>%USERPROFILE%</code>打开生成文件位置，根据<a href="https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/" target="_blank" rel="noopener">清华大学镜像源</a>提示进行修改<br><img src="/img/20250428_2/12.png" alt></p>
+<h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>conda中的环境是独立的隔离空间，您可以在其中安装特定版本的软件包，包括依赖项、库和 Python 版本。这种隔离有助于避免包版本之间的冲突，并确保项目具有所需的确切库和工具。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#查看环境信息 --envs可以简写为-e</span><br><span class="line">conda info --envs</span><br><span class="line"></span><br><span class="line">#创建环境helloWorld --name可以简写为-n</span><br><span class="line">#conda create --name &lt;ENV_NAME&gt; &lt;PACKAGE&gt;=&lt;VERSION&gt;</span><br><span class="line">conda create --name helloWorld python=3.11.5</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20250428_2/13.png" alt></p>
+<p>输入<code>y</code>回车下载依赖（后续同版本python创建环境时无需再下载，可以直接使用）<br><img src="/img/20250428_2/14.png" alt></p>
+<p>使用环境前需要初始化<br><code>conda init</code><br><img src="/img/20250428_2/15.png" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#激活环境</span><br><span class="line">conda activate helloWorld</span><br><span class="line">#停用环境</span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20250428_2/16.png" alt></p>
+<p>在环境中安装包，并执行<br><code>conda install numpy=2.2.4</code><br><img src="/img/20250428_2/17.png" alt></p>
+<p>删除环境<br><code>conda env remove -n helloWrold</code><br><img src="/img/20250428_2/18.png" alt></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://xuchunlei.top/music/1.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://xuchunlei.top/music/2.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://xuchunlei.top/music/3.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://xuchunlei.top/music/4.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://xuchunlei.top/music/5.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: -25px; bottom: -10px; display: block; user-select: none; transform: scale(0.5);">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+
+<canvas id="canvas"></canvas>
+<script src="../../../../js/createjs.min.js"></script>
+<script src="../../../../js/particlejs.min.js" charset="UTF-8"></script>
+<script src="../../../../js/mouseparticle.js" charset="UTF-8"></script>
+</body>
+</html>
