@@ -321,6 +321,8 @@ var points = [
 	{"flag":"1", "date":"20240509", "lng":121.61329947641129,"lat":37.47236861525887,"title":"养马岛","content":"4A景区", "img":"img/map/ymd-gjt.jpg"},
 	{"flag":"1", "date":"20240509", "lng":121.61820696432756,"lat":37.39027601296539,"title":"烟台市牟平区博物馆","content":"百年流苏", "img":"img/map/mpbwg-bnls.jpg"},
 	{"flag":"1", "date":"20240214", "lng":120.07376885103126,"lat":37.20097134839021,"title":" ","content":"", "img":"img/map/mjz.jpg"},
+	{"flag":"1", "date":"20240106", "lng":120.22063919322758,"lat":30.276139152745753,"title":" ","content":"", "img":"img/map/qjjdqcld.jpg"},
+	{"flag":"1", "date":"20230306", "lng":120.216084784292,"lat":30.246754690803833,"title":" ","content":"", "img":"img/map/hzgmjjds.jpg"},
 	{"flag":"1", "date":"20220610", "lng":121.37361184854322,"lat":37.60754608914226,"title":" ","content":"", "img":"img/map/ythb-xha.jpg"},
 	{"flag":"1", "date":"20220208", "lng":120.76137172821774,"lat":37.8320159938661,"title":"蓬莱阁景区","content":"5A景区，过年回烟台路过，没带身份证买的全票。夜晚快关门的时间去的，去看了虎年的花灯，很漂亮", "img":"img/map/plg.jpg"},
 	{"flag":"1", "date":"20210818", "lng":121.36069421530974,"lat":37.5979042959138,"title":" ","content":"", "img":"img/map/ythb-xha2.jpg"},
