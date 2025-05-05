@@ -130,12 +130,29 @@ var points = [
 	{"flag":"0", "date":"20171231", "lng":135.72913239, "lat":35.04004117, "title":" ", "content":"", "img":"img/map/kinnkakuji3.jpg"},
 	{"flag":"0", "date":"20171231", "lng":135.72923956, "lat":35.04023594, "title":" ", "content":"", "img":"img/map/kinnkakujixj.jpg"}, // 金阁寺-夕佳亭-贵人塌
 	//{"flag":"0", "date":"20171231", "lng":135.7473579348677, "lat":34.99601940549828, "title":"", "content":""}, // 罗森 大宫五条
-	{"flag":"0", "date":"20171231", "lng":135.74333952384575, "lat":35.00161137433349, "title":"壬生寺", "content":"除夜，敲了新年的钟声，晚上回宾馆大家饮酒作欢"},
-	{"flag":"0", "date":"20180101", "lng":135.77542, "lat":34.967278, "title":"伏见稻荷大社", "content":"初拜，抽了签，去了向往已久的千本鸟居（居然还有(魔法少女)小圆(pv)做宣传）", "img":"img/map/senhon.jpg"},
+	{"flag":"0", "date":"20171231", "lng":135.74333952384575, "lat":35.00161137433349, "title":"壬生寺", "content":"除夜，敲了新年的钟声，晚上回宾馆大家饮酒作欢", "img":"img/map/rss.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.77093518036352, "lat":34.96701084565998, "title":" ", "content":"", "img":"img/map/inarirk.jpg"}, // 伏见稻荷大社-入口-狐像
+	{"flag":"0", "date":"20180101", "lng":135.77224670640808, "lat":34.967110680025705, "title":" ", "content":"", "img":"img/map/inariebnj.jpg"}, // 伏见稻荷大社-二番鸟居
+	{"flag":"0", "date":"20180101", "lng":135.7723634861244, "lat":34.967110680025705, "title":" ", "content":"", "img":"img/map/inari3.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.77255662180903, "lat":34.967114377592466, "title":" ", "content":"", "img":"img/map/inarilm.jpg"}, // 伏见稻荷大社-楼门-狛狐（键 玉）
+	{"flag":"0", "date":"20180101", "lng":135.7728485710998, "lat":34.96704042622559, "title":" ", "content":"", "img":"img/map/inariwbd.jpg"}, // 伏见稻荷大社-外拜殿
+	{"flag":"0", "date":"20180101", "lng":135.77308213053237, "lat":34.96711807515903, "title":"伏见稻荷大社", "content":"初拜，抽了签，去了向往已久的千本鸟居（居然还有(魔法少女)小圆(pv)做宣传）", "img":"img/map/inaribd.jpg"}, // 伏见稻荷大社-本殿
+	{"flag":"0", "date":"20180101", "lng":135.7733471306578, "lat":34.96743976280645, "title":" ", "content":"", "img":"img/map/inari7.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.77397145298724, "lat":34.967192026455166, "title":" ", "content":"", "img":"img/map/inari8.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.77472602961564, "lat":34.96701454323127, "title":" ", "content":"", "img":"img/map/inari9.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.77548958929913, "lat":34.96649688161205, "title":" ", "content":"", "img":"img/map/inari10.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.77544467402362, "lat":34.96694798692227, "title":" ", "content":"", "img":"img/map/senhon.jpg"}, // 不准确
 	// 神户
-	{"flag":"0", "date":"20180101", "lng":135.186724, "lat":34.682646, "title":"神户港塔", "content":"计划失误，错过六甲山的夜景，其他地方也没怎么逛。牛肉只吃了牛丼，神户牛最后没吃。", "img":"img/map/sht.jpg"},
-	{"flag":"0", "date":"20180101", "lng":135.188112, "lat":34.688225, "title":"南京街", "content":"", "img":"img/map/njj.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.25044178, "lat":34.71221219, "title":" ", "content":"", "img":"img/map/swc.jpg"},
 	{"flag":"0", "date":"20180101", "lng":135.254281, "lat":34.711266, "title":"", "content":""}, // （住宿一晚）
+	{"flag":"0", "date":"20180101", "lng":135.18948725962034,　"lat":34.68833666936849, "title":"长安门", "content":"", "img":"img/map/cam.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.1866688466177, "lat":34.68313750491544, "title":" ", "content":"", "img":"img/map/sh4.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.186724, "lat":34.682646, "title":"神户港塔", "content":"计划失误，错过六甲山的夜景，其他地方也没怎么逛。牛肉只吃了牛丼，神户牛最后没吃。", "img":"img/map/sht.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.18714045701043, "lat":34.68249188324984, "title":" ", "content":"", "img":"img/map/shhybwg.jpg"}, // 神户海洋博物馆
+	{"flag":"0", "date":"20180101", "lng":135.18695181285332, "lat":34.68137501998194, "title":" ", "content":"", "img":"img/map/sh7.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.18493511698344, "lat":34.68027298384968, "title":" ", "content":"", "img":"img/map/sh8.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.18559537153328, "lat":34.67805402444434, "title":"旧神户港信号所", "content":"", "img":"img/map/jshgxhs.jpg"},
+	{"flag":"0", "date":"20180101", "lng":135.188112, "lat":34.688225, "title":"南京町", "content":"", "img":"img/map/njt.jpg"},
 	// 大阪
 	{"flag":"0", "date":"20180102", "lng":135.500412, "lat":34.675128, "title":"心斋桥", "content":"", "img":"img/map/xzq.jpg"},
 	{"flag":"0", "date":"20180102", "lng":135.500745, "lat":34.669143, "title":"道顿崛", "content":"著名的格力高广告牌，吃了一份章鱼小丸子", "img":"img/map/doutonnbori.jpg"},
@@ -144,6 +161,7 @@ var points = [
 	{"flag":"0", "date":"20180103", "lng":135.525915, "lat":34.687154, "title":"大阪城", "content":"没有登阁，外面有个老爷爷穿着铠甲和游客免费拍照（旗子上汉语翻译不对）", "img":"img/map/dbc.jpg"},
 	{"flag":"0", "date":"20180102", "lng":135.500152, "lat":34.651705, "title":" ", "content":"", "img":"img/map/dabanzhusu.jpg"}, // （住宿一晚）
 
+	{"flag":"0", "date":"20180103", "lng":135.50028352905616,"lat":34.733231517881514, "title":" ", "content":"", "img":"img/map/xdb.jpg"}, // 途经 新大阪站
 	{"flag":"0", "date":"20180103", "lng":136.26371633861913,"lat":35.27213430911956, "title":" ", "content":"", "img":"img/map/yg.jpg"}, // 途经 彦根站
 	// 国内
 	// 杭州 第一次实习工作的地方，记录一下去过的景点
