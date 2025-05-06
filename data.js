@@ -153,13 +153,28 @@ var points = [
 	{"flag":"0", "date":"20180101", "lng":135.18493511698344, "lat":34.68027298384968, "title":" ", "content":"", "img":"img/map/sh8.jpg"},
 	{"flag":"0", "date":"20180101", "lng":135.18559537153328, "lat":34.67805402444434, "title":"旧神户港信号所", "content":"", "img":"img/map/jshgxhs.jpg"},
 	{"flag":"0", "date":"20180101", "lng":135.188112, "lat":34.688225, "title":"南京町", "content":"", "img":"img/map/njt.jpg"},
+	{"flag":"0", "date":"20180102", "lng":135.2499907797162, "lat":34.7134840309345, "title":" ", "content":"", "img":"img/map/swcz.jpg"}, // 石屋川站 离去
 	// 大阪
-	{"flag":"0", "date":"20180102", "lng":135.500412, "lat":34.675128, "title":"心斋桥", "content":"", "img":"img/map/xzq.jpg"},
-	{"flag":"0", "date":"20180102", "lng":135.500745, "lat":34.669143, "title":"道顿崛", "content":"著名的格力高广告牌，吃了一份章鱼小丸子", "img":"img/map/doutonnbori.jpg"},
-	{"flag":"0", "date":"20180102", "lng":135.506301, "lat":34.652519, "title":"通天阁", "content":"上塔上溜了一圈，夜景还行", "img":"img/map/ttg.jpg"},
-	{"flag":"0", "date":"20180102", "lng":135.505519, "lat":34.66175, "title":"大阪日本桥", "content":"宅的三大圣地之一（后来才知道的），因为是元旦，开着的店铺不多，陪朋友买了海贼王的手办", "img":"img/map/osakanihonhasi.jpg"},
-	{"flag":"0", "date":"20180103", "lng":135.525915, "lat":34.687154, "title":"大阪城", "content":"没有登阁，外面有个老爷爷穿着铠甲和游客免费拍照（旗子上汉语翻译不对）", "img":"img/map/dbc.jpg"},
 	{"flag":"0", "date":"20180102", "lng":135.500152, "lat":34.651705, "title":" ", "content":"", "img":"img/map/dabanzhusu.jpg"}, // （住宿一晚）
+	{"flag":"0", "date":"20180102", "lng":135.5013897966611,　"lat":34.67523255742592, "title":"心斋桥", "content":"", "img":"img/map/xzq.jpg"},
+	{"flag":"0", "date":"20180102", "lng":135.500745, "lat":34.669143, "title":"道顿崛", "content":"著名的格力高广告牌，吃了一份章鱼小丸子", "img":"img/map/doutonnbori.jpg"},
+	{"flag":"0", "date":"20180102", "lng":135.50123869, "lat":34.669263, "title":" ", "content":"", "img":"img/map/xzqj.jpg"},
+	{"flag":"0", "date":"20180102", "lng":135.50609686, "lat":34.66878442, "title":" ", "content":"", "img":"img/map/ddj.jpg"},
+	{"flag":"0", "date":"20180102", "lng":135.50602050403157, "lat":34.661807230296255, "title":" ", "content":"", "img":"img/map/rbq.jpg"}, // JUNGLE　ジャングル大阪日本橋店
+	{"flag":"0", "date":"20180102", "lng":135.5059621141734, "lat":34.65961375228644, "title":"大阪日本桥", "content":"宅的三大圣地之一（后来才知道的），因为是元旦，开着的店铺不多，陪朋友在附近买了海贼王的手办", "img":"img/map/osakanihonhasi.jpg"}, // スーパーキッズランド本店 感觉地址变了，18年在拐角
+	{"flag":"0", "date":"20180102", "lng":135.506301, "lat":34.652519, "title":"通天阁", "content":"上塔上溜了一圈，夜景还行", "img":"img/map/ttg.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.53340803, "lat":34.68183667, "title":" ", "content":"", "img":"img/map/dbcyg.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.53194642166054, "lat":34.68274481702262, "title":" ", "content":"", "img":"img/map/dbcpq.jpg"}, // 大阪城-喷水广场
+	{"flag":"0", "date":"20180103", "lng":135.53080571236214, "lat":34.68434149041188, "title":" ", "content":"", "img":"img/map/dbcww.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.52916281, "lat":34.68418328, "title":" ", "content":"", "img":"img/map/dbcyt.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.52868014, "lat":34.68508122, "title":" ", "content":"", "img":"img/map/dbcyg2.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.5256911480632, "lat":34.68502947143895, "title":" ", "content":"", "img":"img/map/dbcym.jpg"}, // 大阪城-樱门
+	{"flag":"0", "date":"20180103", "lng":135.5260849782079, "lat":34.686006257525875, "title":" ", "content":"", "img":"img/map/dbcyg3.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.52608048668037, "lat":34.68588752703994, "title":" ", "content":"", "img":"img/map/dbcgwzx.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.525915, "lat":34.687154, "title":"大阪城", "content":"没有登阁，外面有个老爷爷穿着铠甲和游客免费拍照（旗子上汉语翻译不对）", "img":"img/map/dbc.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.52546963893357, "lat":34.687271468594524, "title":" ", "content":"", "img":"img/map/dbc2.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.5257031983662, "lat":34.68766846628601, "title":" ", "content":"", "img":"img/map/dbc3.jpg"},
+	{"flag":"0", "date":"20180103", "lng":135.5268395548363, "lat":34.68845132526263, "title":" ", "content":"", "img":"img/map/dbcyg4.jpg"},
 
 	{"flag":"0", "date":"20180103", "lng":135.50028352905616,"lat":34.733231517881514, "title":" ", "content":"", "img":"img/map/xdb.jpg"}, // 途经 新大阪站
 	{"flag":"0", "date":"20180103", "lng":136.26371633861913,"lat":35.27213430911956, "title":" ", "content":"", "img":"img/map/yg.jpg"}, // 途经 彦根站
