@@ -72,9 +72,9 @@ var points = [
 	{"flag":"0", "date":"2017", "lng":139.76894, "lat":35.681535, "title":"", "content":""}, // 大丸百货（代购侦查去过一次）
 	// 名古屋
 	{"flag":"0", "date":"20170909", "lng":136.814647, "lat":34.859167, "title":"", "content":""}, // 中部国际机场
-	{"flag":"0", "date":"20170909", "lng":136.92128000978553, "lat":35.17071572389569, "title":" ", "content":"", "img":"img/map/sinsakaefirst.jpg"},
-	{"flag":"0", "date":"20170909", "lng":136.920355, "lat":35.172214, "title":"新荣町", "content":"在名古屋待了半年，整体还行，就是过得比较艰苦（自己带的日元，没敢太嗨）", "img":"img/map/sinsakae.jpg"},
-	{"flag":"0", "date":"20170910", "lng":136.9065940947514, "lat":35.16973365754099, "title":"荣", "content":"附近经常去，bookoff蹭书看（买过几本），地下街，以及代购", "img":"img/map/sakae.jpg"},
+	{"flag":"0", "date":"20170909", "lng":136.92128000978553, "lat":35.17071572389569, "title":" ", "content":"", "img":"img/map/sinsakae.jpg"},
+	{"flag":"0", "date":"20170909", "lng":136.920355, "lat":35.172214, "title":"新荣町", "content":"在名古屋待了半年，整体还行，就是过得比较艰苦（自己带的日元，没敢太嗨）", "img":"img/map/sinsakaezc.jpg"},
+	{"flag":"0", "date":"20170910", "lng":136.9099549632249, "lat":35.170290722192185, "title":"荣", "content":"附近经常去，bookoff蹭书看（买过几本），地下街，以及代购，偶尔和别人出去吃", "img":"img/map/sakaeadd.jpg"}, // img20180217 走之前拍的
 	{"flag":"0", "date":"20170911", "lng":136.911372, "lat":35.173703, "title":"", "content":""}, // 中部电力（工作）
 	{"flag":"0", "date":"20170917", "lng":136.90477131, "lat":35.18227203, "title":" ", "content":"", "img":"img/map/mgwsys.jpg"},
 	{"flag":"0", "date":"20170917", "lng":136.90313411048461, "lat":35.18403291261324, "title":" ", "content":"", "img":"img/map/mgwcdm.jpg"}, // 名古屋城-东门
@@ -85,11 +85,11 @@ var points = [
 	{"flag":"0", "date":"20170917", "lng":136.89917618413475, "lat":35.18747857408984, "title":"名古屋城", "content":"附近转过，第一次去因为台风不能进（其实没钱，后来也没进去）", "img":"img/map/mgwcww3.jpg"},
 	{"flag":"0", "date":"20170917", "lng":136.90149183072555, "lat":35.18689500529755, "title":" ", "content":"", "img":"img/map/mcgy.jpg"}, // 名城公园
 	{"flag":"0", "date":"20170917", "lng":136.90421358514993, "lat":35.18611548994793, "title":" ", "content":"", "img":"img/map/mgwcww4.jpg"},
-	{"flag":"0", "date":"201709", "lng":136.908295, "lat":35.172342, "title":"名古屋电视塔", "content":"", "img":"img/map/nagoyatvt.jpg"},
+	{"flag":"0", "date":"20170917", "lng":136.9065940947514, "lat":35.16973365754099, "title":" ", "content":"", "img":"img/map/sakae.jpg"}, // SUNSHINE SAKAE
+	{"flag":"0", "date":"20170917", "lng":136.9085711871957, "lat":35.16982278910119, "title":" ", "content":"", "img":"img/map/nagoyatvtfirst.jpg"},
+	{"flag":"0", "date":"201709", "lng":136.908295, "lat":35.172342, "title":"名古屋电视塔", "content":""},
 	{"flag":"0", "date":"20170924", "lng":136.92156746754873, "lat":35.174164183182896, "title":" ", "content":"", "img":"img/map/mgwroad.jpg"}, // 路上看见银杏
 	{"flag":"0", "date":"20170924", "lng":136.91205195792136,　"lat":35.12631355306516, "title":" ", "content":"", "img":"img/map/sgq.jpg"},
-	{"flag":"0", "date":"20171119", "lng":136.899694, "lat":35.159888, "title":"大须观音寺", "content":"大须，宅的三大圣地之一", "img":"img/map/daxu.jpg"},
-	{"flag":"0", "date":"2017", "lng":136.90043470242713, "lat":35.15897504717824, "title":"大须商店街", "content":"", "img":"img/map/daxusyotengai.jpg"},
 	{"flag":"0", "date":"20171015", "lng":136.90931014014174, "lat":35.126221351690845, "title":"热田神宫", "content":"步行18.45公里耗时3:31:08，下雨，打伞的手好累(裤子一半鞋子全湿透)，第一次见巫女。后来去买御守，也是步行来回的（穷）", "img":"img/map/atudajingun.jpg"}, // 热田神宫-神乐殿
 	{"flag":"0", "date":"20171015", "lng":136.90843224557548, "lat":35.12657955252291, "title":" ", "content":"", "img":"img/map/rtsgbg.jpg"}, // 热田神宫-本宫
 	{"flag":"0", "date":"20171015", "lng":136.90942455051805, "lat":35.12778416114145, "title":" ", "content":"", "img":"img/map/rtsgxxj.jpg"}, // 热田神宫-こころの小径 位置不准确
@@ -99,18 +99,33 @@ var points = [
 	{"flag":"0", "date":"20171015", "lng":136.91244508, "lat":35.12670347, "title":" ", "content":"", "img":"img/map/rtsgfh.jpg"},
 	{"flag":"0", "date":"20171015", "lng":136.91405644, "lat":35.12988019, "title":" ", "content":"", "img":"img/map/sgpsgc.jpg"}, // 神宫东公园 南园-喷水广场
 	{"flag":"0", "date":"20171015", "lng":136.91415053, "lat":35.13084775, "title":" ", "content":"", "img":"img/map/sgbqgc.jpg"}, // 神宫东公园 北园-壁泉广场
-	{"flag":"0", "date":"20171105", "lng":136.891739, "lat":35.174548, "title":"四间道", "content":"自己去过，发现有庆典，后来和朋友一起转过"},
-	{"flag":"0", "date":"2017", "lng":136.8833534231549, "lat":35.17004071153502, "title":"", "content":""}, // ビックカメラ名古屋　ＪＲゲートタワー店 附近去过几次，陪朋友买过耳机
-	{"flag":"0", "date":"2017", "lng":136.936789, "lat":35.192492, "title":"", "content":""}, // QBハウス（理发）,
-	{"flag":"0", "date":"2017", "lng":136.932437, "lat":35.184333, "title":"德川园", "content":"没进去，只是围着饶了一圈"},
+	{"flag":"0", "date":"20171105", "lng":136.89221520701082, "lat":35.17392808761858, "title":"四间道", "content":"自己去过，发现有庆典，后来和别人一起转过", "img":"img/map/sjd.jpg"},
+	{"flag":"0", "date":"20171105", "lng":136.89085181429886, "lat":35.17629744446045, "title":" ", "content":"", "img":"img/map/edssdj.jpg"}, // 円頓寺商店街
+	{"flag":"0", "date":"20171105", "lng":136.90805017, "lat":35.17485356, "title":" ", "content":"", "img":"img/map/nagoyatvt.jpg"},
+	{"flag":"0", "date":"20171119", "lng":136.89940397946634, "lat":35.15945796718894, "title":"大须观音寺", "content":"大须，宅的三大圣地之一，逛过一些店铺，可惜没有拍赤门", "img":"img/map/daxu.jpg"},
+	{"flag":"0", "date":"20171119", "lng":136.90417847325187, "lat":35.158318124290254, "title":"大须商店街", "content":"", "img":"img/map/daxusyotengai.jpg"},
+	{"flag":"0", "date":"2017", "lng":136.8833534231549, "lat":35.17004071153502, "title":"", "content":""}, // ビックカメラ名古屋　ＪＲゲートタワー店 附近去过几次，陪朋友买过耳机。名古屋站附近，一来名古屋就中转了
+	{"flag":"0", "date":"2017", "lng":136.936789, "lat":35.192492, "title":"", "content":""}, // QBハウス（理发）
+	{"flag":"0", "date":"2017", "lng":136.932437, "lat":35.184333, "title":"德川园", "content":"没进去，只是围着饶了一圈"}, // 理发途径
 	{"flag":"0", "date":"2017", "lng":136.926409, "lat":35.171324, "title":"", "content":""}, // バロー車道店（经常去的超市）
 	{"flag":"0", "date":"2017", "lng":136.922228, "lat":35.177992, "title":"", "content":""}, // マックスバリュ　代官店（活动范围扩大 超市）
 	{"flag":"0", "date":"2017", "lng":136.920489, "lat":35.163722, "title":"", "content":""}, // バロー 新栄店（活动范围扩大 超市）
-	{"flag":"0", "date":"2017", "lng":136.918935, "lat":35.155504, "title":"", "content":""}, // 鹤舞公园
+	{"flag":"0", "date":"2017", "lng":136.918935, "lat":35.155504, "title":"", "content":""}, // 鹤舞公园，去田神宫路过
 	{"flag":"0", "date":"20171202", "lng":137.1558723657169, "lat":35.087070282131116, "title":"", "content":""}, // 豊田 本来打算从这里去香岚溪的额，发现bus都错过了，然后去的猿投做的bus
 	{"flag":"0", "date":"20171202", "lng":137.1785500883163, "lat":35.1219604328598, "title":"", "content":""}, // 猿投 第一次体验日本的bus
-	{"flag":"0", "date":"20171202", "lng":137.313256, "lat":35.130291, "title":"香岚溪", "content":"赏枫叶的地方，可惜去的有点晚，枫叶的状态不是很好。", "img":"img/map/kourannkei.jpg"},
-	{"flag":"0", "date":"20171230", "lng":136.90121231835764,"lat":35.14282363159182, "title":"", "content":""}, // 金山 去机场接朋友中转
+	{"flag":"0", "date":"20171202", "lng":137.31257277887747, "lat":35.13404591864856, "title":"　", "content":"", "img":"img/map/xlx.jpg"},
+	{"flag":"0", "date":"20171202", "lng":137.31314769440385, "lat":35.13320460603569, "title":"　", "content":"", "img":"img/map/xlx2.jpg"},
+	{"flag":"0", "date":"20171202", "lng":137.3132420164824, "lat":35.131879889887465, "title":"　", "content":"", "img":"img/map/xlx3.jpg"},
+	{"flag":"0", "date":"20171202", "lng":137.31423913559848, "lat":35.12975070444014, "title":"　", "content":"", "img":"img/map/xlx4.jpg"},
+	{"flag":"0", "date":"20171202", "lng":137.3124784567989, "lat":35.13374334231543, "title":"香岚溪", "content":"赏枫叶的地方，可惜去的有点晚，枫叶的状态不是很好。", "img":"img/map/kourannkei.jpg"},
+	{"flag":"0", "date":"20171202", "lng":137.3112163375574, "lat":35.13389832057902, "title":"　", "content":"", "img":"img/map/xlx5.jpg"}, // 香岚溪公交站
+	{"flag":"0", "date":"20171202", "lng":137.3130443892702, "lat":35.13523407327354, "title":"　", "content":"", "img":"img/map/xlx6.jpg"},
+	{"flag":"0", "date":"20171230", "lng":136.90121231835764, "lat":35.14282363159182, "title":"", "content":""}, // 金山 去机场接朋友中转，忘了是不是第一次
+	{"flag":"0", "date":"20171202", "lng":136.91407456, "lat":35.13990697, "title":"　", "content":"", "img":"img/map/mgwroad2.jpg"}, // 去买御守途中
+	{"flag":"0", "date":"20171202", "lng":136.91034210060593, "lat":35.12556753025109, "title":"　", "content":"", "img":"img/map/rtsghgq.jpg"}, // 热天神宫会馆 前
+	{"flag":"0", "date":"20171202", "lng":136.90819611, "lat":35.12426219, "title":"　", "content":"", "img":"img/map/rtsgnsc.jpg"}, // 热天神宫-南神池 附近买了一个 绸鱼烧
+	{"flag":"0", "date":"20171202", "lng":136.91619353, "lat":35.15808728, "title":"　", "content":"", "img":"img/map/mgwroad3.jpg"}, // 买御守返回途中
+	{"flag":"0", "date":"20171202", "lng":136.90951030199744, "lat":35.17074438060087, "title":"　", "content":"", "img":"img/map/nagoyatv3.jpg"},
 	// 京都，遍地古建筑，记录不全。后来知道本能寺，五条大桥之类的，都擦肩而过……
 	{"flag":"0", "date":"20171231", "lng":135.75849308, "lat":34.98622483, "title":"京都", "content":"大晦日和朋友出行第一站，JR站了一路，不过速度挺快的", "img":"img/map/kyoto.jpg"},
 	{"flag":"0", "date":"20171231", "lng":135.76672382962815, "lat":34.989209477929855, "title":" ", "content":"", "img":"img/map/jdd.jpg"},
@@ -429,6 +444,7 @@ var points = [
 	{"flag":"1", "date":"20180512", "lng":117.02370503911331,"lat":36.68099481171207,"title":" ","content":"", "img":"img/map/dmhhjsfj.jpg"},
 	{"flag":"1", "date":"20180512", "lng":117.02341308982257,"lat":36.67958744512695,"title":" ","content":"", "img":"img/map/dmhbwfj.jpg"},
 	{"flag":"1", "date":"20180512", "lng":117.02299537776042,"lat":36.67868657216226,"title":"大明湖","content":"5A景区-天下第一泉风景区的核心组成部分之一。最开始的时候收费，只是外围转了下。免费开放的时候进去溜达过几次", "img":"img/map/dmhxnm.jpg"},
+	{"flag":"1", "date":"20170831", "lng":117.14053225981839,"lat":36.677563723719814,"title":" ","content":"", "img":"img/map/qlrjy.jpg"},
 	{"flag":"1", "date":"20170824", "lng":117.10603859958229,"lat":36.685691774605665,"title":" ","content":"", "img":"img/map/djz.jpg"},
 	{"flag":"1", "date":"20150305?", "lng":121.4108988955467,"lat":37.516346940817094,"title":" ","content":"", "img":"img/map/ytts.jpg"},
 	{"flag":"1", "date":"20140909", "lng":121.1901223503594,"lat":37.59126875945926,"title":"天马栈桥","content":"", "img":"img/map/tmzq.jpg"},
