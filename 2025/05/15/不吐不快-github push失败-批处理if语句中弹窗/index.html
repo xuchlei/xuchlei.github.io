@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>不吐不快-github push失败(批处理if语句中弹窗) - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,吐槽,批处理,mshta,弹窗,github"> 
+    <meta name="description" content="一个战五渣的个人博客,前段时间，github的工程无法push上去了，以前虽然github.com经常不能访问，但是push不上去貌似是第一次，而且持续了一周，中间只成功过一次提交
+应对因为经常提交失败就写了一段批处理脚,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?aa62861fd73e49c9dda3e2a2f5b6db5d";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">不吐不快-github push失败(批处理if语句中弹窗)</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">不吐不快-github push失败(批处理if语句中弹窗)</h1>
+        <div class="stuff">
+            <span>五月 15, 2025</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/吐槽/">吐槽</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/批处理/">批处理</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>前段时间，github的工程无法push上去了，以前虽然github.com经常不能访问，但是push不上去貌似是第一次，而且持续了一周，中间只成功过一次提交</em></p>
+<h4 id="应对"><a href="#应对" class="headerlink" title="应对"></a>应对</h4><p>因为经常提交失败就写了一段批处理脚本来自动提交</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">@echo off</span><br><span class="line">setlocal enabledelayedexpansion</span><br><span class="line"></span><br><span class="line">:: ============== 配置区 ==============</span><br><span class="line">set &quot;TARGET_DIR=C:\Users\xuchl\Desktop\xuchlei.github.io&quot;  :: 仓库路径</span><br><span class="line">set &quot;RETRY_DELAY=60&quot;                   :: 重试间隔秒数</span><br><span class="line">:: ===================================</span><br><span class="line"></span><br><span class="line">:: 验证目录是否存在</span><br><span class="line">if not exist &quot;%TARGET_DIR%&quot; (</span><br><span class="line">    echo ? 错误：目录不存在 &quot;%TARGET_DIR%&quot;</span><br><span class="line">    pause</span><br><span class="line">    exit /b 1</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">:: 进入目标仓库目录</span><br><span class="line">cd /d &quot;%TARGET_DIR%&quot;</span><br><span class="line"></span><br><span class="line">set ATTEMPT=0</span><br><span class="line">:retry_push</span><br><span class="line">set /a ATTEMPT+=1</span><br><span class="line">echo [尝试 !ATTEMPT! 次] 正在提交到远程仓库...</span><br><span class="line"></span><br><span class="line">git push</span><br><span class="line"></span><br><span class="line">if %errorlevel% equ 0 (</span><br><span class="line">    echo Git 提交成功！</span><br><span class="line">    mshta vbscript:&quot;&lt;script language=&quot;&quot;vbscript&quot;&quot;&gt;msgbox(&quot;&quot;Git Push 成功&quot;&quot;):self.close &lt;/script&gt;&lt;/html&gt;&quot;</span><br><span class="line">) else (</span><br><span class="line">    echo 提交失败，%RETRY_DELAY%秒后重试...</span><br><span class="line">    timeout /t %RETRY_DELAY% /nobreak &gt;nul</span><br><span class="line">    goto retry_push</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然而并没有什么卵用，一整天都无法成功<br><img src="/img/20250515/1.png" alt></p>
+<p>其中弹窗遇到一些问题，发现只要弹窗语句中经常报缺少’)’的错误。</p>
+<h4 id="批处理弹窗"><a href="#批处理弹窗" class="headerlink" title="批处理弹窗"></a>批处理弹窗</h4><p>一些弹窗语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mshta vbscript:msgbox(&quot;Git Push 成功&quot;,6,&quot;提示&quot;)(window.close)</span><br><span class="line"># 单行if无()可以用</span><br><span class="line">if 1==1 mshta vbscript:msgbox(&quot;Git Push 成功&quot;,6,&quot;提示&quot;)(window.close)</span><br><span class="line"></span><br><span class="line">mshta vbscript:execute(&quot;msgbox &quot;&quot;Git Push 成功&quot;&quot;:window.close&quot;)</span><br><span class="line"></span><br><span class="line">mshta vbscript:CreateObject(&quot;Wscript.Shell&quot;).popup(&quot;Git Push 成功&quot;,7,&quot;提示&quot;,64)(window.close)</span><br><span class="line"></span><br><span class="line">mshta javascript:window.execScript(&quot;msgBox(&apos;Git Push 成功&apos;):window.close&quot;,&quot;vbs&quot;)</span><br><span class="line"></span><br><span class="line">mshta vbscript:&quot;&lt;script language=&quot;&quot;vbscript&quot;&quot;&gt;msgbox(&quot;&quot;Git Push 成功&quot;&quot;):self.close &lt;/script&gt;&lt;/html&gt;&quot;</span><br><span class="line"></span><br><span class="line">msg %username% /time 100 &quot;Git Push 成功&quot;</span><br></pre></td></tr></table></figure>
+
+<p>可以在if () 中能使用的弹窗：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if 1==1 (</span><br><span class="line">    mshta vbscript:&quot;&lt;script language=&quot;&quot;vbscript&quot;&quot;&gt;msgbox(&quot;&quot;Git Push 成功&quot;&quot;):self.close &lt;/script&gt;&lt;/html&gt;&quot;</span><br><span class="line">    msg %username% /time 100 &quot;Git Push 成功&quot;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://xuchunlei.top/music/1.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://xuchunlei.top/music/2.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://xuchunlei.top/music/3.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://xuchunlei.top/music/4.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://xuchunlei.top/music/5.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: -25px; bottom: -10px; display: block; user-select: none; transform: scale(0.5);">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+
+<canvas id="canvas"></canvas>
+<script src="../../../../js/createjs.min.js"></script>
+<script src="../../../../js/particlejs.min.js" charset="UTF-8"></script>
+<script src="../../../../js/mouseparticle.js" charset="UTF-8"></script>
+</body>
+</html>

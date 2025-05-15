@@ -2110,4 +2110,23 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
         <tag>黑客</tag>
       </tags>
   </entry>
+  <entry>
+    <title>不吐不快-github push失败(批处理if语句中弹窗)</title>
+    <url>/2025/05/15/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-github%20push%E5%A4%B1%E8%B4%A5-%E6%89%B9%E5%A4%84%E7%90%86if%E8%AF%AD%E5%8F%A5%E4%B8%AD%E5%BC%B9%E7%AA%97/</url>
+    <content><![CDATA[<p><em>前段时间，github的工程无法push上去了，以前虽然github.com经常不能访问，但是push不上去貌似是第一次，而且持续了一周，中间只成功过一次提交</em></p>
+<h4 id="应对"><a href="#应对" class="headerlink" title="应对"></a>应对</h4><p>因为经常提交失败就写了一段批处理脚本来自动提交</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@echo off</span><br><span class="line">setlocal enabledelayedexpansion</span><br><span class="line"></span><br><span class="line">:: ============== 配置区 ==============</span><br><span class="line">set &quot;TARGET_DIR=C:\Users\xuchl\Desktop\xuchlei.github.io&quot;  :: 仓库路径</span><br><span class="line">set &quot;RETRY_DELAY=60&quot;                   :: 重试间隔秒数</span><br><span class="line">:: ===================================</span><br><span class="line"></span><br><span class="line">:: 验证目录是否存在</span><br><span class="line">if not exist &quot;%TARGET_DIR%&quot; (</span><br><span class="line">    echo ? 错误：目录不存在 &quot;%TARGET_DIR%&quot;</span><br><span class="line">    pause</span><br><span class="line">    exit /b 1</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">:: 进入目标仓库目录</span><br><span class="line">cd /d &quot;%TARGET_DIR%&quot;</span><br><span class="line"></span><br><span class="line">set ATTEMPT=0</span><br><span class="line">:retry_push</span><br><span class="line">set /a ATTEMPT+=1</span><br><span class="line">echo [尝试 !ATTEMPT! 次] 正在提交到远程仓库...</span><br><span class="line"></span><br><span class="line">git push</span><br><span class="line"></span><br><span class="line">if %errorlevel% equ 0 (</span><br><span class="line">    echo Git 提交成功！</span><br><span class="line">    mshta vbscript:&quot;&lt;script language=&quot;&quot;vbscript&quot;&quot;&gt;msgbox(&quot;&quot;Git Push 成功&quot;&quot;):self.close &lt;/script&gt;&lt;/html&gt;&quot;</span><br><span class="line">) else (</span><br><span class="line">    echo 提交失败，%RETRY_DELAY%秒后重试...</span><br><span class="line">    timeout /t %RETRY_DELAY% /nobreak &gt;nul</span><br><span class="line">    goto retry_push</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然而并没有什么卵用，一整天都无法成功<br><img src="/img/20250515/1.png" alt></p>
+<p>其中弹窗遇到一些问题，发现只要弹窗语句中经常报缺少’)’的错误。</p>
+<h4 id="批处理弹窗"><a href="#批处理弹窗" class="headerlink" title="批处理弹窗"></a>批处理弹窗</h4><p>一些弹窗语句：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mshta vbscript:msgbox(&quot;Git Push 成功&quot;,6,&quot;提示&quot;)(window.close)</span><br><span class="line"># 单行if无()可以用</span><br><span class="line">if 1==1 mshta vbscript:msgbox(&quot;Git Push 成功&quot;,6,&quot;提示&quot;)(window.close)</span><br><span class="line"></span><br><span class="line">mshta vbscript:execute(&quot;msgbox &quot;&quot;Git Push 成功&quot;&quot;:window.close&quot;)</span><br><span class="line"></span><br><span class="line">mshta vbscript:CreateObject(&quot;Wscript.Shell&quot;).popup(&quot;Git Push 成功&quot;,7,&quot;提示&quot;,64)(window.close)</span><br><span class="line"></span><br><span class="line">mshta javascript:window.execScript(&quot;msgBox(&apos;Git Push 成功&apos;):window.close&quot;,&quot;vbs&quot;)</span><br><span class="line"></span><br><span class="line">mshta vbscript:&quot;&lt;script language=&quot;&quot;vbscript&quot;&quot;&gt;msgbox(&quot;&quot;Git Push 成功&quot;&quot;):self.close &lt;/script&gt;&lt;/html&gt;&quot;</span><br><span class="line"></span><br><span class="line">msg %username% /time 100 &quot;Git Push 成功&quot;</span><br></pre></td></tr></table></figure>
+
+<p>可以在if () 中能使用的弹窗：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if 1==1 (</span><br><span class="line">    mshta vbscript:&quot;&lt;script language=&quot;&quot;vbscript&quot;&quot;&gt;msgbox(&quot;&quot;Git Push 成功&quot;&quot;):self.close &lt;/script&gt;&lt;/html&gt;&quot;</span><br><span class="line">    msg %username% /time 100 &quot;Git Push 成功&quot;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>吐槽</tag>
+        <tag>批处理</tag>
+      </tags>
+  </entry>
 </search>
