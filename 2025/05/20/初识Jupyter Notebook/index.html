@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>初识Jupyter Notebook - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,Jupyter,Notebook,AI"> 
+    <meta name="description" content="一个战五渣的个人博客,接受朋友建议，开始学习AI相关的东西，简单记录下
+简介Jupyter Notebook一个开源的Web应用程序，便于创建和共享程序文档。支持实时代码，数学方程，图表，图像，Markdown等内容的文,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?aa62861fd73e49c9dda3e2a2f5b6db5d";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">初识Jupyter Notebook</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">初识Jupyter Notebook</h1>
+        <div class="stuff">
+            <span>五月 20, 2025</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/AI/">AI</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Jupyter/">Jupyter</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>接受朋友建议，开始学习AI相关的东西，简单记录下</em></p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><a href="https://jupyter.org/" target="_blank" rel="noopener">Jupyter Notebook</a>一个开源的Web应用程序，便于创建和共享程序文档。支持实时代码，数学方程，图表，图像，Markdown等内容的文档。可以交互地编写代码，执行代码并查看结果，支持多人实时编辑和协作，支持多种编程语言，包括Python、R、Julia等。用于数据分析，机器学习，人工智能等等。</p>
+<h3 id="安装运行"><a href="#安装运行" class="headerlink" title="安装运行"></a>安装运行</h3><p>需要先安装Python<br>第一种是原生Python安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#升级pip版本</span><br><span class="line">pip install --upgrade pip</span><br><span class="line">#安装</span><br><span class="line">pip install jupyter</span><br></pre></td></tr></table></figure>
+
+<p>不过，pip或者pip3安装都报错，貌似缺少Rust工具链（Rustup），需要先装。<br><img src="/img/20250520/1.jpg" alt></p>
+<p>另一种是通过Anaconda</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install jupyter notebook</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20250520/2.png" alt></p>
+<p>运行Jupyter Notebook，从命令行中启动，需要一直开启</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#默认端口8888启动并打开浏览器</span><br><span class="line">jupyter notebook</span><br><span class="line">#指定端口启动</span><br><span class="line">jupyter notebook --port &lt;port_number&gt;</span><br><span class="line">#启动服务器但不打开浏览器</span><br><span class="line">jupyter notebook --no-browser</span><br><span class="line">#启动时打开指定文档</span><br><span class="line">jupyter notebook notebook.ipynb</span><br></pre></td></tr></table></figure>
+
+<p>默认启动界面<br><img src="/img/20250520/3.png" alt></p>
+<h3 id="一些命令"><a href="#一些命令" class="headerlink" title="一些命令"></a>一些命令</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#所有配置目录</span><br><span class="line">jupyter --paths</span><br><span class="line">#配置目录</span><br><span class="line">jupyter --config-dir</span><br><span class="line">#数据目录</span><br><span class="line">jupyter --data-dir</span><br><span class="line">#运行时目录</span><br><span class="line">jupyter --runtime-dir</span><br></pre></td></tr></table></figure>
+
+<h3 id="基本操做"><a href="#基本操做" class="headerlink" title="基本操做"></a>基本操做</h3><p><img src="/img/20250520/7.png" alt><br>工具栏<br>保存，插入单元格，剪切单元格，复制单元格，粘贴单元格(到下方)，运行单元格，重置内核，充值内核并运行所有单元格，选择单元格类型（代码，Markdown等）<br>单元格工具栏<br>复制单元格并插入到下方，上移单元格，下移单元格，在前面插入单元格，在后面插入单元格，删除单元格</p>
+<p>新建文档，扩展名ipynb<br><img src="/img/20250520/4.png" alt><br>内核选择Python3<br><img src="/img/20250520/5.png" alt><br>文档效果展示，单元格支持Markdown语法和代码执行<br><img src="/img/20250520/6.png" alt></p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://xuchunlei.top/music/1.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://xuchunlei.top/music/2.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://xuchunlei.top/music/3.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://xuchunlei.top/music/4.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://xuchunlei.top/music/5.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: -25px; bottom: -10px; display: block; user-select: none; transform: scale(0.5);">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+
+<canvas id="canvas"></canvas>
+<script src="../../../../js/createjs.min.js"></script>
+<script src="../../../../js/particlejs.min.js" charset="UTF-8"></script>
+<script src="../../../../js/mouseparticle.js" charset="UTF-8"></script>
+</body>
+</html>
