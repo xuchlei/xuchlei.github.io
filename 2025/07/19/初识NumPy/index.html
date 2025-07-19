@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>初识NumPy - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,Jupyter,Python,AI"> 
+    <meta name="description" content="一个战五渣的个人博客,接受朋友建议，开始学习AI相关的东西，简单记录下。
+简介NumPy（Numerical Python）是Python的一个扩展库，提供多维数组与矩阵运算，运行速度快。
+安装pip安装(以Python,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?aa62861fd73e49c9dda3e2a2f5b6db5d";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">初识NumPy</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">初识NumPy</h1>
+        <div class="stuff">
+            <span>七月 19, 2025</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/AI/">AI</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/NumPy/">NumPy</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>接受朋友建议，开始学习AI相关的东西，简单记录下。</em></p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><a href="https://numpy.org/" target="_blank" rel="noopener">NumPy</a>（Numerical Python）是Python的一个扩展库，提供多维数组与矩阵运算，运行速度快。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>pip安装(以Python3为例，Python用pip)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install numpy</span><br></pre></td></tr></table></figure>
+
+<p>conda安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install numpy</span><br></pre></td></tr></table></figure>
+
+<p>验证安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import numpy as np</span><br><span class="line">print(np.__version__)</span><br></pre></td></tr></table></figure>
+
+<p>安装成功，会输出正确的版本号</p>
+<h3 id="Ndarray-N维数组对象"><a href="#Ndarray-N维数组对象" class="headerlink" title="Ndarray-N维数组对象"></a>Ndarray-N维数组对象</h3><p>NumPy数组的维数称为秩（rank），秩就是轴（axis）的数量，即数组的维度（dimensions）<br>属性：<br>ndarray.ndim 数组的轴数（维度）<br>ndarray.shape 数组的纬度，表示数组在每个轴上的大小（各维度的长度）<br>ndarray.size 数组的元素总数<br>ndarray.dtype 数组中元素类型<br><img src="/img/20250719/1.png" alt><br>图片表示数组数据类型的类型对象的层次结构。未显示用于索引的两种整数类型intp和uintp</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">（&apos;字符代码&apos;， 别名）</span><br><span class="line"></span><br><span class="line">整数</span><br><span class="line">numpy.int8（&apos;b&apos;,&apos;i1&apos;, byte -128到127）,</span><br><span class="line">numpy.int16（&apos;h&apos;,&apos;i2&apos;, short）,</span><br><span class="line">numpy.int32（&apos;i&apos;,&apos;i4&apos;, intc）,</span><br><span class="line">numpy.int64（&apos;i8&apos;，longlong，&apos;q&apos;）,</span><br><span class="line">numpy.int_（&apos;l&apos;，long；intp 用于索引的整数类型，指向足够大的整数类型以容纳C指针） 默认整数，64位系统上为64位，在32位系统上为32位（dtype指定&apos;l&apos;或者long，在Windows平台即使64位系统，固定映射为int32）</span><br><span class="line">无符号整数</span><br><span class="line">numpy.uint8（&apos;B&apos;,&apos;u1&apos;, ubyte 0到255）,</span><br><span class="line">numpy.uint16（&apos;H&apos;,&apos;u2&apos;, ushort）,</span><br><span class="line">numpy.uint32（&apos;I&apos;,&apos;u4&apos;, uintc）,</span><br><span class="line">numpy.uint64（&apos;u8&apos;, ulonglong,&apos;Q&apos;）,</span><br><span class="line">numpy.uint（&apos;L&apos;, ulong；uintp，足够大的无符号整数以容纳指针）（类上）</span><br><span class="line">浮点数</span><br><span class="line">numpy.float16（&apos;e&apos;, &apos;f2&apos;, half）,</span><br><span class="line">numpy.float32（&apos;f&apos;, &apos;f4&apos;, single）,</span><br><span class="line">numpy.float64（&apos;d&apos;, &apos;f8&apos;, double）,</span><br><span class="line">numpy.float128（&apos;g&apos;, longdouble） （在大多数x86-64系统上实际对应80位扩展精度浮点（理论应输出float80），但NumPy为保持兼容性默认映射为float64）</span><br><span class="line">复数浮点数</span><br><span class="line">numpy.comples64（&apos;F&apos;, &apos;c8&apos;, csingle）,</span><br><span class="line">numpy.comples128（&apos;D&apos;, &apos;c16&apos;, cdouble）,</span><br><span class="line">numpy.comples256（&apos;G&apos;, clongdouble）（类上，继承为两个float64组成的complex128）</span><br><span class="line"></span><br><span class="line">字符串 numpy.bytes_（&apos;S&apos;） 后可加字符串长度比如&apos;Dream&apos;,dtype为&apos;&lt;S5&apos;，长度为5,&apos;c&apos;等价于&apos;S1&apos;</span><br><span class="line">Unicode字符串 numpy.str_（&apos;U&apos;） 后可加符串长度比</span><br><span class="line">原始数据void numpy.void（&apos;V&apos;） 后可加符串长度比</span><br><span class="line">布尔值 numpy.bool（&apos;?&apos;, &apos;b1&apos;, bool_）</span><br><span class="line">日期时间 numpy.datetime64（&apos;M&apos;, &apos;M8&apos;）</span><br><span class="line">时间间隔 numpy.timedelta64（&apos;m&apos;, &apos;m8&apos;）</span><br><span class="line">对象 numpy.object_（&apos;O&apos;, &apos;O8&apos;）</span><br></pre></td></tr></table></figure>
+
+<p>ndarray.itemsize 数组中每个元素的大小（以字节为单位）<br>ndarray.data 数组的实际元素的缓冲区，一般通过索引访问元素，不直接使用该属性<br>ndarray.flags 有关内存布局信息，返回</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C_CONTIGUOUS : 数据是否为C风格连续（行优先）</span><br><span class="line">F_CONTIGUOUS : 数据是否为Fortran风格连续（列优先）</span><br><span class="line">OWNDATA : 数组是否拥有底层数据的所有权</span><br><span class="line">WRITEABLE : 数组是否可修改</span><br><span class="line">ALIGNED : 数据内存地址是否按硬件对齐</span><br><span class="line">WRITEBACKIFCOPY : 数组是否拥有数据所有权</span><br></pre></td></tr></table></figure>
+
+<p>ndarray.real 数组中每个元素的实部（如果元素类型为复数）<br>ndarray.imag 数组中每个元素的虚部（如果元素类型为复数）<br>ndarray.strides 每个维度上以字节为单位的步长<br>ndarray.base 数组的数据来源对象（返回None独立拥有数据内存（非视图）；返回ndarray对象与其他数组的视图或派生对象（共享内存））<br>ndarray.T 快速获取数组转置视图<br>ndarray.<strong>array_interface</strong> 数组协议：Python端，描述数组内存布局的底层字典接口<br>ndarray.<strong>array_struct</strong> 数组协议：结构体，底层 C 结构体接口<br>ndarray.<strong>array_priority</strong> 数组优先级<br>ndarray.<strong>array_wrap</strong> 自定义数组运算结果包装行为</p>
+<h3 id="创建数组"><a href="#创建数组" class="headerlink" title="创建数组"></a>创建数组</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">使用array函数从普通的Python列表或元组创建数组</span><br><span class="line">	import numpy as np</span><br><span class="line">	a = np.array([1, 2])</span><br><span class="line">	b = np.array([1, 2], dtype=&apos;i&apos;) #指定数据类型-字符代码</span><br><span class="line">	c = np.array([1, 2], dtype=np.int32) #指定数据类型</span><br><span class="line">	c2 = np.asarray([1, 2]) #避免内存复制</span><br><span class="line">	c3 = np.asanyarray([1, 2]) #避免内存复制 保留子类特性</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">使用zeros函数创建全零数组</span><br><span class="line">	d = np.zeros((2, 3))</span><br><span class="line">	d2 = np.zeros_like(d) #与给定数组具有相同形状和类型的新数组</span><br><span class="line"></span><br><span class="line">使用ones函数创建全一数组</span><br><span class="line">	e = np.ones((3, 2))</span><br><span class="line">	e2= np.ones_like(e)</span><br><span class="line"></span><br><span class="line">使用empty函数创建一个内容随机数组</span><br><span class="line">	f = np.empty((1, 2))</span><br><span class="line">	f2 = np.empty_like(f)</span><br><span class="line"></span><br><span class="line">使用arange函数创建一个数字序列数组（指定步长值）</span><br><span class="line">	g = np.arange(1, 10, 2)</span><br><span class="line"></span><br><span class="line">使用linspace函数创建一个数字序列数组（指定元素数量，浮点数推荐）</span><br><span class="line">	h = np.linspace(0, 2, 9)</span><br><span class="line"></span><br><span class="line">使用full函数创建一个用指定元素填充的数组</span><br><span class="line">	i = np.full((2, 3), &apos;xu&apos;)</span><br><span class="line">	i2 = np.full_like(i, 2)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">numpy.eye 对角线上为1，其余位置为0的二维数组</span><br><span class="line">numpy.identity 方阵，其主对角线元素为一</span><br><span class="line">numpy.ascontiguousarray 返回内存中连续的数组</span><br><span class="line">numpy.asmatrix 将输入解释为矩阵</span><br><span class="line">numpy.astype 将数组复制到指定的数据类型</span><br><span class="line">numpy.copy 返回给定对象的数组副本</span><br><span class="line">numpy.frombuffer 将缓冲区解释为一维数组</span><br><span class="line">numpy.from_dlpack 从实现__dlpack__协议的对象创建数组</span><br><span class="line">numpy.fromfile 从文本或二进制文件中的数据构造数组</span><br><span class="line">numpy.fromfunction 通过对每个坐标执行函数来构造数组</span><br><span class="line">numpy.fromiter 从可迭代对象创建新的1维数组</span><br><span class="line">numpy.fromstring 从字符串中的文本数据初始化新的1维数组 </span><br><span class="line">numpy.loadtxt 从文本文件加载数据</span><br><span class="line">记录数组</span><br><span class="line">numpy.rec.array 从多种对象构造记录数组</span><br><span class="line">numpy.rec.fromarrays 从（扁平）数组列表创建记录数组</span><br><span class="line">numpy.rec.fromrecords 从文本形式的记录列表创建记录数组</span><br><span class="line">numpy.rec.fromstring 从二进制数据创建记录数组</span><br><span class="line">numpy.rec.fromfile  从二进制文件数据创建数组</span><br><span class="line">字符数组</span><br><span class="line">numpy.char.array</span><br><span class="line">numpy.char.asarray</span><br><span class="line">数值范围</span><br><span class="line">numpy.arange 返回给定区间内均匀分布的值</span><br><span class="line">numpy.linspace 在指定区间内返回均匀分布的数字</span><br><span class="line">numpy.logspace 返回在对数尺度上均匀分布的数字</span><br><span class="line">numpy.geomspace 返回在对数尺度上均匀分布的数字（几何级数）</span><br><span class="line">numpy.meshgrid 从坐标向量返回坐标矩阵的元组</span><br><span class="line">numpy.mgrid 返回密集多维“网格”的实例</span><br><span class="line">numpy.ogrid 返回开放多维“网格”的实例</span><br><span class="line">矩阵</span><br><span class="line">numpy.diag 提取对角线或构造对角数组</span><br><span class="line">numpy.diagflat 创建一个以扁平化输入为对角线的二维数组</span><br><span class="line">numpy.tri 一个在给定对角线及以下位置为一、其他位置为零的数组</span><br><span class="line">numpy.tril 数组的下三角</span><br><span class="line">numpy.triu 数组的上三角</span><br><span class="line">numpy.vander 生成范德蒙德矩阵</span><br><span class="line">numpy.bmat 从字符串、嵌套序列或数组构建矩阵对象</span><br></pre></td></tr></table></figure>
+
+<h3 id="索引和切片"><a href="#索引和切片" class="headerlink" title="索引和切片"></a>索引和切片</h3><p>Ndarray数组下标从0开始，允许负索引从数组的末尾进行索引</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(10)</span><br><span class="line">print(x[0]) #0</span><br><span class="line">print(x[-1]) #9</span><br></pre></td></tr></table></figure>
+
+<p>切片规则为start:stop:step，start为起始索引，stop为停止索引，step为步长</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x[1:7:2]</span><br><span class="line">array([1, 3, 5]) #array([1, 3, 5])</span><br></pre></td></tr></table></figure>
+
+<p>如果索引值超出范围，会抛出IndexError</p>
+<p>高级索引:<br>整数数组索引 使用一个数组来访问另一个数组的元素<br>布尔数组索引 通过布尔运算来获取符合指定条件的元素的数组</p>
+<h3 id="广播"><a href="#广播" class="headerlink" title="广播"></a>广播</h3><p>广播(Broadcast)是NumPy对不同形状的数组进行数值计算的方式，对数组的算术运算通常在相应的元素上进行。<br>对两个数组进行操作时，NumPy会逐元素比较它们的形状。它从末尾（即最右侧）维度开始，然后向左移动。</p>
+<ol>
+<li>若两数组维度数不同，较小维度数组的左侧补1直到维度数相同</li>
+<li>若某维度大小不同但其中一个为1，则小维度数组沿该维度扩展以匹配大数组</li>
+<li>若某维度大小均不为1且不一致，则触发<code>ValueError: operands could not be broadcast together</code>异常</li>
+</ol>
+<h3 id="副本与视图"><a href="#副本与视图" class="headerlink" title="副本与视图"></a>副本与视图</h3><p>可以通过仅更改某些元数据（例如步长和数据类型）来以不同方式访问数组，而无需更改数据缓冲区。这创建了一种查看数据的新方式，这些新数组称为视图。数据缓冲区保持不变，因此对视图所做的任何更改都会反映在原始副本中。<br>当通过复制数据缓冲区和元数据来创建新数组时，这称为副本。对副本所做的更改不会反映在原始数组上。<br>ndarray.base属性可以轻松判断数组是视图还是副本。视图的base属性返回原始数组，而副本的base属性返回None。</p>
+<h3 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h3><p>numpy.e 自然数e<br>numpy.pi 圆周率π<br>numpy.euler_gamma 欧拉常数γ<br>numpy.inf （正）无穷大<br>numpy.nan 非数字（NaN）<br>numpy.newaxis None别名</p>
+<h3 id="数组操做"><a href="#数组操做" class="headerlink" title="数组操做"></a>数组操做</h3><p>numpy.copyto 复制数组到<br>numpy.ndim 返回数组的维度数量<br>numpy.shape 返回数组的形状<br>numpy.size 返回沿给定轴的元素数量<br>修改形状<br>numpy.reshape 不改变数据的条件下修改形状<br>numpy.ravel 返回展开数组<br>numpy.flat 数组元素迭代器<br>numpy.flatten 返回数组副本<br>翻转<br>numpy.moveaxis 将数组的轴移动到新位置<br>numpy.rollaxis 向后滚动指定的轴，直到它位于给定位置<br>numpy.swapaxes 交换数组的两个轴<br>numpy.transpose 返回一个轴已转置的数组（对换数组的维度）<br>numpy.T 转置数组的视图，同上transpose<br>numpy.permute_dims 返回一个轴已转置的数组<br>numpy.matrix_transpose 转置矩阵<br>改变纬度<br>numpy.atleast_1d 将输入转换为至少具有一个维度的数组<br>numpy.atleast_2d 将输入视为至少具有两个维度的数组<br>numpy.atleast_3d 将输入视为至少具有三个维度的数组<br>numpy.broadcast 生成一个模拟广播的对象<br>numpy.broadcast_to 将数组广播到新的形状<br>numpy.broadcast_arrays 任意数量的数组相互广播<br>numpy.expand_dims 扩展数组的形状<br>numpy.squeeze 移除长度为一的轴<br>改变类型<br>numpy.asarray 将输入转换为数组<br>numpy.asanyarray 将输入转换为ndarray，但让ndarray子类通过<br>numpy.asmatrix 将输入解释为矩阵<br>numpy.asfortranarray 返回一个在内存中以Fortran顺序布局的数组<br>numpy.ascontiguousarray 返回一个在内存中连续的数组<br>numpy.asarray_chkfinite 将输入转换为数组，并检查是否存在NaN或Inf<br>numpy.require 返回一个满足要求的指定类型的ndarray<br>连接<br>numpy.concatenate 沿着现有轴连接一系列数组<br>numpy.concat 沿着现有轴连接一系列数组<br>numpy.stack 沿着新轴连接一系列数组<br>numpy.block 从嵌套的块列表中组装一个nd-array<br>numpy.vstack 垂直（按行）堆叠数组<br>numpy.hstack 水平（按列）堆叠数组<br>numpy.dstack 沿深度方向（沿第三轴）堆叠数组<br>numpy.column_stack 将一维数组作为列堆叠成二维数组<br>分割<br>numpy.split 将数组分割成多个子数组视图<br>numpy.array_split 将数组分割成多个子数组<br>numpy.dsplit 沿第三轴（深度）将数组分割成多个子数组<br>numpy.hsplit 水平（按列）将数组分割成多个子数组。<br>numpy.vsplit 垂直（按行）将数组分割成多个子数组<br>numpy.unstack 沿给定轴将数组分割成一系列数组<br>平铺<br>numpy.tile 通过重复指定次数来构造数组<br>numpy.repeat 重复数组中的每个元素<br>添加和移除<br>numpy.delete 返回一个新数组，其中沿某个轴的子数组已被删除<br>numpy.insert 沿给定轴在给定索引前插入值<br>numpy.append 将值附加到数组的末尾<br>numpy.resize 返回具有指定形状的新数组<br>numpy.trim_zeros 移除沿某个维度上为零，且在所有其他维度上也都为零的值<br>numpy.unique 查找数组中的唯一元素<br>numpy.pad 填充数组<br>排序<br>numpy.flip 沿给定轴反转数组中元素的顺序<br>numpy.fliplr 沿轴 1（左右）反转元素的顺序<br>numpy.flipud 沿轴 0（上下）反转元素的顺序<br>numpy.roll 沿给定轴滚动数组元素<br>numpy.rot90 在由轴指定的平面内将数组旋转90度</p>
+<h3 id="位操做"><a href="#位操做" class="headerlink" title="位操做"></a>位操做</h3><p>numpy.bitwise_and 逐元素计算两个数组的位与运算<br>numpy.bitwise_or 逐元素计算两个数组的位或运算<br>numpy.bitwise_xor 逐元素计算两个数组的位异或运算<br>numpy.invert 逐元素计算位反转或位非运算<br>numpy.bitwise_invert 逐元素计算位反转或位非运算<br>numpy.left_shift 将整数的位向左移动<br>numpy.bitwise_left_shift 将整数的位向左移动<br>numpy.right_shift 将整数的位向右移动<br>numpy.bitwise_right_shift 将整数的位向右移动<br>numpy.bitwise_count 计算绝对值中1位的数量<br>numpy.packbits 将二进制值数组的元素打包为uint8数组中的位<br>numpy.unpackbits 将uint8数组的元素解包为二进制值输出数组<br>numpy.binary_repr 将输入数字的二进制表示形式作为字符串返回</p>
+<h3 id="字符串操做"><a href="#字符串操做" class="headerlink" title="字符串操做"></a>字符串操做</h3><p>numpy.add 按元素添加参数<br>numpy.center 居中字符串<br>numpy.capitalize 返回副本，其中每个元素的第一个字符大写<br>numpy.decode 按元素调用bytes.decode<br>numpy.encode 按元素调用str.encode<br>numpy.expandtabs 返回每个字符串元素的副本，其中所有制表符都替换为一个或多个空格<br>numpy.ljust 返回一个数组，左对齐<br>numpy.lower 返回一个数组，其中元素已转换为小写<br>numpy.lstrip 返回一个移除了前导字符的副本<br>numpy.mod 返回Python2.6之前的字符串格式化（插值），对一对str或unicode类型的类数组对象进行按元素操作<br>numpy.multiply 返回字符串多次连接后的字符串<br>numpy.partition 将的每个元素进行分区<br>numpy.replace 返回一个字符串副本，使用新字符串替换字符串中的所有子字符串<br>numpy.rjust 返回一个数组，右对齐<br>numpy.rpartition 将每个元素围绕最右边的分隔符进行分区（分割）<br>numpy.rstrip 返回一个移除了尾随字符的副本<br>numpy.slice 按指定进行切片<br>numpy.strip 返回一个移除了前导和尾随字符的副本<br>numpy.swapcase 按元素返回字符串的副本，其中大写字符转换为小写，反之亦然<br>numpy.title 按元素返回字符串或 Unicode 的标题化版本<br>numpy.translate 返回一个字符串副本，通过给定的翻译表进行映射<br>numpy.upper 返回一个数组，其中元素已转换为大写<br>numpy.zfill 返回用零左填充的数字字符串<br>……</p>
+<h3 id="数学函数"><a href="#数学函数" class="headerlink" title="数学函数"></a>数学函数</h3><p>三角函数<br>numpy.sin 正弦<br>numpy.cos 余弦<br>numpy.tan 正切<br>numpy.arcsin 反正弦<br>numpy.asin 反正弦<br>numpy.arccos 反余弦<br>numpy.acos 反余弦<br>numpy.arctan 反正切<br>numpy.atan 反正切<br>numpy.hypot 给定直角三角形的“直角边”，返回其斜边<br>……<br>双曲函数<br>numpy.sinh 双曲正弦<br>numpy.cosh 双曲余弦<br>numpy.tanh 双曲正切<br>numpy.arcsinh 反双曲正弦<br>numpy.asinh 反双曲正弦<br>numpy.arccosh 反双曲余弦<br>numpy.acosh 反双曲余弦<br>numpy.arctanh 反双曲正切<br>numpy.atanh 反双曲正切<br>四舍五入<br>numpy.round 将数组四舍五入到给定的小数位数<br>numpy.around 将数组四舍五入到给定的小数位数<br>numpy.rint 将数组元素四舍五入到最近的整数<br>numpy.fix 向零方向舍入到最近的整数<br>numpy.floor 向下取整<br>numpy.ceil 向上取整<br>numpy.trunc 截断<br>和、积、差<br>numpy.prod 乘积<br>numpy.sum 总和<br>numpy.nanprod 乘积，将非数字 (NaNs) 视为一<br>numpy.nansum 总和，将非数字 (NaNs) 视为零<br>numpy.cumulative_sum 累积和<br>numpy.cumulative_prod 累积积<br>numpy.cumprod 累积积<br>numpy.cumsum 累积和<br>numpy.nancumprod 累积积，将非数字 (NaNs) 视为一<br>numpy.nancumsum 累积和，将非数字 (NaNs) 视为零<br>numpy.diff 离散差分<br>numpy.ediff1d 连续元素之间的差值<br>numpy.gradient 梯度<br>numpy.cross 叉积<br>numpy.trapezoid 使用复合梯形法则沿给定轴进行积分<br>指数和对数<br>numpy.exp 指数<br>numpy.log 自然对数<br>……<br>算术运算<br>numpy.add 相加<br>numpy.reciprocal 倒数<br>numpy.positive 正值<br>numpy.negative 负值<br>numpy.multiply 相乘<br>numpy.divide 相除<br>numpy.power 底数的指数的幂<br>numpy.pow 底数的指数的幂<br>numpy.subtract 相减<br>numpy.true_divide 相除<br>numpy.floor_divide 最大整数<br>numpy.float_power 底数的指数的幂<br>numpy.fmod 余数<br>numpy.mod 余数<br>numpy.modf 小数部分和整数部分<br>numpy.remainder 余数<br>numpy.divmod 商和余数<br>……<br>……</p>
+<h3 id="统计函数"><a href="#统计函数" class="headerlink" title="统计函数"></a>统计函数</h3><p>顺序统计<br>numpy.ptp 最大值与最小值的差（最大值-最小值）<br>numpy.percentile 表示小于这个值的观察值的百分比<br>numpy.nanpercentile 表示小于这个值的观察值的百分比，同时忽略NaN值<br>numpy.quantile 分位数<br>numpy.nanquantile 分位数，同时忽略NaN值<br>平均值和方差<br>numpy.median 中位数<br>numpy.average 加权平均值<br>numpy.mean 算术平均值<br>numpy.std 标准差<br>numpy.var 方差<br>numpy.nanmedian 中位数，同时忽略NaN值<br>numpy.nanmean 算术平均值，忽略NaN值<br>numpy.nanstd 标准差，同时忽略NaN值<br>numpy.nanvar 方差，同时忽略NaN值<br>相关性<br>numpy.corrcoef 皮尔逊积矩相关系数<br>numpy.correlate 两个一维序列的互相关<br>numpy.cov 根据数据和权重估计协方差矩阵<br>直方图<br>numpy.histogram 直方图<br>numpy.histogram2d 二维直方图<br>numpy.histogramdd 多维直方图<br>numpy.bincount 计算非负整数数组中每个值的出现次数<br>……</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>还有好多其他函数，比如日期时间，离散傅里叶变换，输入和输出，线性代数，窗口函数等等，这里就不一一列举了。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://xuchunlei.top/music/1.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://xuchunlei.top/music/2.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://xuchunlei.top/music/3.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://xuchunlei.top/music/4.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://xuchunlei.top/music/5.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: -25px; bottom: -10px; display: block; user-select: none; transform: scale(0.5);">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+
+<canvas id="canvas"></canvas>
+<script src="../../../../js/createjs.min.js"></script>
+<script src="../../../../js/particlejs.min.js" charset="UTF-8"></script>
+<script src="../../../../js/mouseparticle.js" charset="UTF-8"></script>
+</body>
+</html>
