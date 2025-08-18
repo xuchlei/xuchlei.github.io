@@ -130,6 +130,7 @@ var points = [
 	{"flag":"0", "date":"20171231", "lng":135.75849308, "lat":34.98622483, "title":"京都", "content":"大晦日和朋友出行第一站，JR站了一路，不过速度挺快的", "img":"img/map/kyoto.jpg"},
 	{"flag":"0", "date":"20171231", "lng":135.76672382962815, "lat":34.989209477929855, "title":" ", "content":"", "img":"img/map/jdd.jpg"},
 	{"flag":"0", "date":"20171231", "lng":135.76736203847236, "lat":34.989223036761366, "title":" ", "content":"", "img":"img/map/qtt.jpg"},
+	{"flag":"0", "date":"20171231", "lng":135.7745030677483, "lat":34.99030539867313, "title":" ", "content":"", "img":"img/map/jdbwg.jpg"}, // 位置不确定
 	{"flag":"0", "date":"20171231", "lng":135.7830975516529, "lat":34.99523307047112, "title":" ", "content":" ", "img":"img/map/jrwm.jpg"},
 	{"flag":"0", "date":"20171231", "lng":135.78303017873964, "lat":34.99550289887008, "title":" ", "content":"", "img":"img/map/kiyomizurwm.jpg"}, // 清水寺-仁王门
 	{"flag":"0", "date":"20171231", "lng":135.78380272147822, "lat":34.995214589041076, "title":"清水寺", "content":"出行第一个去的景点，人挺多的，依旧没进去，朋友想买的樱花铃铛断货了", "img":"img/map/kiyomizu.jpg"}, // 清水寺-三重塔 景清爪形观音
