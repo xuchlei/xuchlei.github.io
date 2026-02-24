@@ -276,6 +276,9 @@ var points = [
 	{"flag":"1", "date":"20250306", "lng":116.32790903177724,"lat":39.90040583254356,"title":"","content":""}, // 北京西站
 	{"flag":"1", "date":"20250616", "lng":116.12631130922799,"lat":39.944853336517745,"title":"","content":""}, // （住宿的地方）
 	{"flag":"1", "date":"20250616", "lng":116.1319841085235,"lat":39.950122026609705,"title":"","content":""}, // 北京天宏
+	{"flag":"1", "date":"20260202", "lng":116.198761,"lat":40.077602,"title":"","content":""}, // 恒实科技
+	{"flag":"1", "date":"20260204", "lng":116.218524,"lat":40.106464,"title":"","content":""}, // （临时住宿一晚）
+	{"flag":"1", "date":"20260209", "lng":116.308147,"lat":39.857326,"title":"","content":""}, // 北京丰台站
 	// 广州
 	{"flag":"1", "date":"20191127", "lng":113.30913776314385, "lat":23.39143278940526, "title":"", "content":""}, // 广州白云国际机场 国内航线第一次到达，遥墙出发。回济南就比较悲催了，晚上的飞机，因为济南大雾(霾)，飞机延误一个半小时多，虽然飞了但是最后备降浦东，在上海住了一晚。
 	{"flag":"1", "date":"20191127", "lng":113.244857242995,"lat":23.108184572121772, "title":" ", "content":"", "img":"img/map/lbzx.jpg"}, // 澜沧古茶 img20191130
@@ -379,6 +382,8 @@ var points = [
 	{"flag":"1", "date":"20240302", "lng":113.12034260095461,"lat":23.034812332058866,"title":"祖庙","content":"4A景区，还是很不错的，在一堆人的外面看了舞狮表演，各种雕刻很是惊艳", "img":"img/map/zm.jpg"},
 	{"flag":"1", "date":"20240303", "lng":113.11986780157748,"lat":23.041119034510952,"title":"","content":""}, // （吃饭的地方） 尝试了新鲜猪杂粥
 	{"flag":"1", "date":"20240303", "lng":112.98395660338757,"lat":22.93167135936873,"title":"西樵山风景名胜区","content":"5A景区，走了十几公里，只逛了下南边的景点，作为自然景点还所可以吧"},
+	{"flag":"1", "date":"20260126", "lng":113.217409,"lat":23.098932,"title":"","content":""}, // 澜沧古茶物流园
+	{"flag":"1", "date":"20260126", "lng":113.206065,"lat":23.102636,"title":"","content":""}, // （住宿的地方）
 	// 青岛 5oKy5Lyk55qE5pWF5LqL
 	{"flag":"1", "date":"20240814", "lng":120.31641657521578,"lat":36.268621194023865,"title":"","content":""}, // MjAyNDA4MTTpnZLlspvnrKzkuIDnq5nvvIzor7fmiJHlkIPljYjppa3vvIzlkI7mnaUyMDI0MDgxOOi/mOivt+aIkeWQg+aZmumlrQ==
 	{"flag":"1", "date":"20240814", "lng":120.34730728051653,"lat":36.255906927635586,"title":"","content":""}, // 5Y6755yL5oCd5oCd77yM5oiR5rKh5Y675oiQ
@@ -441,9 +446,10 @@ var points = [
 	{"flag":"1", "date":"20210818", "lng":121.36069421530974,"lat":37.5979042959138,"title":" ","content":"", "img":"img/map/ythb-xha2.jpg"},
 	{"flag":"1", "date":"20210326", "lng":117.06689787394266,"lat":36.683130906934025,"title":" ","content":"", "img":"img/map/sddxtyg.jpg"},
 	{"flag":"1", "date":"20150603", "lng":121.36580022874374,"lat":37.55937098304097,"title":"革命烈士纪念碑","content":"", "img":"img/map/gmlsjnb.jpg"},
-	{"flag":"1", "date":"20150305?", "lng":121.4108988955467,"lat":37.516346940817094,"title":" ","content":"", "img":"img/map/ytts.jpg"},
+	{"flag":"1", "date":"20150305", "lng":121.4108988955467,"lat":37.516346940817094,"title":"塔山","content":"", "img":"img/map/ytts.jpg"},
 	{"flag":"1", "date":"20141221", "lng":121.48610624332028,"lat":37.463250002141834,"title":" ","content":"", "img":"img/map/ytlhgjrjy.jpg"},
 	{"flag":"1", "date":"20141004", "lng":121.28604116471686,"lat":37.48882308271907,"title":"烟台农博园","content":"", "img":"img/map/ytnby.jpg"},
+	{"flag":"1", "date":"20140910", "lng":121.373801,"lat":37.609630,"title":" ","content":"", "img":"img/map/ythb-xha3.jpg"},
 	{"flag":"1", "date":"20140909", "lng":121.1901223503594,"lat":37.59126875945926,"title":"天马栈桥","content":"", "img":"img/map/tmzq.jpg"},
 	{"flag":"1", "date":"20140823", "lng":121.44019214192485,"lat":37.54146048046382,"title":"月亮湾","content":"", "img":"img/map/ylw.jpg"},
 	{"flag":"1", "date":"20140823", "lng":121.44523612736339,"lat":37.53671769337549,"title":"栈桥","content":"", "img":"img/map/zq.jpg"},
