@@ -451,6 +451,7 @@ var points = [
 	{"flag":"1", "date":"20210818", "lng":121.36069421530974,"lat":37.5979042959138,"title":" ","content":"", "img":"img/map/ythb-xha2.jpg"},
 	{"flag":"1", "date":"20210326", "lng":117.06689787394266,"lat":36.683130906934025,"title":" ","content":"", "img":"img/map/sddxtyg.jpg"},
 	{"flag":"1", "date":"20150603", "lng":121.36580022874374,"lat":37.55937098304097,"title":"革命烈士纪念碑","content":"", "img":"img/map/gmlsjnb.jpg"},
+	{"flag":"1", "date":"20150511", "lng":121.456488,"lat":37.501171,"title":"黄海明珠","content":"132合肥号导弹驱逐舰（051Z型驱逐舰，弦号：132）。2012年10月退役，服役32年。停靠黄海明珠北侧", "img":"img/map/hhmz.jpg"},
 	{"flag":"1", "date":"20150305", "lng":121.4108988955467,"lat":37.516346940817094,"title":"塔山","content":"", "img":"img/map/ytts.jpg"},
 	{"flag":"1", "date":"20141221", "lng":121.48610624332028,"lat":37.463250002141834,"title":" ","content":"", "img":"img/map/ytlhgjrjy.jpg"},
 	{"flag":"1", "date":"20141004", "lng":121.28604116471686,"lat":37.48882308271907,"title":"烟台农博园","content":"", "img":"img/map/ytnby.jpg"},
