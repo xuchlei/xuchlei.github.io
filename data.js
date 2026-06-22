@@ -423,6 +423,7 @@ var points = [
 
 	// 倒叙 时间为拍照日期 对以前的一些回忆
 	// 有些地点去过多次，并不一定是第一次
+	{"flag":"1", "date":"20260620", "lng":120.142426,"lat":37.313708,"title":" ","content":"", "img":"img/map/lgljc.jpg"},
 	{"flag":"1", "date":"20260426", "lng":121.454723,"lat":37.517654,"title":"虞美人广场","content":"去的比较晚，郁金香基本都败了", "img":"img/map/ymrgc.jpg"},
 	{"flag":"1", "date":"20260329", "lng":121.408355,"lat":37.549082,"title":"朝阳街","content":"", "img":"img/map/cyj.jpg"},
 	{"flag":"1", "date":"20260315", "lng":121.392427,"lat":37.522191,"title":"南山公园","content":"", "img":"img/map/nsgy.jpg"},
