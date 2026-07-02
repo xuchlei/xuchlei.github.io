@@ -17,10 +17,17 @@
             width: 25px;
             height: 34px;
         }
+        .normal {position:absolute;top:0;padding:2px 5px;color:black;background:#00adff;z-index:100;}
     </style>
 </head>
 <body>
-<div id="container"></div>
+	<div class="normal" style="right:0;">
+		年度
+		<select style="color:red; width:auto; padding:0; background:#FFF;" id="year" name="year" onchange="getCurrentYearPoint();">
+			<option value selected disabled>    </option>
+		</select>
+	</div>
+	<div id="container"></div>
 <!-- 加载地图JSAPI脚本 -->
 <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.4&key=ab90646a4f5e056555ba2e086181d327&plugin=AMap.Geocoder"></script>
 <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=ab90646a4f5e056555ba2e086181d327&plugin=AMap.DistrictSearch"></script>
@@ -117,6 +124,62 @@ var iw = new AMap.InfoWindow({
 	content: "<br/><span style='float:left;width:40%;font-size:10px;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />"  //使用默认信息窗体框样式，显示信息内容
 });
 iw.open(map, map.getCenter());
+
+// 年度功能
+document.addEventListener('DOMContentLoaded', function() {
+	var yearList = new Set([]);
+	var yearFirstDropdown = document.getElementById('year');
+
+	var yearList = new Set([]);
+	for (var i = 0; i < points.length; i++) {
+		if (points[i].date) {
+			yearList.add(points[i].date.slice(0, 4))
+		}
+	}
+
+	var optionAry = [...yearList].sort();
+
+	optionAry.forEach(item => {
+		var option = document.createElement('option');
+		option.value = item;
+		option.textContent = item;
+		yearFirstDropdown.appendChild(option);
+	});
+});
+
+function getCurrentYearPoint() {
+	var year = document.getElementsByName('year')[0].value;
+	map.clearMap();
+	for (var i = 0; i < points.length; i++) {
+		if (points[i].date && points[i].date.slice(0, 4) === year) {
+			addMarker2(points[i]);
+		}
+	}
+}
+
+function addMarker2(marker){
+	// 百度转高德（百度坐标bd09–>火星坐标gcj02）
+	var PI = Math.PI * 3000.0 / 180.0;
+	var x = marker.lng - 0.0065;
+	var y = marker.lat - 0.006;
+	var z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * PI);
+	var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * PI);
+	var mk = new AMap.Marker({
+	  map: map,
+	  position: [z * Math.cos(theta), z * Math.sin(theta)]
+	});
+	if (marker.title !== "") {
+		mk.setIcon('https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png');
+		var infoWindow = new AMap.InfoWindow({
+			content: marker.content,  //使用默认信息窗体框样式，显示信息内容
+			offset: new AMap.Pixel(4, -34)
+		});
+		//鼠标点击marker弹出自定义的信息窗体
+		AMap.event.addListener(mk, 'click', function () {
+			infoWindow.open(map, mk.getPosition());
+		});
+	}
+}
 </script>
 </body>
 </html>
