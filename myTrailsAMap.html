@@ -17,14 +17,14 @@
             width: 25px;
             height: 34px;
         }
-        .normal {position:absolute;top:0;padding:2px 5px;color:black;background:#00adff;z-index:100;}
+        .normal {position:absolute;top:10px;right:10px;z-index:1000;background:#00adff;opacity:0.8;padding:2px 5px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.25);font-size:11px;display:inline-block;white-space:nowrap;color:red;}
     </style>
 </head>
 <body>
-	<div class="normal" style="right:0;">
+	<div class="normal">
 		年度
-		<select style="color:red; width:auto; padding:0; background:#FFF; height:80%; width:35px; text-align:center;" id="year" name="year" onchange="getCurrentYearPoint();">
-			<option value selected disabled>    </option>
+		<select style="color:red;font-size:11px;border:1px solid #ccc;border-radius:3px;padding:1px 3px !important;background:#fff !important;cursor:pointer;display:inline-block !important;vertical-align:middle;width:auto !important;-webkit-appearance:auto !important;appearance:auto !important;line-height:normal !important;height:auto !important;" id="year" name="year" onchange="getCurrentYearPoint();">
+			<option value selected>全部</option>
 		</select>
 	</div>
 	<div id="container"></div>
@@ -32,52 +32,56 @@
 <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.4&key=ab90646a4f5e056555ba2e086181d327&plugin=AMap.Geocoder"></script>
 <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=ab90646a4f5e056555ba2e086181d327&plugin=AMap.DistrictSearch"></script>
 <script type="text/javascript" src="data.js"></script>
+<script type="text/javascript" src="areas_boundary.js"></script>
 <script>
 var map = new AMap.Map('container');
 
-var district = null;
-function drawBounds(areas) {
-	//加载行政区划插件
-	if(!district){
-		//实例化DistrictSearch
-		var opts = {
-			subdistrict: 0,   //获取边界不需要返回下级行政区
-			extensions: 'all',  //返回行政区边界坐标组等具体信息
-			level: 'district'  //查询行政级别为 区
-		};
-		district = new AMap.DistrictSearch(opts);
-	}
-	//行政区查询
-	district.setLevel("city")
-	for (var i = 0; i < areas.length; i++) {
-		getDistrict(areas[i], i);
-	}
+// ===== 行政区边界：直接读取 areas_boundary.js（GCJ-02，与高德底图同源，无需坐标转换）=====
+var areaPolys = [];
+function areaCityKey(adcode) {
+	var s = String(adcode);
+	if (s.indexOf('3706') === 0) return 'yantai';
+	if (s.indexOf('3701') === 0) return 'jinan';
+	if (s.indexOf('3301') === 0) return 'hangzhou';
+	if (s.indexOf('31') === 0)   return 'shanghai';
+	return 'other';
 }
-function getDistrict(city, second) {
-	setTimeout(function(){
-		district.search(city, function(status, result) {
-			//map.remove(polygons)//清除上次结果
-			polygons = [];
-			var bounds = result.districtList[0].boundaries;
-			if (bounds) {
-				for (var i = 0, l = bounds.length; i < l; i++) {
-					//生成行政区划polygon
-					var polygon = new AMap.Polygon({
-						strokeWeight: 1,
-						path: bounds[i],
-						fillOpacity: 0.4,
-						fillColor: '#80d8ff',
-						strokeColor: '#0091ea'
-					});
-					polygons.push(polygon);
-				}
-			}
-			map.add(polygons)
-			//map.setFitView(polygons);//视口自适应
+var AREA_STYLE = {
+	yantai:   { color: '#1e88e5' }, // 烟台 蓝
+	jinan:    { color: '#43a047' }, // 济南 绿
+	hangzhou: { color: '#e53935' }, // 杭州 红
+	shanghai: { color: '#fb8c00' }, // 上海 橙
+	other:    { color: '#888888' }
+};
+function drawAreas() {
+	areaPolys = [];
+	if (typeof AREA_BOUNDARIES === 'undefined' || !AREA_BOUNDARIES || !AREA_BOUNDARIES.features) return;
+	AREA_BOUNDARIES.features.forEach(function (f) {
+		var props = f.properties || {};
+		var style = AREA_STYLE[areaCityKey(props.adcode)] || AREA_STYLE.other;
+		var g = f.geometry;
+		if (!g) return;
+		// 每个多边形 rings = [[外环], [洞1], [洞2]...]，多维数组作为 AMap 带洞 path
+		var polys = [];
+		if (g.type === 'Polygon') polys.push(g.coordinates);
+		else if (g.type === 'MultiPolygon') g.coordinates.forEach(function (poly) { polys.push(poly); });
+		polys.forEach(function (rings) {
+			var path = rings.map(function (ring) {
+				return ring.map(function (c) { return [c[0], c[1]]; }); // GCJ-02 经纬度
+			});
+			var polygon = new AMap.Polygon({
+				strokeWeight: 2,
+				path: path,
+				fillOpacity: 0.2,
+				fillColor: style.color,
+				strokeColor: style.color
+			});
+			areaPolys.push(polygon);
+			map.add(polygon);
 		});
-	}, 400 * second); // 设置延时，降低api请求qps（上限3）
+	});
 }
-drawBounds(areasAMap);
+drawAreas();
 
 // 标记点
 points.forEach(function(marker) {
@@ -89,10 +93,11 @@ points.forEach(function(marker) {
 	var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * PI);
 	var mk = new AMap.Marker({
 	  map: map,
-	  position: [z * Math.cos(theta), z * Math.sin(theta)]
+	  position: [z * Math.cos(theta), z * Math.sin(theta)],
+	  icon: 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png'  // 默认无内容→红
 	});
 	if (marker.title !== "") {
-		mk.setIcon('https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png');
+		mk.setIcon();
 
 		var contentLen = marker.content.length;
 		marker.content = "<h4>" + marker.title + "</h4><span style='text-indent:2em'>" + marker.content + "</span>";
@@ -118,7 +123,8 @@ points.forEach(function(marker) {
 });
 
 // 根据地图上添加的覆盖物分布情况，自动缩放地图到合适的视野级别，参数均可缺省
-map.setFitView();
+// 初始：根据所有足迹点自动调整显示范围（只 fit marker，不把区域边界 Polygon 算进来）
+map.setFitView(map.getAllOverlays('marker'));
 
 var iw = new AMap.InfoWindow({
 	content: "<br/><span style='float:left;width:40%;font-size:10px;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />"  //使用默认信息窗体框样式，显示信息内容
@@ -137,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	}
 
-	var optionAry = [...yearList].sort();
+	var optionAry = [...yearList].sort().reverse();
 
 	optionAry.forEach(item => {
 		var option = document.createElement('option');
@@ -149,12 +155,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function getCurrentYearPoint() {
 	var year = document.getElementsByName('year')[0].value;
-	map.clearMap();
+	// 仅移除已添加的足迹标记（getAllOverlays('marker')），区域边界 Polygon 保持不动，避免重画区域
+	map.remove(map.getAllOverlays('marker'));
 	for (var i = 0; i < points.length; i++) {
-		if (points[i].date && points[i].date.slice(0, 4) === year) {
+		if (points[i].date && (year === '' || points[i].date.slice(0, 4) === year)) {
 			addMarker2(points[i]);
 		}
 	}
+	// 年份筛选后：根据当前可见的足迹点自动调整显示范围（只 fit marker，不把区域边界算进来）
+	map.setFitView(map.getAllOverlays('marker'));
 }
 
 function addMarker2(marker){
@@ -166,10 +175,11 @@ function addMarker2(marker){
 	var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * PI);
 	var mk = new AMap.Marker({
 	  map: map,
-	  position: [z * Math.cos(theta), z * Math.sin(theta)]
+	  position: [z * Math.cos(theta), z * Math.sin(theta)],
+	  icon: 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png'  // 默认无内容→红
 	});
 	if (marker.title !== "") {
-		mk.setIcon('https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png');
+		mk.setIcon();
 		var infoWindow = new AMap.InfoWindow({
 			content: marker.content,  //使用默认信息窗体框样式，显示信息内容
 			offset: new AMap.Pixel(4, -34)

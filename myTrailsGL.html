@@ -8,18 +8,19 @@
 html{height:100%}
 body{height:100%;margin:0px;padding:0px}
 #container{height:100%}
-.normal {position:absolute;top:0;padding:2px 5px;color:black;background:#00adff;z-index:100;}
+.normal {position:absolute;top:10px;right:10px;z-index:1000;background:#00adff;opacity:0.8;padding:2px 5px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.25);font-size:11px;display:inline-block;white-space:nowrap;color:red;}
 </style>
 <script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=AA4uqECjDYfZUk9vSVMNR5bPdFEtw6GU">
 </script>
 <script type="text/javascript" src="data.js"></script>
+<script type="text/javascript" src="areas_boundary.js"></script>
 </head>
 
 <body>
-	<div class="normal" style="right:0;">
+	<div class="normal">
 		年度
-		<select style="color:red; text-align:center; right:0;" id="year" name="year" onchange="getCurrentYearPoint();">
-			<option value selected disabled>    </option>
+		<select style="color:red;font-size:11px;border:1px solid #ccc;border-radius:3px;padding:1px 3px !important;background:#fff !important;cursor:pointer;display:inline-block !important;vertical-align:middle;width:auto !important;-webkit-appearance:auto !important;appearance:auto !important;line-height:normal !important;height:auto !important;" id="year" name="year" onchange="getCurrentYearPoint();">
+			<option value selected>全部</option>
 		</select>
 	</div>
 	<div id="container"></div>
@@ -30,45 +31,70 @@ map.centerAndZoom(point, 5);
 map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
 map.setMapType(BMAP_EARTH_MAP);      // 设置地图类型为地球模式
 
-// 短信一直告警 js地点检索功能服务超过配额，禁用，使用新方法
-//function getBoundary(){
-//	var bdary = new BMapGL.Boundary();
-//	for(var i = 0; i < areas.length; i++) {
-//		bdary.get(areas[i], function(rs){       //获取行政区域
-//			//map.clearOverlays();        //清除地图覆盖物
-//			var count = rs.boundaries.length; //行政区域的点有多少个
-//			for (var i = 0; i < count; i++) {
-//				var ply = new BMapGL.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeColor: "#ff0000"}); //建立多边形覆盖物
-//				map.addOverlay(ply);  //添加覆盖物
-//			}
-//		});
-//	}
-//}
-//getBoundary();
-
-// 失忆了，除了这个新方法，又升级了一遍老代码，和这个版本调整的基本一致……
-function getDistrictLayer(){
-	map.addDistrictLayer(dist);
-	for(var i = 0; i < areas.length; i++) {
-		var dist = new BMapGL.DistrictLayer({
-			name: '(' + areas[i] + ')',
-			fillColor: 'red',
-			fillOpacity: 0.3,
-			strokeColor: "#ff0000"
-		});
-		map.addDistrictLayer(dist);
-	}
+// ===== 行政区边界：直接读取 areas_boundary.js（GCJ-02 坐标），转换到百度 BD-09 =====
+var AREA_X_PI = Math.PI * 3000.0 / 180.0;
+function gcj02ToBd09(lng, lat) {
+    var x = lng, y = lat;
+    var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * AREA_X_PI);
+    var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * AREA_X_PI);
+    return [z * Math.cos(theta) + 0.0065, z * Math.sin(theta) + 0.0065];
 }
-getDistrictLayer();
+function areaCityKey(adcode) {
+    var s = String(adcode);
+    if (s.indexOf('3706') === 0) return 'yantai';
+    if (s.indexOf('3701') === 0) return 'jinan';
+    if (s.indexOf('3301') === 0) return 'hangzhou';
+    if (s.indexOf('31') === 0)   return 'shanghai';
+    return 'other';
+}
+var AREA_STYLE = {
+    yantai:   { color: '#1e88e5' }, // 烟台 蓝
+    jinan:    { color: '#43a047' }, // 济南 绿
+    hangzhou: { color: '#e53935' }, // 杭州 红
+    shanghai: { color: '#fb8c00' }, // 上海 橙
+    other:    { color: '#888888' }
+};
+var areaPolys = [];
+function drawAreas() {
+    areaPolys = [];
+    if (typeof AREA_BOUNDARIES === 'undefined' || !AREA_BOUNDARIES || !AREA_BOUNDARIES.features) return;
+    AREA_BOUNDARIES.features.forEach(function (f) {
+        var props = f.properties || {};
+        var style = AREA_STYLE[areaCityKey(props.adcode)] || AREA_STYLE.other;
+        var g = f.geometry;
+        if (!g) return;
+        // 取每个多边形的「外环」绘制（百度 Polygon 不支持孔洞，画外环即可正确铺陆地）
+        var rings = [];
+        if (g.type === 'Polygon') rings.push(g.coordinates[0]);
+        else if (g.type === 'MultiPolygon') g.coordinates.forEach(function (poly) { rings.push(poly[0]); });
+		rings.forEach(function (ring) {
+			var bdRing = ring.map(function (c) {
+				return gcj02ToBd09(c[0], c[1]); // GCJ-02 -> BD-09
+			});
+			var pts = bdRing.map(function (b) {
+				return new BMapGL.Point(b[0], b[1]);
+			});
+			if (!pts.length) return;
+			var ply = new BMapGL.Polygon(pts, {
+				strokeWeight: 2, strokeColor: style.color,
+				fillColor: style.color, fillOpacity: 0.2
+			});
+			areaPolys.push(ply);
+			map.addOverlay(ply);
+		});
+	});
+}
+function addAreaOverlays() { areaPolys.forEach(function (p) { map.addOverlay(p); }); }
+drawAreas();
 
-var iw = new BMapGL.InfoWindow("<span style='float:left;width:156px;font-size:13px;;line-height:normal;'>有一个夜晚我烧毁了所有的记忆，从此我的梦就透明了；<br/>有一个早晨我扔掉了所有的昨天，从此我的脚步就轻盈了。</span><img style='float:right;' src='img/map/index.jpg' width='150' height='100' />", {width : 335, height: 150, title: "　"}); // 创建信息窗口对象
-map.openInfoWindow(iw, point); //开启信息窗口
+var markerList = []; // 记录已添加的足迹标记，供年份筛选时仅移除标记（区域边界保持不动）
 
 function addMarker(point){
 	var curpoint = new BMapGL.Point(point.lng, point.lat);
 	var myIcon = new BMapGL.Icon("img/map/marker_blue.png", new BMapGL.Size(23, 25), {anchor: new BMapGL.Size(8, 25)}); // 自定义标记图片，设置anchor使图片位置和默认标记位置一致
 	var marker = new BMapGL.Marker(curpoint); // 自定义标记图片，直接使用参数{icon: myIcon}会丢失自动添加的阴影
 	map.addOverlay(marker);
+	markerList.push(marker); // 登记标记，供年份筛选时仅移除标记（区域边界保持不动）
 	if (point.title !== "") {
 		var opts = {
 			width : 300,     // 信息窗口宽度
@@ -100,9 +126,43 @@ function addMarker(point){
 	}
 }
 
+// 根据点数组手动计算 bounds 并精确 fit（百度GL setViewport 在切换年份时只平移不缩放，导致边缘点被切，故手动算 zoom+center）
+function fitBoundsGL(pts) {
+  if (!pts || !pts.length) return;
+  var minLng = 180, maxLng = -180, minLat = 90, maxLat = -90;
+  for (var i = 0; i < pts.length; i++) {
+    var lng = pts[i].lng, lat = pts[i].lat;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  }
+  var center = new BMapGL.Point((minLng + maxLng) / 2, (minLat + maxLat) / 2);
+  var size = map.getSize();
+  var w = size.width * 0.85, h = size.height * 0.85; // 只用 85% 视野，留边距
+  if (maxLng - minLng < 1e-7 && maxLat - minLat < 1e-7) {
+    map.centerAndZoom(center, 13);
+    return;
+  }
+  var PI = Math.PI;
+  var dxFrac = (maxLng - minLng) / 360;
+  var zLng = Math.log(w / (256 * dxFrac)) / Math.LN2;
+  var yTop = 0.5 - Math.log((1 + Math.sin(maxLat * PI / 180)) / (1 - Math.sin(maxLat * PI / 180))) / (4 * PI);
+  var yBot = 0.5 - Math.log((1 + Math.sin(minLat * PI / 180)) / (1 - Math.sin(minLat * PI / 180))) / (4 * PI);
+  var dyFrac = Math.abs(yTop - yBot);
+  var zLat = Math.log(h / (256 * dyFrac)) / Math.LN2;
+  var z = Math.min(zLng, zLat);
+  z = Math.floor(z); // 取整更保守，保证全部点可见
+  if (z < 3) z = 3;
+  if (z > 19) z = 19;
+  map.centerAndZoom(center, z);
+}
+
 for (var i = 0; i < points.length; i++) {
 	addMarker(points[i]);
 }
+// 初始：根据所有足迹点自动调整显示范围（替代固定的 centerAndZoom）
+fitBoundsGL(points);
 
 // 年度功能
 document.addEventListener('DOMContentLoaded', function() {
@@ -116,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	}
 
-	var optionAry = [...yearList].sort();
+	var optionAry = [...yearList].sort().reverse();
 
 	optionAry.forEach(item => {
 		var option = document.createElement('option');
@@ -128,12 +188,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function getCurrentYearPoint() {
 	var year = document.getElementsByName('year')[0].value;
-	map.clearOverlays();
+	// 仅移除已添加的足迹标记，区域边界 Polygon 保持不动，避免重画区域
+	for (var i = 0; i < markerList.length; i++) {
+		map.removeOverlay(markerList[i]);
+	}
+	markerList = [];
+	var curPts = [];
 	for (var i = 0; i < points.length; i++) {
-		if (points[i].date && points[i].date.slice(0, 4) === year) {
+		if (points[i].date && (year === '' || points[i].date.slice(0, 4) === year)) {
 			addMarker2(points[i]);
+			curPts.push(new BMapGL.Point(points[i].lng, points[i].lat));
 		}
 	}
+	// 年份筛选后：根据当前可见的足迹点自动调整显示范围（手动算 bounds，避免 setViewport 只平移不缩放）
+	fitBoundsGL(curPts);
 }
 
 function addMarker2(point){
@@ -141,6 +209,7 @@ function addMarker2(point){
 	var myIcon = new BMapGL.Icon("img/map/marker_blue.png", new BMapGL.Size(23, 25), {anchor: new BMapGL.Size(8, 25)}); // 自定义标记图片，设置anchor使图片位置和默认标记位置一致
 	var marker = new BMapGL.Marker(curpoint); // 自定义标记图片，直接使用参数{icon: myIcon}会丢失自动添加的阴影
 	map.addOverlay(marker);
+	markerList.push(marker); // 登记标记，供年份筛选时仅移除标记（区域边界保持不动）
 	if (point.title !== "") {
 		var opts = {
 			width : 300,     // 信息窗口宽度
@@ -161,5 +230,6 @@ function addMarker2(point){
 	}
 }
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{"version":"2024.11.0","token":"91c23c5fc0a846ce91a5a660e533b255","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}" crossorigin="anonymous"></script>
 </body>
 </html>

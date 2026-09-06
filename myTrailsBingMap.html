@@ -4,13 +4,17 @@
         <title>我的足迹</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <style type="text/css">body{margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,Sans-Serif}</style>
-		<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=ab90646a4f5e056555ba2e086181d327&plugin=AMap.DistrictSearch"></script>
 		<script type="text/javascript" src="data.js"></script>
+		<script type="text/javascript" src="areas_boundary.js"></script>
     </head>
     <body>
         <div id="printoutPanel"></div>
         
         <div id="myMap" style="width: 100vw; height: 100vh;"></div>
+        <div id="yearPanel" style="position:absolute;top:230px;right:10px;z-index:1000;background:#00adff;opacity:0.8;padding:2px 5px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.25);font-size:11px;display:inline-block;white-space:nowrap;color:red;">
+            <label>年度</label>
+            <select id="year" style="color:red;font-size:11px;border:1px solid #ccc;border-radius:3px;padding:1px 3px !important;background:#fff !important;cursor:pointer;display:inline-block !important;vertical-align:middle;width:auto !important;-webkit-appearance:auto !important;appearance:auto !important;line-height:normal !important;height:auto !important;"></select>
+        </div>
         <script type="text/javascript">
             function loadMapScenario() {
                 var map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
@@ -24,21 +28,51 @@
 			firstInfobox.setMap(map);
 			Microsoft.Maps.Events.addHandler(map, 'click', function (e) { firstInfobox.setOptions({visible: false}); });
 
-var district = new AMap.DistrictSearch({
-		subdistrict: 0,   //获取边界不需要返回下级行政区
-		extensions: 'all',  //返回行政区边界坐标组等具体信息
-		level: 'city'  //查询行政级别为 市
-	});
+				// ===== 区域覆盖：读取 areas_boundary.js（GCJ-02，国内无需坐标转换，直接绘制） =====
+				function cityKeyOf(adcode) {
+					var p = String(adcode);
+					if (p.indexOf('3706') === 0) return 'yantai';
+					if (p.indexOf('3701') === 0) return 'jinan';
+					if (p.indexOf('3301') === 0) return 'hangzhou';
+					if (p.indexOf('31') === 0) return 'shanghai';
+					return 'other';
+				}
+				var AREA_COLOR = { yantai: '#1e88e5', jinan: '#43a047', hangzhou: '#e53935', shanghai: '#fb8c00' };
+				function hexToRgb(hex) {
+					hex = hex.replace('#', '');
+					return [parseInt(hex.substr(0, 2), 16), parseInt(hex.substr(2, 2), 16), parseInt(hex.substr(4, 2), 16)];
+				}
+				function drawAreas() {
+					if (typeof AREA_BOUNDARIES === 'undefined') return;
+					AREA_BOUNDARIES.features.forEach(function (f) {
+						var adcode = f.properties.adcode;
+						var key = cityKeyOf(adcode);
+						var color = AREA_COLOR[key] || '#888888';
+						var rgb = hexToRgb(color);
+						var fill = new Microsoft.Maps.Color(51, rgb[0], rgb[1], rgb[2]); // 填充透明度 0.2
+						var stroke = new Microsoft.Maps.Color(255, rgb[0], rgb[1], rgb[2]);
+						var g = f.geometry;
+						var polys = (g.type === 'MultiPolygon') ? g.coordinates : (g.type === 'Polygon' ? [g.coordinates] : []);
+						polys.forEach(function (polyCoords) {
+							var rings = polyCoords.map(function (ring) {
+								return ring.map(function (c) {
+									return new Microsoft.Maps.Location(c[1], c[0]); // GCJ-02（国内无需转换）：Bing 取 (lat, lng)
+								});
+							});
+							var polygon = new Microsoft.Maps.Polygon(rings, { fillColor: fill, strokeColor: stroke, strokeThickness: 2 });
+							map.entities.push(polygon);
+						});
+					});
+				}
+				drawAreas();
 
-for (var i = 0; i < areasAMap.length; i++) {
-	//高德行政区查询
-	getDistrict(district, map, areasAMap[i], i);
-}
 
-				//points.forEach(function(marker) { // 使用forEach的话，点击标记pushpin，之前的Infobox不会消失
-				for(var i = 0; i < points.length; i++) { // 使用for的话，click事件需要详细设定infobox的Options
-					var marker = points[i];
-
+								// ===== 共享 Infobox：足迹标记点击显示信息（年份筛选只移除 pushpin，不重建 infobox） =====
+				var pushpinInfobox = new Microsoft.Maps.Infobox(map.getCenter(), { visible: false });
+				pushpinInfobox.setMap(map);
+				Microsoft.Maps.Events.addHandler(map, 'click', function (e) { pushpinInfobox.setOptions({visible: false}); });
+				var markerList = []; // 记录已添加的足迹 pushpin，供年份筛选时仅移除标记（区域边界保持不动）
+				function addMarker(marker) {
 					var lat = marker.lat;
 					var lng = marker.lng;
 					var ee = 0.00669342162296594323; // 偏心率平方
@@ -51,84 +85,82 @@ for (var i = 0; i < areasAMap.length; i++) {
 						var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * PI);
 						lng = z * Math.cos(theta);
 						lat = z * Math.sin(theta);
-						// 火星坐标系 (GCJ-02)转地心坐标系（WGS84）
-						/*var dLat = transformLat(lng - 105.0, lat - 35.0);
-						var dLon = transformLon(lng - 105.0, lat - 35.0);
-						var radLat = lat / 180.0 * Math.PI;
-						var magic = Math.sin(radLat);
-						magic = 1 - ee * magic * magic;
-						var sqrtMagic = Math.sqrt(magic);
-						dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
-						dLon = (dLon * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
-						lat = lat * 2 - (lat + dLat);
-						lng = lng * 2 - (lng + dLon);*/
 					}
 					var point = new Microsoft.Maps.Location(lat, lng);
-					var pushpin = new Microsoft.Maps.Pushpin(point, null);
-					
+					var pushpin = new Microsoft.Maps.Pushpin(point, { color: 'red' });  // 默认无内容→红
 					if (marker.title !== "") {
-						pushpin.setOptions({color: 'red'});
-
-						var contentLen = marker.content.length;
-						marker.content = '<div id="infoboxText" style="background-color:#FFF8; height:130px; width: 300px;"><h4 style="margin:0">' + marker.title + "</h4><span style='text-indent:2em'>" + marker.content + "</span>";
-						// 有图片时，调整内容
-						if (marker.img && marker.img !== "") {
-							// 内容过多时，调整字体大小
-							var reFontSize = "";
-							if (34 < contentLen) {
-								reFontSize = "font-size:12px;"
+						pushpin.setOptions({color: 'blue'});  // 有内容（title 非空）→ 蓝
+						// 仅在首次拼接内容（年份筛选重复调用 addMarker 时直接复用，避免重复叠加）
+						if (!marker._built) {
+							var contentLen = marker.content.length;
+							marker.content = '<div id="infoboxText" style="background-color:#FFF8; height:130px; width: 300px;"><h4 style="margin:0">' + marker.title + "</h4><span style='text-indent:2em'>" + marker.content + "</span>";
+							if (marker.img && marker.img !== "") {
+								var reFontSize = "";
+								if (34 < contentLen) {
+									reFontSize = "font-size:12px;";
+								}
+								marker.content = marker.content.replace("text-indent:2em", reFontSize + "text-indent:2em;float:left;width:48%;") + "<img style='float:right;' src='" + marker.img + "' width='150' height='100' />";
 							}
-							marker.content = marker.content.replace("text-indent:2em", reFontSize + "text-indent:2em;float:left;width:48%;") + "<img style='float:right;' src='" + marker.img + "' width='150' height='100' />"
+							marker.content = marker.content + '</div>';
+							marker._built = true;
 						}
-						marker.content = marker.content + '</div>';
-
-						//var infobox = new Microsoft.Maps.Infobox(point, { title: marker.title, description: marker.content, visible: false });
-						var infobox = new Microsoft.Maps.Infobox(null, { visible: false });
-						infobox.setMap(map);
-
-						pushpin.metadata = {
-							//title: marker.title,
-							//description: marker.content,
-							htmlContent: marker.content
-						};
-
+						pushpin.metadata = { htmlContent: marker.content };
 						Microsoft.Maps.Events.addHandler(pushpin, 'click', function (args) {
-							infobox.setOptions({
+							pushpinInfobox.setOptions({
 								location: args.target.getLocation(),
 								htmlContent: args.target.metadata.htmlContent, // htmlContent会使title，description以及关闭按钮失效
-								//title: args.target.metadata.title,
-								//description: args.target.metadata.description,
 								visible: true
 							});
 						});
-						// 点击地图隐藏
-						Microsoft.Maps.Events.addHandler(map, 'click', function (e) { infobox.setOptions({visible: false}); });
 					}
-					
 					map.entities.push(pushpin);
+					markerList.push(pushpin);
 				}
-				//});
+				// 初始：添加全部足迹
+				for (var i = 0; i < points.length; i++) { addMarker(points[i]); }
+				// 初始：根据所有足迹点自动调整显示范围（替代固定的 center/zoom）
+				fitToMarkers();
+				// 年份下拉填充（按 date 去重倒序）
+				(function fillYear() {
+					var years = {};
+					for (var i = 0; i < points.length; i++) { if (points[i].date) years[points[i].date.slice(0, 4)] = true; }
+					var ys = Object.keys(years).sort().reverse();
+					var sel = document.getElementById('year');
+					if (!sel) return;
+					// 空白选项 = 全部显示；默认选中且 disabled，用户不可自行选择（只能选具体年份）
+					var oAll = document.createElement('option');
+					oAll.value = ''; oAll.textContent = '全部'; oAll.selected = true; sel.appendChild(oAll);
+					ys.forEach(function (y) { var o = document.createElement('option'); o.value = y; o.textContent = y; sel.appendChild(o); });
+					// 默认即空白（代表全部），无需再设其它年份
+					sel.onchange = getCurrentYearPoint; // 绑定筛选（函数已在 loadMapScenario 闭包内）
+					getCurrentYearPoint(); // 应用默认筛选：空白=全部
+				})();
+				// 年份筛选：只移除/重加足迹标记，区域边界（map.entities 中的 Polygon）保持不动
+				// 用「函数声明」而非赋值（函数声明会 hoisting，fillYear 在其之前调用也不会报 ReferenceError）；同时挂 window 双保险
+				function getCurrentYearPoint() {
+					var year = document.getElementById('year').value;
+					for (var i = 0; i < markerList.length; i++) { map.entities.remove(markerList[i]); }
+					markerList = [];
+					for (var i = 0; i < points.length; i++) {
+						// 空白（全部）或匹配年份均显示
+						if (points[i].date && (year === '' || points[i].date.slice(0, 4) === year)) { addMarker(points[i]); }
+					}
+					// 年份筛选后：根据当前可见的足迹点自动调整显示范围
+					fitToMarkers();
+				}
+				window.getCurrentYearPoint = getCurrentYearPoint; // 双保险：即使以后用 inline onchange 也能在全局调到
+				// 根据当前 markerList 中的足迹点自动调整地图显示范围（函数声明，hoisting 安全）
+				function fitToMarkers() {
+					if (!markerList || markerList.length === 0) return;
+					var locs = [];
+					for (var i = 0; i < markerList.length; i++) { locs.push(markerList[i].getLocation()); }
+					var bounds = Microsoft.Maps.LocationRect.fromLocations(locs);
+					map.setView({ bounds: bounds, padding: 60 });
+				}
 
             }
-function getDistrict(district, map, city, second) {
-	setTimeout(function(){
-		district.search(city, function(status, result) {
-			var bounds = result.districtList[0].boundaries;
-			if (bounds) {
-				for (var i = 0; i < bounds.length; i++) {
-					var locations = [];
-					for (var m = 0; m < bounds[i].length; m++) {
-						var location = new Microsoft.Maps.Location(bounds[i][m].lat, bounds[i][m].lng);
-						locations.push(location);
-					}
-					//必应生成行政区划polygon
-					var polygon = new Microsoft.Maps.Polygon(locations, null);
-					map.entities.push(polygon);
-				}
-			}
-		});
-	}, 400 * second); // 设置延时，降低api请求qps（上限3）
-}
+
+
 /*
 function transformLat(x, y) {
 	var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y
@@ -147,7 +179,8 @@ function transformLon(x, y) {
 	ret += (150.0 * Math.sin(x / 12.0 * Math.PI) + 300.0 * Math.sin(x / 30.0
 			* Math.PI)) * 2.0 / 3.0;
 	return ret;
-}*/
+}
+*/
         </script>
         <script type="text/javascript" src="https://cn.bing.com/api/maps/mapcontrol?key=AjyDwWyE-xgBsL_3W5rKf93dtsFz-3dHXx30f_fJUR6rTfNa1q56-gT6xqVj6Fff&callback=loadMapScenario" async defer></script>
     </body>
