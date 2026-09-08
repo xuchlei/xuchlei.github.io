@@ -105,12 +105,12 @@
             const c = (p.content || '').trim();
             const hasImg = !!(p.img && String(p.img).trim());
 
-            let html = '<div style="padding:6px 8px;max-width:260px;max-height:320px;overflow-y:auto;' +
+            let html = '<div style="padding:6px 8px;max-width:170px;max-height:320px;overflow-y:auto;' +
                 'line-height:1.5;word-break:break-word;white-space:normal;box-sizing:border-box;">';
             if (t) html += '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + esc(t) + '</div>';
             if (c) html += '<div style="font-size:13px;color:#333;white-space:pre-wrap;word-break:break-word;">' + esc(c) + '</div>';
             if (hasImg) html += '<img src="' + esc(p.img) + '" alt="" ' +
-                'style="display:block;max-width:100%;max-height:200px;width:auto;height:auto;' +
+                'style="display:block;width:150px;height:100px;' +
                 'margin-top:6px;border-radius:4px;object-fit:contain;" ' +
                 'onerror="this.style.display=\'none\'">';
             html += '</div>';
